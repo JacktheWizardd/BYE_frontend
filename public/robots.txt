@@ -1,0 +1,3 @@
+# Tester phase: keep the site out of search engines.
+User-agent: *
+Disallow: /
