@@ -1,0 +1,4 @@
+# The download buttons link to /download. To ship a new version:
+#   1. add the new DMG to public/downloads/
+#   2. change the file name on the line below
+/download /downloads/BYE-0.3.0-beta.4-AppleSilicon.dmg 302
