@@ -21,8 +21,8 @@
         <a href="#features">Features</a>
         <a href="#install">Install</a>
         <a href="#feedback">Feedback</a>
-        <!-- DOWNLOAD LINK: /download always redirects to the newest DMG (see public/_redirects) -->
-        <a class="btn btn-primary" href="/download">Download</a>
+        <!-- DOWNLOAD LINK (paused): buttons say "Available soon"; /download still redirects to the newest DMG (see public/_redirects) -->
+        <span class="btn btn-soon" aria-disabled="true">Available soon</span>
       </nav>
     </header>
 
@@ -33,10 +33,12 @@
           <h1>Pick classes without <em>forty open tabs.</em></h1>
           <p class="lead">BYE puts class sections, professor ratings and student reviews in one place, so you can compare your options and enroll with more confidence.</p>
           <div class="cta">
-            <a class="btn btn-primary" href="/download">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-              Download for Mac
-            </a>
+            <!-- COMING SOON: to re-enable downloads, swap this span back for
+                 <a class="btn btn-primary" href="/download">Download for Mac</a> -->
+            <span class="btn btn-soon" aria-disabled="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              Available soon
+            </span>
             <a class="btn btn-ghost" href="#install">How to install</a>
           </div>
           <p class="fine">Version 0.3.0-beta.4 · Apple Silicon Macs · macOS 14 or newer</p>

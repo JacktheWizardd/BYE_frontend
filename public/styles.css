@@ -70,6 +70,7 @@ a:hover { color: var(--ink); }
 .btn-ghost { color: var(--ink); }
 .btn-ghost:hover { background: var(--paper-2); color: var(--ink); }
 .btn svg { width: 18px; height: 18px; }
+.btn-soon { color: var(--ink-2); border-style: dashed; border-color: var(--ink-2); cursor: default; }
 
 /* Hero */
 .hero { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; padding: 48px 0 88px; }
