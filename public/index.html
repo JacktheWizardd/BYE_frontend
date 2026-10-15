@@ -2,17 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>BYE — Before You Enroll</title>
-  <meta name="description" content="Find PCC classes, compare professors and read student reviews in one free Mac app.">
+  <meta name="description" content="Compare PCC sections, professor ratings and student reviews before you enroll. Free, in your browser or on your Mac.">
   <meta name="theme-color" content="#faf8f3">
   <!-- Tester phase: keep out of search engines. Remove when launching publicly. -->
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" href="/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
+  <link rel="preload" href="/fonts/schibsted-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -20,141 +18,89 @@
     <header class="nav">
       <a class="brand" href="/" aria-label="BYE, Before You Enroll, home"><span class="mark swipe">BYE</span><span class="sub">Before You Enroll</span></a>
       <nav class="nav-links" aria-label="Main">
-        <a href="#features">Features</a>
-        <a href="#install">Install</a>
+        <a href="#how">How it works</a>
+        <a href="#mac">Mac app</a>
         <a href="#feedback">Feedback</a>
-        <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
-        <a class="btn btn-primary" href="/download">Download</a>
+        <!-- APP LINK: the web app (sample data for now) lives at /demo/ -->
+        <a class="btn btn-primary" href="/demo/">Search a class</a>
       </nav>
     </header>
 
     <main>
       <div class="hero">
         <div>
-          <span class="eyebrow">Free beta · for PCC students</span>
-          <h1>Pick classes without <span class="swipe">forty open tabs.</span></h1>
-          <p class="lead">BYE puts class sections, open seats, professor ratings and student reviews in one place, so you can compare your options and enroll with more confidence.</p>
+          <span class="eyebrow outlined">Free · for PCC students</span>
+          <h1>Pick classes with <span class="swipe">your eyes open.</span></h1>
+          <p class="lead">See every section of a PCC class next to professor ratings and student reviews. Then decide for yourself.</p>
           <div class="cta">
-            <a class="btn btn-primary" href="/download">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
-              Download for Mac
-            </a>
-            <a class="btn" href="#install">How to install</a>
+            <a class="btn btn-primary btn-big" href="/demo/">Search a class <span aria-hidden="true">→</span></a>
+            <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
+            <a class="btn btn-big desktop-only" href="/download">Download for Mac</a>
           </div>
-          <p class="fine">Version 0.4.0-beta.1 · Apple Silicon Macs · macOS 14 or newer</p>
+          <p class="fine">Works in any browser · sample data for now<span class="desktop-only">. Mac app: Apple Silicon, macOS 14 or newer.</span></p>
         </div>
 
-        <figure style="margin: 0">
-          <div class="mock" role="img" aria-label="Illustration of BYE showing a professor's class sections with format, term and open seats">
-            <div class="mock-bar" aria-hidden="true"><span></span><span></span><span></span><b>MATH 005A</b><small>Fall 2026</small></div>
-            <div class="mock-body" aria-hidden="true">
-              <div class="mock-side">
-                <div class="mock-label">Class days</div>
-                <div class="days"><i class="on">M</i><i>T</i><i class="on">W</i><i>Th</i><i>F</i></div>
-                <div class="mock-label">Professors · A–Z</div>
-                <div class="prof"><b>Professor A</b><span class="score">4.1</span><small>12 ratings · 2 sections</small><div class="bar"><i style="width: 82%"></i></div></div>
-                <div class="prof selected"><b>Professor B</b><span class="score">3.8</span><small>30 ratings · 3 sections</small><div class="bar"><i style="width: 76%"></i></div></div>
-                <div class="prof"><b>Professor C</b><span class="score">4.4</span><small>8 ratings · 1 section</small><div class="bar"><i style="width: 88%"></i></div></div>
-              </div>
-              <div class="mock-main">
-                <h4>Professor B</h4>
-                <div class="who">3 sections · Mathematics</div>
-                <div class="class-card">
-                  <div>
-                    <div class="tags"><span class="chip">CRN 41208</span><span class="tag">In person</span><span class="tag term">Full term</span></div>
-                    <b>MW 8:00 – 10:05 AM · R 218</b>
-                    <small>Pasadena · 5 units</small>
-                  </div>
-                  <div class="seats"><strong>22</strong> <span>of 40 open</span><div class="meter"><i style="width: 45%"></i></div><span>Waitlist 0 of 10</span></div>
-                </div>
-                <div class="class-card">
-                  <div>
-                    <div class="tags"><span class="chip">CRN 41231</span><span class="tag">Hybrid</span><span class="tag term">8 week second</span></div>
-                    <b>W 12:00 – 2:05 PM · C 207</b>
-                    <small>Online, no set meeting time</small>
-                  </div>
-                  <div class="seats"><strong>8</strong> <span>of 40 open</span><div class="meter"><i class="few" style="width: 80%"></i></div><span>Waitlist 2 of 10</span></div>
-                </div>
-                <div class="class-card">
-                  <div>
-                    <div class="tags"><span class="chip">CRN 41260</span><span class="tag">Online · live</span><span class="tag term">Full term</span></div>
-                    <b>MW 6:00 – 8:05 PM · Zoom</b>
-                    <small>5 units</small>
-                  </div>
-                  <div class="seats"><strong>0</strong> <span>of 35 open</span><div class="meter"><i class="low" style="width: 100%"></i></div><span class="full">Full · waitlist 6 of 10</span></div>
-                </div>
-              </div>
+        <figure class="preview">
+          <div class="window" role="img" aria-label="Illustration of BYE comparing professors for MATH 5A">
+            <div class="window-bar" aria-hidden="true"><span class="chip">MATH 5A</span><small>Fall 2026 · 5 professors · sorted by rating</small></div>
+            <div class="window-body" aria-hidden="true">
+              <div class="prof selected"><b>Professor A</b><span class="score">4.6</span><small>Difficulty 2.8 · 91% would take again</small><small>38 ratings · 2 sections</small><div class="bar"><i style="width: 92%"></i></div></div>
+              <div class="prof"><b>Professor B</b><span class="score">4.1</span><small>Difficulty 3.2 · 80% would take again</small><small>21 ratings · 1 section</small><div class="bar"><i style="width: 82%"></i></div></div>
+              <div class="prof third"><b>Professor C</b><span class="score">3.7</span><small>Difficulty 3.6 · 68% would take again</small><small>54 ratings · 2 sections</small><div class="bar"><i style="width: 74%"></i></div></div>
             </div>
           </div>
-          <figcaption class="mock-note">Illustration, not real data</figcaption>
+          <figcaption>Illustration, not real data</figcaption>
         </figure>
       </div>
 
+      <section id="how">
+        <span class="eyebrow">How it works</span>
+        <h2>Three steps, one tab.</h2>
+        <ol class="how">
+          <li><h3>Type a class</h3><p>A code like <b>MATH 5A</b> or a title, plus your semester and the days you want class.</p></li>
+          <li><h3>Compare professors</h3><p>Rating, difficulty and “would take again” for everyone teaching it, sorted your way.</p></li>
+          <li><h3>Read and decide</h3><p>Student reviews for your class, with links back to the source. BYE never picks for you.</p></li>
+        </ol>
+      </section>
+
       <section id="features">
-        <div class="section-head">
-          <h2>Everything you check before enrolling, in one window.</h2>
-          <p>Search a course once and BYE gathers what you'd normally collect across a dozen tabs. It never ranks a “best” professor; you compare and decide.</p>
-        </div>
+        <span class="eyebrow">What you see</span>
+        <h2>Everything you check before enrolling, <span class="swipe">in one place.</span></h2>
         <div class="features">
-          <article class="feature">
-            <span class="num">01</span>
-            <h3>Course search</h3>
-            <p>Type a code like <b>math 5a</b> or <b>stat c1000</b>. BYE opens on an overview of the class (sections, professors, open seats, formats and terms) before you pick anyone.</p>
-          </article>
-          <article class="feature">
-            <span class="num">02</span>
-            <h3>Class details and seats</h3>
-            <p>Each section shows its format (in person, hybrid, online live or async), term, campus, units, and open seats with the waitlist, straight from PCC's schedule.</p>
-            <div class="legend" aria-label="Seat bar colours">
-              <span><i style="background: var(--ink)"></i>Plenty of seats</span>
-              <span><i style="background: var(--highlight)"></i>10 or fewer</span>
-              <span><i style="background: var(--signal)"></i>5 or fewer</span>
-            </div>
-          </article>
-          <article class="feature">
-            <span class="num">03</span>
-            <h3>Days that fit you</h3>
-            <p>Tap the days you can make it to campus and BYE shows classes that meet on every day you picked. Turn on <b>Fully online only</b> to skip campus entirely.</p>
-          </article>
-          <article class="feature">
-            <span class="num">04</span>
-            <h3>Ratings and student reviews</h3>
-            <p>Overall rating, difficulty and “would take again” side by side, plus original reviews for your course or the professor's others, each linked to its source.</p>
-          </article>
+          <article class="feature"><span class="num">01</span><h3>Sections and times</h3><p>Days, times, format and open seats for every section of the class.</p></article>
+          <article class="feature"><span class="num">02</span><h3>Ratings side by side</h3><p>Overall rating, difficulty, number of ratings and “would take again” for each professor.</p></article>
+          <article class="feature"><span class="num">03</span><h3>Student reviews</h3><p>Reviews for the course you're taking, or from the professor's other courses, with links to the original source.</p></article>
+          <article class="feature"><span class="num">04</span><h3>Days that fit you</h3><p>Pick your class days and BYE shows the sections that meet on them. Online classes always show.</p></article>
         </div>
       </section>
 
-      <section id="install">
-        <div class="section-head">
-          <h2>Install in a minute.</h2>
-        </div>
-        <div class="install">
-          <div>
+      <section id="mac">
+        <div class="mac">
+          <div class="mac-intro">
+            <span class="eyebrow">On a Mac?</span>
+            <h2>BYE is also a Mac app.</h2>
+            <p>The same search in a native window, plus review summaries made on your Mac with Apple's on-device AI. Apple Silicon · macOS 14 or newer.</p>
+            <div class="mac-actions">
+              <button type="button" class="btn phone-only" id="copy-link">Copy link for your Mac</button>
+              <a class="btn btn-primary" href="/download">Download for Mac</a>
+            </div>
+            <p class="fine" id="copy-status" role="status"></p>
+          </div>
+          <div class="mac-install">
             <ol class="steps">
               <li><span><a href="/download">Download</a> the <b>AppleSilicon.dmg</b> file.</span></li>
-              <li><span>Open the downloaded DMG.</span></li>
-              <li><span>Drag <b>BYE Beta</b> into your Applications folder.</span></li>
+              <li><span>Open it and drag <b>BYE Beta</b> into Applications.</span></li>
               <li><span>Eject the DMG and open BYE Beta from Applications.</span></li>
             </ol>
-            <div class="callout">
+            <div class="note">
               <b>Seeing a security warning?</b>
               <p>BYE is signed but not yet notarized by Apple, so macOS may block the first launch. If you trust the download, go to System Settings → Privacy &amp; Security and choose Open Anyway.</p>
             </div>
-            <div class="callout">
+            <div class="note">
               <b>Updates install themselves.</b>
-              <p>BYE checks for a new version about once a day and installs it when you quit. Keep it in Applications so it can update. You can turn this off in Settings.</p>
+              <p>BYE checks for a new version about once a day and installs it when you quit. Keep it in Applications so it can update.</p>
             </div>
-          </div>
-          <div>
-          <table class="req">
-            <tbody>
-              <tr><th scope="row">Mac</th><td>Apple Silicon (M-series)</td></tr>
-              <tr><th scope="row">macOS</th><td>14 Sonoma or newer</td></tr>
-              <tr><th scope="row">Internet</th><td>Needed for class schedules and professor data</td></tr>
-              <tr><th scope="row">Account</th><td>None. No sign-in, no API key</td></tr>
-            </tbody>
-          </table>
-          <p class="fine" style="margin-top: 10px">Windows isn't planned right now.</p>
+            <p class="fine">No sign-in or API key. Internet is needed for class schedules and professor data. Windows isn't planned right now.</p>
           </div>
         </div>
       </section>
@@ -172,14 +118,28 @@
     </main>
 
     <footer>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/demo/">Search a class</a>
+        <a href="#how">How it works</a>
+        <a href="#mac">Mac app</a>
+        <a href="#feedback">Feedback</a>
+      </nav>
       <div class="cols">
         <div>
           <p>BYE is a free, independent student project. It is not affiliated with Pasadena City College or Rate My Professors.</p>
-          <p>Professor ratings and reviews come from Rate My Professors, with links back to each original profile. BYE's ratings client is adapted from <a href="https://github.com/amaanjaved1/rate-my-professors-client-ts">rate-my-professors-client-ts</a> by Amaan, under the MIT License. Headlines use Libre Baskerville under the SIL Open Font License.</p>
+          <p>Professor ratings and reviews come from Rate My Professors, with links back to each original profile. BYE's ratings client is adapted from <a href="https://github.com/amaanjaved1/rate-my-professors-client-ts">rate-my-professors-client-ts</a> by Amaan, under the MIT License. Libre Baskerville, Schibsted Grotesk and JetBrains Mono are used under the SIL Open Font License.</p>
         </div>
         <p>© 2026 BYE</p>
       </div>
     </footer>
   </div>
+  <script>
+    // Phones can't install the Mac app, so offer to copy the address for later.
+    document.getElementById('copy-link').addEventListener('click', async () => {
+      const status = document.getElementById('copy-status');
+      try { await navigator.clipboard.writeText(location.origin + '/#mac'); status.textContent = 'Link copied. Open it on your Mac to download.'; }
+      catch { status.textContent = 'Copy this address: ' + location.origin + '/#mac'; }
+    });
+  </script>
 </body>
 </html>

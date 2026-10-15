@@ -1,2 +1,6 @@
 /updates/appcast.xml
   Cache-Control: public, max-age=300
+
+# Web demo assets have hashed file names, so they never change in place.
+/demo/assets/*
+  Cache-Control: public, max-age=31536000, immutable
