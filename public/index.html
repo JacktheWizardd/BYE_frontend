@@ -21,8 +21,10 @@
         <a href="#how">How it works</a>
         <a href="#mac">Mac app</a>
         <a href="#feedback">Feedback</a>
+        <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
+        <a class="btn nav-mac" href="/download">Download for Mac</a>
         <!-- APP LINK: the web app (sample data for now) lives at /demo/ -->
-        <a class="btn btn-primary" href="/demo/">Search a class</a>
+        <a class="btn btn-primary" href="/demo/">Use on the web</a>
       </nav>
     </header>
 
@@ -32,12 +34,23 @@
           <span class="eyebrow outlined">Free · for PCC students</span>
           <h1>Pick classes with <span class="swipe">your eyes open.</span></h1>
           <p class="lead">See every section of a PCC class next to professor ratings and student reviews. Then decide for yourself.</p>
-          <div class="cta">
-            <a class="btn btn-primary btn-big" href="/demo/">Search a class <span aria-hidden="true">→</span></a>
-            <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
-            <a class="btn btn-big desktop-only" href="/download">Download for Mac</a>
+          <div class="choices" role="group" aria-label="Two ways to use BYE">
+            <div class="choice choice-web">
+              <span class="eyebrow">On the web</span>
+              <h2>Use BYE in your browser</h2>
+              <p>Any phone or computer. Nothing to install.</p>
+              <a class="btn btn-primary btn-big" href="/demo/">Search a class <span aria-hidden="true">→</span></a>
+              <p class="fine">Sample data for now</p>
+            </div>
+            <div class="choice choice-mac">
+              <span class="eyebrow">Mac app</span>
+              <h2>Get BYE for Mac</h2>
+              <p>Adds review summaries made on your Mac.</p>
+              <a class="btn btn-big desktop-only" href="/download">Download for Mac</a>
+              <a class="btn btn-big phone-only" href="#mac">Get it on your Mac</a>
+              <p class="fine">Apple Silicon · macOS 14 or newer</p>
+            </div>
           </div>
-          <p class="fine">Works in any browser · sample data for now<span class="desktop-only">. Mac app: Apple Silicon, macOS 14 or newer.</span></p>
         </div>
 
         <figure class="preview">
@@ -119,7 +132,7 @@
 
     <footer>
       <nav class="footer-links" aria-label="Footer">
-        <a href="/demo/">Search a class</a>
+        <a href="/demo/">Use on the web</a>
         <a href="#how">How it works</a>
         <a href="#mac">Mac app</a>
         <a href="#feedback">Feedback</a>
