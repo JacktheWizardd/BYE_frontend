@@ -23,8 +23,8 @@
         <a href="#features">Features</a>
         <a href="#install">Install</a>
         <a href="#feedback">Feedback</a>
-        <!-- DOWNLOAD LINK (paused): buttons say "Available soon"; /download still redirects to the newest DMG (see public/_redirects) -->
-        <span class="btn btn-soon" aria-disabled="true">Available soon</span>
+        <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
+        <a class="btn btn-primary" href="/download">Download</a>
       </nav>
     </header>
 
@@ -35,12 +35,10 @@
           <h1>Pick classes without <span class="swipe">forty open tabs.</span></h1>
           <p class="lead">BYE puts class sections, open seats, professor ratings and student reviews in one place, so you can compare your options and enroll with more confidence.</p>
           <div class="cta">
-            <!-- COMING SOON: to re-enable downloads, swap this span back for
-                 <a class="btn btn-primary" href="/download">Download for Mac</a> -->
-            <span class="btn btn-soon" aria-disabled="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-              Available soon
-            </span>
+            <a class="btn btn-primary" href="/download">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>
+              Download for Mac
+            </a>
             <a class="btn" href="#install">How to install</a>
           </div>
           <p class="fine">Version 0.4.0-beta.1 · Apple Silicon Macs · macOS 14 or newer</p>
@@ -133,7 +131,7 @@
         <div class="install">
           <div>
             <ol class="steps">
-              <li><span>Download the <b>AppleSilicon.dmg</b> file.</span></li>
+              <li><span><a href="/download">Download</a> the <b>AppleSilicon.dmg</b> file.</span></li>
               <li><span>Open the downloaded DMG.</span></li>
               <li><span>Drag <b>BYE Beta</b> into your Applications folder.</span></li>
               <li><span>Eject the DMG and open BYE Beta from Applications.</span></li>
@@ -147,8 +145,8 @@
               <p>BYE checks for a new version about once a day and installs it when you quit. Keep it in Applications so it can update. You can turn this off in Settings.</p>
             </div>
           </div>
+          <div>
           <table class="req">
-            <caption class="fine" style="caption-side: bottom; text-align: left; padding-top: 10px">Windows isn't planned right now.</caption>
             <tbody>
               <tr><th scope="row">Mac</th><td>Apple Silicon (M-series)</td></tr>
               <tr><th scope="row">macOS</th><td>14 Sonoma or newer</td></tr>
@@ -156,6 +154,8 @@
               <tr><th scope="row">Account</th><td>None. No sign-in, no API key</td></tr>
             </tbody>
           </table>
+          <p class="fine" style="margin-top: 10px">Windows isn't planned right now.</p>
+          </div>
         </div>
       </section>
 
