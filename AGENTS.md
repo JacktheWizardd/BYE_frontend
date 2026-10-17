@@ -9,7 +9,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, currently serving `public/`; the prepared web-beta build and Pages Functions configuration require owner rollout (see `docs/WEB_BETA.md`).
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get two ways to use BYE:
-  1. **On the web:** the live web app at `/app/` (fictional sample data remains at `/demo/`, unlinked).
+  1. **On the web:** the web app at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
   2. **Mac app:** a download for Apple Silicon Macs.
 - The app's source code lives in a separate repository, `BYE_Before_You_Enroll`, usually checked out beside this one (`../BYE_Before_You_Enroll`).
 
@@ -112,6 +112,8 @@ Live rollout is gated by `docs/DATA_ACCESS.md`, `docs/release-readiness.json`, a
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-17 web app paused (supersedes the go-live entry below):** "Use on the web" links back to the sample-data `/demo/` ("Sample data for now"); the live `/app/` is unlinked and disabled. The landing page links `/reviews/` (open to `@go.pasadena.edu` students; it needs a verified Resend domain and Supabase Pages variables before sign-in works). All PCC/RMP flags are off. Test only with repo fixtures.
 
 - **2026-10-16 go-live prepared (not deployed):** Landing links now point to the live app `/app/` and the review form `/reviews/`; fictional `/demo/` stays built but unlinked. Production/preview config enables the live app, RMP (owner decision without RMP permission, 24h cache) and student review sign-in (`REVIEW_ACCESS=students`). See the owner decision in `docs/DATA_ACCESS.md`. Before pushing: verified Resend sending domain, Supabase variables in Pages, source Worker deploys, and hosted preview checks.
 

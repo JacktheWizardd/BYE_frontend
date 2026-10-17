@@ -3,7 +3,7 @@
   "pages_build_output_dir": "./public",
   "compatibility_date": "2025-10-11",
   "vars": {
-    "LIVE_APP_ENABLED": "true",
+    "LIVE_APP_ENABLED": "false",
     "REVIEWS_ENABLED": "true",
     "REVIEW_ACCESS": "students"
   },
@@ -19,7 +19,7 @@
   "env": {
     "preview": {
       "vars": {
-        "LIVE_APP_ENABLED": "true",
+        "LIVE_APP_ENABLED": "false",
         "REVIEWS_ENABLED": "true",
         "REVIEW_ACCESS": "students"
       },

@@ -185,3 +185,4 @@ while PCC is disabled; the existing demo remains usable.
 - A small number of real source requests were made during this check (PCC terms + one MATH 005A schedule; RMP candidates/profile for MATH 005A professors from one search). Jack then directed fixture-only testing; no further live checks. Future verification uses repo fixtures only.
 - Fixed after deploy, not yet redeployed: "would take again" percentages are now rounded.
 - Follow-up: preview `RMP_AUTHORIZED=false` (source Worker `6b2835b7`); Pages `5098207b` includes the rounding fix. Production config keeps the owner's RMP decision. No live checks were run for this redeploy. RMP responses cached during the earlier check remain in preview storage until they expire (24h) or `CACHE_EPOCH` changes.
+- 2026-10-17: live app paused. Preview source Worker `fb1980d5` (all source flags off, new `CACHE_EPOCH`), Pages `4f0bb043` (demo + students reviews). No live checks.

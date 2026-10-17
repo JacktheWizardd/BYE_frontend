@@ -14,14 +14,17 @@
   "ownerReportedWorkersFree": true,
   "ownerDecisions": {
     "pccUseVerified": {
-      "accepted": true,
+      "accepted": false,
       "date": "2026-10-16",
-      "note": "Jack chose to use live PCC schedules without confirmed permitted use while the user base is small."
+      "note": "Jack chose to use live PCC schedules without confirmed permitted use while the user base is small.",
+      "supersededBy": "2026-10-17: live web app paused; website keeps demo + reviews only"
     },
     "rmpPermissionRecorded": {
-      "accepted": true,
+      "accepted": false,
       "date": "2026-10-16",
-      "note": "Jack chose to turn on RMP retrieval without RMP permission; RMP terms require prior permission for automated access. 24h cache and existing rate limits apply; disable with RMP_AUTHORIZED=false."
+      "note": "Jack chose to turn on RMP retrieval without RMP permission; RMP terms require prior permission for automated access. 24h cache and existing rate limits apply; disable with RMP_AUTHORIZED=false.",
+      "supersededBy": "2026-10-17: live web app paused; website keeps demo + reviews only"
     }
-  }
+  },
+  "webMode": "demo-plus-reviews"
 }
