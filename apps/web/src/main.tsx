@@ -88,7 +88,7 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
   return <div className="screen search-screen">
     <header className="topbar">
       <a className="home" href="../" aria-label="BYE home"><Wordmark /><span className="tagline">Before You Enroll</span></a>
-      <span className="row">{!isDemo && <a className="text-link" href="/reviews/">Write a review</a>}<a className="text-link" href="../">About</a></span>
+      <span className="row"><a className="text-link" href="/reviews/">Write a review</a><a className="text-link" href="../">About</a></span>
     </header>
     <main className="search-main">
       <form className="search-form" onSubmit={e => { e.preventDefault(); search() }}>

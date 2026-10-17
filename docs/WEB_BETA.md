@@ -85,3 +85,7 @@ Return the landing page's web links to `/demo/` with sample-data labels if they 
 PCC/BYE browsing no longer requires RMP availability. The approved owner preview
 keeps RMP disabled while permission is pending. See [owner preview](LIVE_APP_PREVIEW.md).
 This does not satisfy or remove production release gates.
+
+## Production Pages settings — October 17, 2026
+
+Builds from `main` failed from `e79f6c5` on: Pages had no build command, so dependencies were never installed and `functions/` could not resolve `@supabase/supabase-js`. The project now uses build command `pnpm install --frozen-lockfile` (output `public`), `NODE_VERSION=22.23.3` and `PNPM_VERSION=11.25.0`, plus production variables `REVIEWS_ENABLED=true`, `REVIEW_ACCESS=students`, `SUPABASE_URL` and the secret `SUPABASE_PUBLISHABLE_KEY`. `LIVE_APP_ENABLED` is unset (off) and no `SOURCES` binding exists in production. Note: Pages reads only a root `wrangler.json(c)`/`wrangler.toml`; the root `wrangler.jsonc` is the backup Worker config, so `wrangler.pages.jsonc` values are documentation, not applied settings. Production deploy `5591a31b` (commit `29663bb`) succeeded; `/reviews/` and `/api/reviews/status` (enabled, students) respond, and `/download`, `/updates/appcast.xml` and `/demo/` are unchanged.
