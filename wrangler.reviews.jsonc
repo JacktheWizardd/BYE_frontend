@@ -1,0 +1,11 @@
+{
+  // Owner-only review preview. No source Worker or Durable Object is required.
+  // Keep disabled until the owner approves email settings and preview deployment.
+  "name": "bye-before-you-enroll",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2025-10-11",
+  "vars": { "LIVE_APP_ENABLED": "false", "REVIEWS_ENABLED": "false" },
+  "env": {
+    "preview": { "vars": { "LIVE_APP_ENABLED": "false", "REVIEWS_ENABLED": "false" } }
+  }
+}

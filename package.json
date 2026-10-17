@@ -1,0 +1,56 @@
+{
+  "name": "bye-website",
+  "version": "0.1.0-beta.1",
+  "private": true,
+  "description": "BYE PCC browser app and gated source API",
+  "author": "BYE contributors",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config apps/web/vite.config.ts --mode demo",
+    "dev:live": "vite --config apps/web/vite.config.ts --mode live",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test apps/web/tests/*.test.ts tests/*.test.ts",
+    "build": "node scripts/build.mjs",
+    "verify:static": "node scripts/verify-static.mjs",
+    "dev:api": "node --import tsx scripts/review-dev.ts --app",
+    "dev:sources": "wrangler dev --config workers/source/wrangler.jsonc",
+    "deploy:sources:preview": "wrangler deploy --config workers/source/wrangler.jsonc --env preview",
+    "deploy:sources:production": "wrangler deploy --config workers/source/wrangler.jsonc --env production",
+    "verify:release": "node scripts/release-gate.mjs",
+    "verify:pcc": "node scripts/probe-pcc.mjs",
+    "test:browser": "node --import tsx scripts/browser-acceptance.ts",
+    "test:runtime": "node --import tsx scripts/runtime-acceptance.ts",
+    "dev:reviews": "vite --config apps/web/vite.reviews.config.ts",
+    "dev:reviews:api": "node --import tsx scripts/review-dev.ts",
+    "test:reviews:browser": "node --import tsx scripts/review-browser-acceptance.ts",
+    "test:reviews:runtime": "node --import tsx scripts/review-runtime-acceptance.ts",
+    "prepare:reviews:preview": "node scripts/prepare-review-preview.mjs",
+    "dev:app:api": "node --import tsx scripts/review-dev.ts --app",
+    "prepare:app:preview": "node scripts/prepare-app-preview.mjs",
+    "test:app:browser": "node --import tsx scripts/app-browser-acceptance.ts"
+  },
+  "dependencies": {
+    "@fontsource/jetbrains-mono": "5.3.0",
+    "@fontsource/schibsted-grotesk": "5.3.0",
+    "@supabase/supabase-js": "2.118.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "4.20251011.0",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "miniflare": "4.20251011.1",
+    "playwright": "1.56.1",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "7.1.12",
+    "wrangler": "4.45.0"
+  },
+  "engines": {
+    "node": ">=22.16"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

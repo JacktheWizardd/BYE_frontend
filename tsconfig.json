@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "lib": [
+      "ES2023",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node",
+      "vite/client",
+      "@cloudflare/workers-types"
+    ],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@shared/*": [
+        "packages/core/*"
+      ]
+    }
+  },
+  "include": [
+    "apps/web/src",
+    "apps/web/tests",
+    "apps/web/vite.config.ts",
+    "packages",
+    "server",
+    "functions",
+    "workers",
+    "tests",
+    "apps/web/reviews",
+    "apps/web/vite.reviews.config.ts"
+  ]
+}

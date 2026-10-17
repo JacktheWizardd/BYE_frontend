@@ -1,0 +1,15 @@
+{
+  "pccCloudflareVerified": false,
+  "pccUseVerified": false,
+  "rmpPermissionRecorded": false,
+  "rmpCloudflareVerified": false,
+  "browserAcceptancePassed": false,
+  "freeTierVerified": false,
+  "permissionReference": "",
+  "verifiedPreview": "",
+  "note": "Do not enable production or change the landing page until evidence is recorded for every gate.",
+  "ownerPreviewURL": "https://full-app-owner-test.bye-before-you-enroll.pages.dev",
+  "ownerPreviewDeployment": "9b8fd48a",
+  "ownerPreviewRoutingVerified": true,
+  "ownerReportedWorkersFree": true
+}

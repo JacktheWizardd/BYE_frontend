@@ -1,0 +1,35 @@
+{
+  "name": "bye-before-you-enroll",
+  "pages_build_output_dir": "./public",
+  "compatibility_date": "2025-10-11",
+  "vars": {
+    "LIVE_APP_ENABLED": "false",
+    "REVIEWS_ENABLED": "false"
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "SOURCES",
+        "class_name": "Sources",
+        "script_name": "bye-sources-production"
+      }
+    ]
+  },
+  "env": {
+    "preview": {
+      "vars": {
+        "LIVE_APP_ENABLED": "false",
+        "REVIEWS_ENABLED": "false"
+      },
+      "durable_objects": {
+        "bindings": [
+          {
+            "name": "SOURCES",
+            "class_name": "Sources",
+            "script_name": "bye-sources-preview"
+          }
+        ]
+      }
+    }
+  }
+}

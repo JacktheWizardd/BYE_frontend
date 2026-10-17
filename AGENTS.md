@@ -6,7 +6,7 @@ Read this before changing anything in this repository. It is written for any AI 
 
 The public website for **BYE (Before You Enroll)**, a free tool that helps Pasadena City College (PCC) students compare class sections, professor ratings and student reviews before they enroll.
 
-- Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, with no build step, serving `public/` as is.
+- Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, currently serving `public/`; the prepared web-beta build and Pages Functions configuration require owner rollout (see `docs/WEB_BETA.md`).
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get two ways to use BYE:
   1. **On the web:** the web app at `/demo/`. It currently runs on bundled, fictional **sample data**.
@@ -21,6 +21,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 | `public/styles.css` | All landing-page styles and design tokens; mobile first | Yes |
 | `public/404.html` | Not-found page; reuses `styles.css` classes (`.wrap .nav .brand .mark .sub .swipe .lead .btn .btn-primary`) | Yes |
 | `public/fonts/` | Self-hosted fonts (Schibsted Grotesk, Libre Baskerville, JetBrains Mono), all SIL OFL | Only to add or replace a font |
+| `public/reviews/` | **Generated** owner-only review page; rebuild from `apps/web/reviews/` | **No** |
 | `public/demo/` | **Generated** build of the web app. Never edit; rebuild it (see recipes) | **No** |
 | `public/updates/` | Mac in-app update feed (`appcast.xml`) and signed update zips | **No.** Release script only |
 | `public/downloads/` | Mac app DMGs | **No.** Release script only |
@@ -72,14 +73,20 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 
 ## Recipes
 
-**Rebuild the web demo after app changes** (in the app repo):
+**Build the browser app** (from this website repository):
 ```sh
-cd ../BYE_Before_You_Enroll/apps/web
-npm run typecheck && npm test && npm run build
-rm -rf ../../../BYE_website/public/demo && mkdir ../../../BYE_website/public/demo
-cp -R dist/ ../../../BYE_website/public/demo/
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm test
+pnpm build
+pnpm test:browser
 ```
-Build file names change every time, so always replace the whole folder. Node 24 on the owner's Mac is installed keg-only, so run `export PATH=/opt/homebrew/opt/node@24/bin:$PATH` first.
+
+The canonical source is `apps/web/` here; read its `AGENTS.md` before editing.
+The build generates `public/demo/` (fictional), `public/app/` (gated live API), and `public/reviews/` (owner-only review form).
+Do not import from the desktop checkout or hand-edit either generated folder.
+Live rollout is gated by `docs/DATA_ACCESS.md`, `docs/release-readiness.json`, and
+`docs/WEB_BETA.md`. Keep live/RMP flags disabled until their gates pass.
 
 **Ship a new Mac release:**
 1. From the app repo, run `python3 scripts/publish-to-website.py ../BYE_website`.
@@ -106,6 +113,13 @@ Build file names change every time, so always replace the whole folder. Node 24 
 
 ## Current state (update this when you change the site)
 
+- **2026-10-16 review submission:** Dedicated `/reviews/` source, same-origin Pages API, short-lived HttpOnly sessions, Supabase RPC submission, and owner-only preview tooling are implemented locally. Defaults remain disabled. Real email delivery, live submission/cleanup, and deployment are pending. See `docs/REVIEW_SUBMISSION.md` and `docs/REVIEW_VERIFICATION.md`. Never commit `.dev.vars`, tester addresses, keys, codes, or review content.
+
+- **2026-10-16:** Browser source moved into this repository; dual demo/live builds,
+  typed Pages API and a separate Durable Object source Worker are prepared.
+  Live release stays disabled pending authorized RMP access and deployed staging.
+  The landing page still links to sample data. See `docs/WEB_BETA.md` for verification.
+
 - **2026-10-15:**
   - Landing page redesigned mobile first.
   - The hero offers "On the web" (→ `/demo/`, sample data) and "Mac app" (→ `/download`); the menu bar has "Download for Mac" (desktop only) and "Use on the web".
@@ -117,3 +131,19 @@ Build file names change every time, so always replace the whole folder. Node 24 
   - live PCC/RMP data for the web app (needs a decision on Rate My Professors access)
   - a nicer domain (must keep the current update address working)
   - remove `noindex` / `robots.txt` at public launch
+
+
+## Full-app owner preview update — October 16, 2026
+
+Live PCC/BYE browsing, separate BYE/RMP review sections, validated submission
+prefilling, and owner-only BYE reporting are implemented locally. All six review
+sorts match the Mac feature set. Summaries and statistical comparisons remain
+disabled. See `docs/LIVE_APP_PREVIEW.md` from the website root. Production/demo
+navigation and default flags remain unchanged; hosted acceptance is pending.
+
+
+Owner preview deployed on October 16: https://full-app-owner-test.bye-before-you-enroll.pages.dev/reviews/ . BYE review routes
+are enabled for the owner; PCC/RMP remain disabled. Hosted routing and phone/desktop
+browser checks passed. Production settings and files were verified unchanged.
+Hosted real owner login/source activation remain pending; see docs/LIVE_APP_PREVIEW.md
+from the website root.
