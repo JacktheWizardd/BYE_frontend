@@ -6,7 +6,10 @@ for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.h
 assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/downloads\/BYE-0\.4\.0-beta\.1-AppleSilicon\.dmg 302/m)
 const routes = JSON.parse(await readFile('public/_routes.json', 'utf8'))
 assert.deepEqual(routes.include, ['/api/v1/*', '/api/reviews/*'])
-assert.match(await readFile('public/index.html', 'utf8'), /href="\/demo\/"/)
+const landing = await readFile('public/index.html', 'utf8')
+// The landing page links the live app; fictional /demo/ stays built for old links but is no longer linked.
+assert.match(landing, /href="\/app\/"/); assert.match(landing, /href="\/reviews\/"/); assert.doesNotMatch(landing, /href="\/demo\/"|Sample data/)
+await readFile('public/demo/index.html')
 for (const path of ['public/updates/appcast.xml', 'public/downloads/BYE-0.4.0-beta.1-AppleSilicon.dmg']) await readFile(path)
 const liveFiles = await readdir('public/app/assets')
 for (const path of liveFiles.filter(x => x.endsWith('.js'))) {

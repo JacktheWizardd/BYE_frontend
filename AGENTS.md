@@ -9,7 +9,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, currently serving `public/`; the prepared web-beta build and Pages Functions configuration require owner rollout (see `docs/WEB_BETA.md`).
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get two ways to use BYE:
-  1. **On the web:** the web app at `/demo/`. It currently runs on bundled, fictional **sample data**.
+  1. **On the web:** the live web app at `/app/` (fictional sample data remains at `/demo/`, unlinked).
   2. **Mac app:** a download for Apple Silicon Macs.
 - The app's source code lives in a separate repository, `BYE_Before_You_Enroll`, usually checked out beside this one (`../BYE_Before_You_Enroll`).
 
@@ -42,7 +42,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 
 - **`noindex` meta tags and `robots.txt`.** These keep the site out of search engines while BYE is in testing. Remove them only when the owner says BYE is launching publicly. Every page, including `/demo/`, should keep them until then.
 - **The two choices in the hero ("On the web" and "Mac app").** These are the main navigation for visitors. Keep the web option first; on phones the Mac card links to `#mac` (phones can't install the Mac app).
-- **Honesty labels.** While `/demo/` uses sample data, any link to it must say so ("Sample data for now"). Illustrations must keep "Illustration, not real data".
+- **Honesty labels.** Any link to `/demo/` must say it is sample data ("Sample data for now"). Illustrations must keep "Illustration, not real data".
 - **Neutrality.** BYE never ranks or recommends professors. Don't add "Top pick", "Best" or similar labels anywhere.
 - **Marked comments in `index.html`:** `APP LINK`, `DOWNLOAD LINK`, `FEEDBACK LINK`. Tools and people search for them; keep them next to their links.
 - **Credits in the footer** (MIT client attribution, font licenses). Keep them when editing the footer.
@@ -112,6 +112,8 @@ Live rollout is gated by `docs/DATA_ACCESS.md`, `docs/release-readiness.json`, a
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-16 go-live prepared (not deployed):** Landing links now point to the live app `/app/` and the review form `/reviews/`; fictional `/demo/` stays built but unlinked. Production/preview config enables the live app, RMP (owner decision without RMP permission, 24h cache) and student review sign-in (`REVIEW_ACCESS=students`). See the owner decision in `docs/DATA_ACCESS.md`. Before pushing: verified Resend sending domain, Supabase variables in Pages, source Worker deploys, and hosted preview checks.
 
 - **2026-10-16 review submission:** Dedicated `/reviews/` source, same-origin Pages API, short-lived HttpOnly sessions, Supabase RPC submission, and owner-only preview tooling are implemented locally. Defaults remain disabled. Real email delivery, live submission/cleanup, and deployment are pending. See `docs/REVIEW_SUBMISSION.md` and `docs/REVIEW_VERIFICATION.md`. Never commit `.dev.vars`, tester addresses, keys, codes, or review content.
 

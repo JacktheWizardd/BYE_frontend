@@ -109,3 +109,32 @@ test('transport rejects redirects without following them and insecure deployed o
   const insecure=new Request('http://public.test/api/reviews/status')
   assert.equal((await handleReviewRequest(insecure,f.env,f.outbound)).status,400)
 })
+test('students mode accepts any confirmed PCC address and saves without the test label',async()=>{
+  const f=reviewFixture();f.env.REVIEW_ACCESS='students';f.env.REVIEW_TEST_EMAIL=''
+  const status=(await(await f.request('status')).json() as any).data
+  assert.equal(status.enabled,true);assert.equal(status.ownerTest,false)
+  for(const email of ['tester@example.com','other@go.pasadena.edu.evil.test'])assert.equal((await f.request('auth/send',{email})).status,403)
+  assert.equal((await f.request('auth/send',{email:'other@go.pasadena.edu'})).status,200)
+  assert.equal(f.state.otpRequests,1)
+  const session=(await(await f.request('session',undefined,sessionCookie())).json() as any).data
+  assert.deepEqual(session,{signedIn:true,email:TEST_EMAIL})
+  assert.equal((await f.request('submit',validForm,sessionCookie())).status,200)
+  assert.equal(f.state.saves[0].p_body,validForm.body)
+  f.state.nonPcc=true
+  assert.equal((await f.request('session',undefined,sessionCookie())).status,401)
+})
+test('owner mode still reports a private test and keeps the test label',async()=>{
+  const f=reviewFixture()
+  assert.equal((await(await f.request('status')).json() as any).data.ownerTest,true)
+  assert.equal((await f.request('submit',validForm,sessionCookie())).status,200)
+  assert.ok(String(f.state.saves[0].p_body).startsWith(f.prefix))
+})
+test('per-address limits stop repeated code requests before Supabase',async()=>{
+  const f=reviewFixture();f.env.REVIEW_ACCESS='students'
+  const send=(ip:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/auth/send',{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json','CF-Connecting-IP':ip},body:JSON.stringify({email:TEST_EMAIL})}),f.env,f.outbound)
+  for(let i=0;i<5;i++)assert.equal((await send('203.0.113.9')).status,200)
+  const limited=await send('203.0.113.9')
+  assert.equal(limited.status,429);assert.ok(Number(limited.headers.get('Retry-After'))>0)
+  assert.equal(f.state.otpRequests,5)
+  assert.equal((await send('203.0.113.10')).status,200)
+})

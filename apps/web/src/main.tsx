@@ -88,7 +88,7 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
   return <div className="screen search-screen">
     <header className="topbar">
       <a className="home" href="../" aria-label="BYE home"><Wordmark /><span className="tagline">Before You Enroll</span></a>
-      <a className="text-link" href="../">About</a>
+      <span className="row">{!isDemo && <a className="text-link" href="/reviews/">Write a review</a>}<a className="text-link" href="../">About</a></span>
     </header>
     <main className="search-main">
       <form className="search-form" onSubmit={e => { e.preventDefault(); search() }}>
@@ -128,7 +128,7 @@ function ProfessorCard({ p, selected, onOpen }: { p: Professor; selected: boolea
   const className = `prof-card${selected ? ' selected' : ''}${unnamed(p) ? ' dashed' : ''}`
   if (p.profile) return <button className={className} aria-pressed={selected} onClick={onOpen}>
     <b className="name">{p.name}</b><span className="big">{score(p.profile.rating)}</span>
-    <small>{isDemo ? '' : 'RMP · '}Difficulty {score(p.profile.difficulty)}{p.profile.wouldTakeAgain === undefined ? '' : ` · ${p.profile.wouldTakeAgain}% would take again`}</small>
+    <small>{isDemo ? '' : 'RMP · '}Difficulty {score(p.profile.difficulty)}{p.profile.wouldTakeAgain === undefined ? '' : ` · ${Math.round(p.profile.wouldTakeAgain)}% would take again`}</small>
     <small>{where}</small>
     <Bar value={p.profile.rating} label="Rating" />
   </button>
@@ -205,7 +205,7 @@ function Report({ p, course, days, back, command }: { p: Professor; course: Cour
         <div className="stats">
           <div className="stat"><b>{score(profile.rating)}<small>/5</small></b><span>RMP rating</span><Bar value={profile.rating} label="Rating" /></div>
           <div className="stat"><b>{score(profile.difficulty)}<small>/5</small></b><span>Difficulty</span><Bar value={profile.difficulty} label="Difficulty" /></div>
-          <div className="stat"><b>{profile.wouldTakeAgain === undefined ? '—' : `${profile.wouldTakeAgain}%`}</b><span>Would take again</span></div>
+          <div className="stat"><b>{profile.wouldTakeAgain === undefined ? '—' : `${Math.round(profile.wouldTakeAgain)}%`}</b><span>Would take again</span></div>
         </div>
         <p className="muted small">{profile.ratingCount === undefined ? 'Rating count unavailable' : plural(profile.ratingCount, 'rating')} across all courses · lower difficulty means easier {isDemo ? ' · sample data' : ''}</p>
       </section>}

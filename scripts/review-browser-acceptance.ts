@@ -118,12 +118,30 @@ try {
       await page.getByRole('button',{name:'Check your review'}).click()
       await page.getByRole('button',{name:'Submit test review'}).click()
       await page.getByRole('alert').filter({hasText:'Do not submit again'}).waitFor()
-      assert.equal(await page.getByRole('button',{name:'Check Supabase before retrying',exact:true}).isEnabled(),false)
+      assert.equal(await page.getByRole('button',{name:'Check back before retrying',exact:true}).isEnabled(),false)
       assert.equal(fixture.state.calls.filter(x=>x.url.includes('/rpc/')).length,1)
       await context.close()
+      // Name-based links (Mac app) fill only exact catalog matches and leave the rest open.
+      fixture=reviewFixture()
+      const named=await browser.newContext({viewport:{width:390,height:844}})
+      assert.equal((await named.request.post(origin+'/api/reviews/auth/verify',{headers:{Origin:origin},data:{email:TEST_EMAIL,code:'123456'}})).status(),200)
+      const exact=await named.newPage();await exact.goto(origin+'/reviews/?'+new URLSearchParams({professor:'Alex Fixture',course:'TEST 001'}))
+      await exact.getByRole('button',{name:'Change professor'}).waitFor();await exact.getByRole('button',{name:'Change course'}).waitFor()
+      assert.ok((await exact.locator('.review-picked').allInnerTexts()).some(t=>t.includes('Alex Fixture')))
+      const missing=await named.newPage();await missing.goto(origin+'/reviews/?'+new URLSearchParams({professor:'Nobody Fixture',course:'TEST 001'}))
+      await missing.getByRole('button',{name:'Change course'}).waitFor()
+      assert.equal(await missing.getByRole('button',{name:'Change professor'}).count(),0)
+      assert.equal(await missing.getByRole('combobox',{name:'Professor',exact:true}).inputValue(),'')
+      await named.close()
+      // Students mode shows real copy, not the private-test wording.
+      fixture=reviewFixture();fixture.env.REVIEW_ACCESS='students'
+      const open=await browser.newPage();await open.goto(origin+'/reviews/')
+      await open.getByText('For PCC students · Beta').waitFor()
+      assert.equal(await open.getByText('private test',{exact:false}).count(),0)
+      await open.close()
       fixture=reviewFixture();fixture.env.REVIEWS_ENABLED='false'
       const disabled=await browser.newPage();await disabled.goto(origin+'/reviews/')
-      await disabled.getByRole('heading',{name:'Review testing is not open yet.'}).waitFor()
+      await disabled.getByRole('heading',{name:'Reviews are not open yet.'}).waitFor()
       assert.equal(fixture.state.calls.length,0);await disabled.close()
     } finally {await browser.close()}
   }

@@ -5,6 +5,8 @@ import { REVIEW_COMMENT_LIMIT, TEST_REVIEW_PREFIX, type ReviewInput } from '../p
 export interface ReviewEnv {
   REVIEWS_ENABLED?: string
   REVIEW_TEST_EMAIL?: string
+  /** 'students' opens sign-in to any @go.pasadena.edu address; anything else keeps the single-tester mode. */
+  REVIEW_ACCESS?: string
   SUPABASE_URL?: string
   SUPABASE_PUBLISHABLE_KEY?: string
   /** Development only; ignored unless the request is loopback HTTP. */
@@ -22,16 +24,16 @@ const sessionError = () => new ReviewError(401, 'SESSION_EXPIRED', 'Verify your 
 
 function settings(env: ReviewEnv) {
   if (env.REVIEWS_ENABLED !== 'true') return null
-  const email = normalizeEmail(env.REVIEW_TEST_EMAIL)
-  if (!schoolEmail(email)) return null
+  const open = env.REVIEW_ACCESS === 'students', email = normalizeEmail(env.REVIEW_TEST_EMAIL)
+  if (!open && !schoolEmail(email)) return null
   try {
     const url = new URL(env.SUPABASE_URL ?? '')
     if (url.protocol !== 'https:' || !url.hostname.endsWith('.supabase.co') || url.username || url.password || url.port || url.pathname !== '/' || url.search || url.hash) return null
     const key = env.SUPABASE_PUBLISHABLE_KEY?.trim() ?? ''
     // Never accidentally run this app using a privileged key, including legacy JWT keys.
-    if (key.startsWith('sb_publishable_') && key.length > 16) return { email, url: url.origin, key }
+    if (key.startsWith('sb_publishable_') && key.length > 16) return { email, open, url: url.origin, key }
     const payload = JSON.parse(atob(key.split('.')[1]?.replaceAll('-', '+').replaceAll('_', '/') ?? ''))
-    if (payload.role === 'anon') return { email, url: url.origin, key }
+    if (payload.role === 'anon') return { email, open, url: url.origin, key }
   } catch { /* Fail closed; never expose configuration values in responses or logs. */ }
   return null
 }
@@ -73,10 +75,11 @@ async function jsonBody(request: Request): Promise<Record<string, unknown>> {
     return value
   } catch { throw invalid('The form could not be read. Please try again.') }
 }
-function emailInput(body: Record<string, unknown>, allowed: string) {
+type Access = { email: string; open: boolean }
+function emailInput(body: Record<string, unknown>, access: Access) {
   const email = normalizeEmail(body.email)
   if (!schoolEmail(email)) throw new ReviewError(403, 'PCC_EMAIL_REQUIRED', 'Use your @go.pasadena.edu school email.')
-  if (email !== allowed) throw new ReviewError(403, 'OWNER_TEST_ONLY', 'This private test is available only to the configured tester.')
+  if (!access.open && email !== access.email) throw new ReviewError(403, 'OWNER_TEST_ONLY', 'This private test is available only to the configured tester.')
   return email
 }
 export function validateReview(body: Record<string, unknown>): ReviewInput {
@@ -111,7 +114,21 @@ function client(config: NonNullable<ReturnType<typeof settings>>, outbound: type
     },
   })
 }
-function eligible(user: User | null, allowed: string) { return user && normalizeEmail(user.email) === allowed && !!user.email_confirmed_at }
+function eligible(user: User | null, access: Access) {
+  const email = normalizeEmail(user?.email)
+  return !!user && !!user.email_confirmed_at && schoolEmail(email) && (access.open || email === access.email)
+}
+// Per-isolate abuse brake in front of Supabase's own limits; keyed by client address, never stored.
+const buckets = new Map<string, { count: number; until: number }>()
+const LIMITS: Record<string, { max: number; windowMs: number }> = { 'auth/send': { max: 5, windowMs: 10 * 60_000 }, 'auth/verify': { max: 20, windowMs: 10 * 60_000 }, submit: { max: 10, windowMs: 60 * 60_000 }, report: { max: 20, windowMs: 60 * 60_000 } }
+export function rateLimit(route: string, client: string, now = Date.now()) {
+  const rule = LIMITS[route]
+  if (!rule) return
+  if (buckets.size > 5000) for (const [k, b] of buckets) if (b.until <= now) buckets.delete(k)
+  const key = route + '|' + client, old = buckets.get(key), bucket = old && old.until > now ? old : { count: 0, until: now + rule.windowMs }
+  if (++bucket.count > rule.max) throw new ReviewError(429, 'RATE_LIMITED', 'Too many attempts. Please wait and try again.', Math.max(1, Math.ceil((bucket.until - now) / 1000)))
+  buckets.set(key, bucket)
+}
 function authFailure(error: { status?: number } | null, verifying = false): never {
   if (error?.status === 429) throw new ReviewError(429, 'AUTH_RATE_LIMITED', 'Please wait before requesting or trying another code.', 60)
   if (verifying && error?.status && error.status < 500) throw new ReviewError(400, 'INVALID_CODE', 'That code is incorrect or has expired. Try again or request a new code.')
@@ -129,11 +146,13 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
     if (request.method === 'POST' && request.headers.get('Origin') !== url.origin) throw new ReviewError(403, 'ORIGIN_DENIED', 'Open the review form on this website before continuing.')
     if (url.protocol !== 'https:' && !(env.REVIEW_LOCAL_HTTP === 'true' && url.protocol === 'http:' && ['localhost','127.0.0.1','[::1]'].includes(url.hostname))) throw new ReviewError(400, 'HTTPS_REQUIRED', 'Use the secure BYE website to verify your email.')
     const config = settings(env)
-    if (route === 'status') return reply({ enabled: !!config, ownerTest: true })
-    if (!config) throw new ReviewError(503, 'REVIEWS_DISABLED', 'Review testing is not open yet.')
+    if (route === 'status') return reply({ enabled: !!config, ownerTest: !config?.open })
+    if (!config) throw new ReviewError(503, 'REVIEWS_DISABLED', 'Reviews are not open yet.')
+    const address = request.headers.get('CF-Connecting-IP')
+    if (address) rateLimit(route, address)
     if (route === 'auth/signout') return reply({ signedIn:false }, cookie(request, env, '', 0))
     if (route === 'auth/send' || route === 'auth/verify') {
-      const body = await jsonBody(request), email = emailInput(body, config.email), supabase = client(config, outbound)
+      const body = await jsonBody(request), email = emailInput(body, config), supabase = client(config, outbound)
       if (route === 'auth/send') {
         const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser:true } })
         if (error) authFailure(error)
@@ -143,7 +162,7 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
       const { data, error } = await supabase.auth.verifyOtp({ email, token:body.code.trim(), type:'email' })
       if (error || !data.session) authFailure(error, true)
       const session = data.session!
-      if (!eligible(session.user, config.email) || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(session.access_token) || session.access_token.length >= 3800) throw sessionError()
+      if (!eligible(session.user, config) || !/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(session.access_token) || session.access_token.length >= 3800) throw sessionError()
       const ttl = Math.min(session.expires_in, (session.expires_at ?? 0) - Math.floor(Date.now()/1000))
       if (!Number.isFinite(ttl) || ttl <= 0) throw sessionError()
       return reply({ signedIn:true, email }, cookie(request, env, session.access_token, ttl))
@@ -161,8 +180,8 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
       if (!identityError.status || identityError.status >= 500) throw new ReviewError(503, 'AUTH_UNAVAILABLE', 'Sign-in could not be checked. Try again shortly.')
       throw sessionError()
     }
-    if (!eligible(identity.user, config.email)) throw sessionError()
-    if (route === 'session') return reply({ signedIn:true, email:config.email })
+    if (!eligible(identity.user, config)) throw sessionError()
+    if (route === 'session') return reply({ signedIn:true, email:normalizeEmail(identity.user!.email) })
     if (route === 'selection') return reply(await selection(supabase,url.searchParams))
     if (route === 'report') {
       const body=await jsonBody(request)
@@ -181,15 +200,15 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
       saveAttempted = true
       const { data, error } = await supabase.rpc('submit_review', {
         p_professor_id:form.professorId, p_course_id:form.courseId, p_quality:form.quality, p_difficulty:form.difficulty,
-        p_body:TEST_REVIEW_PREFIX + form.body, p_answers:form.answers,
+        p_body:(config.open ? '' : TEST_REVIEW_PREFIX) + form.body, p_answers:form.answers,
       })
       if (error) {
         if (error.code === '23505') throw new ReviewError(409, 'DUPLICATE_REVIEW', 'You already reviewed this professor for this course.')
         if (error.code === '42501' || error.code === 'PGRST301' || error.code === 'PGRST303') throw sessionError()
         if (['22023','23503','23514','23502'].includes(error.code)) throw invalid('Check your professor, course, ratings and question answers, then try again.')
-        throw new ReviewError(503, 'SAVE_UNCONFIRMED', 'We could not confirm the save. Do not submit again until the test review is checked in Supabase.')
+        throw new ReviewError(503, 'SAVE_UNCONFIRMED', 'We could not confirm the save. Do not submit again yet; check back shortly before retrying.')
       }
-      if (typeof data !== 'string' || !/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(data)) throw new ReviewError(503, 'SAVE_UNCONFIRMED', 'We could not confirm the save. Check Supabase before submitting again.')
+      if (typeof data !== 'string' || !/^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(data)) throw new ReviewError(503, 'SAVE_UNCONFIRMED', 'We could not confirm the save. Do not submit again yet; check back shortly before retrying.')
       return reply({ id:data })
     }
     if (route === 'dimensions') {

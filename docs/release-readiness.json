@@ -7,9 +7,21 @@
   "freeTierVerified": false,
   "permissionReference": "",
   "verifiedPreview": "",
-  "note": "Do not enable production or change the landing page until evidence is recorded for every gate.",
+  "note": "Gates are evidence records. ownerDecisions records gates the owner chose to go live without; those gates stay false.",
   "ownerPreviewURL": "https://full-app-owner-test.bye-before-you-enroll.pages.dev",
   "ownerPreviewDeployment": "9b8fd48a",
   "ownerPreviewRoutingVerified": true,
-  "ownerReportedWorkersFree": true
+  "ownerReportedWorkersFree": true,
+  "ownerDecisions": {
+    "pccUseVerified": {
+      "accepted": true,
+      "date": "2026-10-16",
+      "note": "Jack chose to use live PCC schedules without confirmed permitted use while the user base is small."
+    },
+    "rmpPermissionRecorded": {
+      "accepted": true,
+      "date": "2026-10-16",
+      "note": "Jack chose to turn on RMP retrieval without RMP permission; RMP terms require prior permission for automated access. 24h cache and existing rate limits apply; disable with RMP_AUTHORIZED=false."
+    }
+  }
 }

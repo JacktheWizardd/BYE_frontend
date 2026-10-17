@@ -60,7 +60,7 @@ try{
    await search()
    const bye=page.getByRole('region',{name:'BYE student reviews'})
    await bye.getByText('25 reviews across all courses',{exact:false}).waitFor()
-   assert.equal(await bye.locator('.review-card').count(),20)
+   await bye.locator('.review-card').nth(19).waitFor();assert.equal(await bye.locator('.review-card').count(),20)
    assert.equal(await bye.locator('.review-card img').count(),0,'Comment is rendered as text')
    await bye.getByLabel('Sort BYE reviews').selectOption('lowest')
    await bye.getByRole('button',{name:'Show more BYE reviews'}).click()

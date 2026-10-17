@@ -3,8 +3,9 @@
   "pages_build_output_dir": "./public",
   "compatibility_date": "2025-10-11",
   "vars": {
-    "LIVE_APP_ENABLED": "false",
-    "REVIEWS_ENABLED": "false"
+    "LIVE_APP_ENABLED": "true",
+    "REVIEWS_ENABLED": "true",
+    "REVIEW_ACCESS": "students"
   },
   "durable_objects": {
     "bindings": [
@@ -18,8 +19,9 @@
   "env": {
     "preview": {
       "vars": {
-        "LIVE_APP_ENABLED": "false",
-        "REVIEWS_ENABLED": "false"
+        "LIVE_APP_ENABLED": "true",
+        "REVIEWS_ENABLED": "true",
+        "REVIEW_ACCESS": "students"
       },
       "durable_objects": {
         "bindings": [

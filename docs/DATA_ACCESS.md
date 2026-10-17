@@ -94,3 +94,13 @@ explicit owner action/approval. Existing fixture tests cover those flows. PCC
 permitted use, RMP permission and full hosted source/free-tier acceptance remain
 production gates. The full class-search page intentionally stays unavailable
 while PCC is disabled; the existing demo remains usable.
+
+## Owner go-live decision — October 16, 2026
+
+Jack decided to switch the website from fictional demo data to live data before the source gates were met:
+
+- **PCC:** live schedules are used without a confirmed permitted-use agreement, accepted while the user base is small. `pccUseVerified` stays false.
+- **RMP:** retrieval is turned on through the BYE source Worker without RMP permission. The inspected RMP terms require prior permission for automated access; this is a known, accepted risk, not a granted permission. `rmpPermissionRecorded` stays false and `RMP_PERMISSION_REF` names the decision, not a permission. Retention is 24 hours (`RMP_CACHE_SECONDS=86400`, matching the Mac app); request limits in `server/network.ts` are unchanged.
+- **Reviews:** sign-in is open to any `@go.pasadena.edu` address (`REVIEW_ACCESS=students`).
+
+Rollback: `RMP_AUTHORIZED=false` on the source Worker stops RMP calls; `LIVE_APP_ENABLED=false` on Pages stops all source operations; change `CACHE_EPOCH` to purge stored RMP data. Record any permission or takedown request here.

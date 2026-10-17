@@ -10,10 +10,10 @@ export async function api<T>(path:string, body?:unknown, signal?:AbortSignal): P
     })
   } catch (error) {
     if (signal?.aborted) throw error
-    throw new FormError(path === 'submit' ? 'SAVE_UNCONFIRMED':'NETWORK_ERROR', path === 'submit' ? 'The save could not be confirmed. Check Supabase before submitting again.' : 'Could not connect to BYE. Check your connection and try again.')
+    throw new FormError(path === 'submit' ? 'SAVE_UNCONFIRMED':'NETWORK_ERROR', path === 'submit' ? 'The save could not be confirmed. Do not submit again yet; check back shortly.' : 'Could not connect to BYE. Check your connection and try again.')
   }
   let result: { data?: unknown; error?: { code?: string; message?: string; retryAfter?: number } }
-  try { result = await response.json() as typeof result; if (!result || typeof result !== 'object') throw new Error() } catch { throw new FormError(path === 'submit' ? 'SAVE_UNCONFIRMED':'NETWORK_ERROR', path === 'submit' ? 'The save could not be confirmed. Check Supabase before submitting again.' : 'BYE returned an unreadable response. Try again shortly.') }
+  try { result = await response.json() as typeof result; if (!result || typeof result !== 'object') throw new Error() } catch { throw new FormError(path === 'submit' ? 'SAVE_UNCONFIRMED':'NETWORK_ERROR', path === 'submit' ? 'The save could not be confirmed. Do not submit again yet; check back shortly.' : 'BYE returned an unreadable response. Try again shortly.') }
   if (!response.ok) throw new FormError(result.error?.code ?? 'REQUEST_FAILED', result.error?.message ?? 'This request could not be completed.', result.error?.retryAfter ?? 0)
   return result.data as T
 }
