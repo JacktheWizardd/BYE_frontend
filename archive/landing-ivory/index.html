@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>BYE — Before You Enroll</title>
+  <meta name="description" content="Compare PCC sections, professor ratings and student reviews before you enroll. Free on your Mac, with a sample-data demo in your browser.">
+  <meta name="theme-color" content="#faf8f3">
+  <!-- Tester phase: keep out of search engines. Remove when launching publicly. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/fonts/schibsted-grotesk-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="nav">
+      <a class="brand" href="/" aria-label="BYE, Before You Enroll, home"><span class="mark swipe">BYE</span><span class="sub">Before You Enroll</span></a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="#how">How it works</a>
+        <a href="#mac">Mac app</a>
+        <a href="#feedback">Feedback</a>
+        <!-- DOWNLOAD LINK: /download redirects to the newest DMG (see public/_redirects) -->
+        <a class="btn nav-mac" href="/download">Download for Mac</a>
+        <!-- APP LINK: the web demo (sample data for now) lives at /demo/ -->
+        <a class="btn btn-primary" href="/demo/">Try the web demo</a>
+      </nav>
+    </header>
+
+    <main>
+      <div class="hero">
+        <div>
+          <span class="eyebrow outlined">Free · for PCC students</span>
+          <h1>Pick classes with <span class="swipe">your eyes open.</span></h1>
+          <p class="lead">See every section of a PCC class next to professor ratings and student reviews. Then decide for yourself.</p>
+          <div class="choices" role="group" aria-label="Two ways to use BYE">
+            <div class="choice choice-web">
+              <span class="eyebrow">Web demo</span>
+              <h2>Try BYE in your browser</h2>
+              <p>A preview of how BYE works, with made-up classes, professors and reviews. Nothing to install. For real PCC data, use the Mac app.</p>
+              <a class="btn btn-primary btn-big" href="/demo/">Try the demo <span aria-hidden="true">→</span></a>
+              <p class="fine">Sample data for now · not real professors</p>
+              <!-- REVIEW LINK: review form for @go.pasadena.edu students -->
+              <a class="btn btn-big" href="/reviews/">Write a review</a>
+            </div>
+            <div class="choice choice-mac">
+              <span class="eyebrow">Mac app</span>
+              <h2>Get BYE for Mac</h2>
+              <p>Real PCC classes, professor ratings and reviews, plus review summaries made on your Mac.</p>
+              <a class="btn btn-big desktop-only" href="/download">Download for Mac</a>
+              <a class="btn btn-big phone-only" href="#mac">Get it on your Mac</a>
+              <p class="fine">Apple Silicon · macOS 14 or newer</p>
+            </div>
+          </div>
+        </div>
+
+        <figure class="preview">
+          <div class="window" role="img" aria-label="Illustration of BYE comparing professors for MATH 5A">
+            <div class="window-bar" aria-hidden="true"><span class="chip">MATH 5A</span><small>Fall 2026 · 5 professors · sorted by rating</small></div>
+            <div class="window-body" aria-hidden="true">
+              <div class="prof selected"><b>Professor A</b><span class="score">4.6</span><small>Difficulty 2.8 · 91% would take again</small><small>38 ratings · 2 sections</small><div class="bar"><i style="width: 92%"></i></div></div>
+              <div class="prof"><b>Professor B</b><span class="score">4.1</span><small>Difficulty 3.2 · 80% would take again</small><small>21 ratings · 1 section</small><div class="bar"><i style="width: 82%"></i></div></div>
+              <div class="prof third"><b>Professor C</b><span class="score">3.7</span><small>Difficulty 3.6 · 68% would take again</small><small>54 ratings · 2 sections</small><div class="bar"><i style="width: 74%"></i></div></div>
+            </div>
+          </div>
+          <figcaption>Illustration, not real data</figcaption>
+        </figure>
+      </div>
+
+      <section id="how">
+        <span class="eyebrow">How it works</span>
+        <h2>Three steps, one tab.</h2>
+        <ol class="how">
+          <li><h3>Type a class</h3><p>A code like <b>MATH 5A</b> or a title, plus your semester and the days you want class.</p></li>
+          <li><h3>Compare professors</h3><p>Rating, difficulty and “would take again” for everyone teaching it, sorted your way.</p></li>
+          <li><h3>Read and decide</h3><p>Student reviews for your class, with links back to the source. BYE never picks for you.</p></li>
+        </ol>
+      </section>
+
+      <section id="features">
+        <span class="eyebrow">What you see</span>
+        <h2>Everything you check before enrolling, <span class="swipe">in one place.</span></h2>
+        <div class="features">
+          <article class="feature"><span class="num">01</span><h3>Sections and times</h3><p>Days, times, format and open seats for every section of the class.</p></article>
+          <article class="feature"><span class="num">02</span><h3>Ratings side by side</h3><p>Overall rating, difficulty, number of ratings and “would take again” for each professor.</p></article>
+          <article class="feature"><span class="num">03</span><h3>Student reviews</h3><p>Reviews for the course you're taking, or from the professor's other courses, with links to the original source.</p></article>
+          <article class="feature"><span class="num">04</span><h3>Days that fit you</h3><p>Pick your class days and BYE shows the sections that meet on them. Online classes always show.</p></article>
+        </div>
+      </section>
+
+      <section id="mac">
+        <div class="mac">
+          <div class="mac-intro">
+            <span class="eyebrow">On a Mac?</span>
+            <h2>BYE is also a Mac app.</h2>
+            <p>The same search in a native window, plus review summaries made on your Mac with Apple's on-device AI. Apple Silicon · macOS 14 or newer.</p>
+            <div class="mac-actions">
+              <button type="button" class="btn phone-only" id="copy-link">Copy link for your Mac</button>
+              <a class="btn btn-primary" href="/download">Download for Mac</a>
+            </div>
+            <p class="fine" id="copy-status" role="status"></p>
+          </div>
+          <div class="mac-install">
+            <ol class="steps">
+              <li><span><a href="/download">Download</a> the <b>AppleSilicon.dmg</b> file.</span></li>
+              <li><span>Open it and drag <b>BYE Beta</b> into Applications.</span></li>
+              <li><span>Eject the DMG and open BYE Beta from Applications.</span></li>
+            </ol>
+            <div class="note">
+              <b>Seeing a security warning?</b>
+              <p>BYE is signed but not yet notarized by Apple, so macOS may block the first launch. If you trust the download, go to System Settings → Privacy &amp; Security and choose Open Anyway.</p>
+            </div>
+            <div class="note">
+              <b>Updates install themselves.</b>
+              <p>BYE checks for a new version about once a day and installs it when you quit. Keep it in Applications so it can update.</p>
+            </div>
+            <p class="fine">No sign-in or API key. Internet is needed for class schedules and professor data. Windows isn't planned right now.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="feedback" class="plain">
+        <div class="feedback">
+          <div>
+            <h2>You're an early tester.</h2>
+            <p>Found a bug, a wrong professor match, or have an idea? Tell me. BYE is built by a PCC student, and tester feedback decides what gets fixed first.</p>
+          </div>
+          <!-- FEEDBACK LINK: replace # with your form link -->
+          <a class="btn" href="#">Send feedback</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/demo/">Web demo (sample data)</a>
+        <a href="/reviews/">Write a review</a>
+        <a href="#how">How it works</a>
+        <a href="#mac">Mac app</a>
+        <a href="#feedback">Feedback</a>
+      </nav>
+      <div class="cols">
+        <div>
+          <p>BYE is a free, independent student project. It is not affiliated with Pasadena City College or Rate My Professors.</p>
+          <p>Professor ratings and reviews come from Rate My Professors, with links back to each original profile. BYE's ratings client is adapted from <a href="https://github.com/amaanjaved1/rate-my-professors-client-ts">rate-my-professors-client-ts</a> by Amaan, under the MIT License. Libre Baskerville, Schibsted Grotesk and JetBrains Mono are used under the SIL Open Font License.</p>
+        </div>
+        <p>© 2026 BYE</p>
+      </div>
+    </footer>
+  </div>
+  <script>
+    // Phones can't install the Mac app, so offer to copy the address for later.
+    document.getElementById('copy-link').addEventListener('click', async () => {
+      const status = document.getElementById('copy-status');
+      try { await navigator.clipboard.writeText(location.origin + '/#mac'); status.textContent = 'Link copied. Open it on your Mac to download.'; }
+      catch { status.textContent = 'Copy this address: ' + location.origin + '/#mac'; }
+    });
+  </script>
+</body>
+</html>

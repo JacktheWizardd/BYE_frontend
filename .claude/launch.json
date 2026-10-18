@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "landing",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": ["pnpm", "dev:landing"],
+      "port": 5174,
+      "url": "http://127.0.0.1:5174"
+    },
+    {
+      "name": "built-site",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "http-server", "public", "-p", "8790", "-c-1", "--silent"],
+      "port": 8790
+    }
+  ]
+}
