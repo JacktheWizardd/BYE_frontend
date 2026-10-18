@@ -1,6 +1,10 @@
 /updates/appcast.xml
   Cache-Control: public, max-age=300
 
+# Home page assets (built from apps/landing) have hashed file names.
+/site/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Web demo assets have hashed file names, so they never change in place.
 /demo/assets/*
   Cache-Control: public, max-age=31536000, immutable

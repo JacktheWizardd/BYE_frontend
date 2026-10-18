@@ -1,0 +1,85 @@
+/* BYE home page. Mobile first: base styles are phones; md (600px) and lg (900px) add tablet and desktop.
+   Tokens come from the BYE design system: warm ivory, Jet Black, one yellow accent. Light only. */
+@import "tailwindcss";
+
+@font-face { font-family: "Schibsted Grotesk"; src: url("/fonts/schibsted-grotesk-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Schibsted Grotesk"; src: url("/fonts/schibsted-grotesk-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Schibsted Grotesk"; src: url("/fonts/schibsted-grotesk-latin-700-normal.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Libre Baskerville"; src: url("/fonts/LibreBaskerville-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Libre Baskerville"; src: url("/fonts/LibreBaskerville-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+
+@theme {
+  --breakpoint-md: 600px;
+  --breakpoint-lg: 900px;
+  --breakpoint-xl: 1200px;
+
+  --color-paper: #faf8f3;   /* ivory page */
+  --color-linen: #f2eee6;   /* panels */
+  --color-card: #ffffff;
+  --color-tile: #eae5db;    /* stone */
+  --color-tile-line: #ddd6c9;
+  --color-ink: #161618;     /* Jet Black */
+  --color-ink-2: #5f5a52;   /* body text, 6.6:1 on paper */
+  --color-ink-3: #6b665e;   /* fine print, 5.4:1 on paper */
+  --color-line: #e2dcd0;
+  --color-line-strong: #8c857a;
+  --color-accent: #f2c14e;  /* the one accent: ratings, counters, swipe, CTA hover */
+
+  --font-display: "Libre Baskerville", Baskerville, Georgia, serif;
+  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --radius-card: 18px;
+  --radius-window: 22px;
+  --shadow-float: 0 1px 0 rgb(22 22 24 / 0.05), 0 24px 48px -28px rgb(22 22 24 / 0.38);
+  --shadow-soft: 0 1px 0 rgb(22 22 24 / 0.04), 0 12px 28px -20px rgb(22 22 24 / 0.3);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes screen-in { from { opacity: 0; transform: translateY(10px); clip-path: inset(0 0 12% 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; }
+  html, body { background: var(--color-paper); color: var(--color-ink); }
+  body { font-family: var(--font-sans); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
+  ::selection { background: var(--color-accent); color: var(--color-ink); }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; border-radius: 4px; }
+  a { text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+}
+
+@layer components {
+  /* Highlighter swipe under the one emphasised phrase (and the wordmark). */
+  .swipe {
+    padding: 0 0.08em;
+    background-image: linear-gradient(var(--color-accent), var(--color-accent));
+    background-repeat: no-repeat;
+    background-position: 0 88%;
+    background-size: var(--swipe, 100%) 0.3em;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+    min-height: 3.25rem; padding: 0.75rem 1.5rem; border-radius: 999px;
+    font: 600 1rem/1.2 var(--font-sans); text-decoration: none; white-space: nowrap;
+    border: 1.5px solid var(--color-line-strong); background: var(--color-card); color: var(--color-ink);
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+  }
+  .btn:hover { border-color: var(--color-ink); }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-paper); }
+  .btn-primary:hover { background: var(--color-accent); border-color: var(--color-accent); color: var(--color-ink); }
+  .btn-soon { background: transparent; border-style: dashed; color: var(--color-ink-3); cursor: default; }
+  .btn-soon:hover { border-color: var(--color-line-strong); }
+  .code { font-family: var(--font-mono); font-weight: 500; font-size: 0.9em; }
+  /* Interactive story: each screen eases in; the active step shows scroll progress. */
+  .story-screen { animation: screen-in 0.55s var(--ease-out-expo) both; }
+  .story-progress { width: 100%; transform: scaleX(var(--p, 0)); transform-origin: left; }
+  @media (min-width: 900px) { .story-progress { transform: scaleY(var(--p, 0)); transform-origin: top; } }
+  @media (prefers-reduced-motion: reduce) { .story-screen { animation: none; } }
+  .wrap { width: 100%; max-width: 1200px; margin-inline: auto; padding-inline: max(20px, env(safe-area-inset-left)); }
+}

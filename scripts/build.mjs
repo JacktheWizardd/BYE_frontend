@@ -11,5 +11,7 @@ for (const mode of ['demo', 'live']) {
   }
 }
 await build({ configFile: 'apps/web/vite.reviews.config.ts' })
+// Home page: apps/landing prerendered into public/index.html and public/site/.
+await import('./build-landing.mjs')
 await copyFile('THIRD_PARTY_NOTICES.md', 'public/licenses.txt')
 await import('./verify-static.mjs')

@@ -36,6 +36,8 @@
     "workers",
     "tests",
     "apps/web/reviews",
-    "apps/web/vite.reviews.config.ts"
+    "apps/web/vite.reviews.config.ts",
+    "apps/landing/src",
+    "apps/landing/vite.config.ts"
   ]
 }
