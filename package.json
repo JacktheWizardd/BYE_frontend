@@ -29,7 +29,8 @@
     "prepare:app:preview": "node scripts/prepare-app-preview.mjs",
     "test:app:browser": "node --import tsx scripts/app-browser-acceptance.ts",
     "dev:landing": "vite --config apps/landing/vite.config.ts",
-    "build:landing": "node scripts/build-landing.mjs"
+    "build:landing": "node scripts/build-landing.mjs",
+    "dev:reviews:preview": "vite build --config apps/web/vite.reviews.config.ts && node --import tsx scripts/review-preview.ts"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "5.3.0",

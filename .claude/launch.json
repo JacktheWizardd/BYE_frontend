@@ -9,6 +9,13 @@
       "url": "http://127.0.0.1:5174"
     },
     {
+      "name": "review-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["--import", "tsx", "scripts/review-preview.ts"],
+      "port": 8791,
+      "url": "http://127.0.0.1:8791"
+    },
+    {
       "name": "built-site",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--yes", "http-server", "public", "-p", "8790", "-c-1", "--silent"],
