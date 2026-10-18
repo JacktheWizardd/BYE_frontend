@@ -1,3 +1,17 @@
+# Every page: only this site's own scripts, fonts and connections, and no framing by other sites.
+# Any script on this origin could read a signed-in student's email from /api/reviews/session, so keep
+# script-src and connect-src at 'self'. This also blocks injected third-party scripts (for example
+# Cloudflare Web Analytics), which keeps the "no tracking scripts" line in About.tsx true.
+# 'unsafe-inline' for styles only: the prerendered home page and 404 page use style attributes.
+# data: fonts: the demo and app builds inline a few small font files.
+# /reviews/ replaces these with its own stricter set below.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
 /updates/appcast.xml
   Cache-Control: public, max-age=300
 
@@ -22,8 +36,11 @@
 /reviews/
   Cache-Control: no-cache
 
+# challenges.cloudflare.com is the optional Turnstile bot check. Nothing loads from it unless
+# TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY are set in Pages (see docs/REVIEW_SUBMISSION.md).
 /reviews/*
+  ! Content-Security-Policy
+  ! Referrer-Policy
   X-Robots-Tag: noindex, nofollow
-  X-Content-Type-Options: nosniff
   Referrer-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self'; font-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'

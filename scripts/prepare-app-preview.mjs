@@ -14,8 +14,9 @@ const previewVars={...config.env.preview.vars}
 config.vars=previewVars
 config.env={preview:{vars:previewVars,durable_objects:previewBinding}}
 await mkdir(stage,{recursive:true});await cp('public',stage+'/public',{recursive:true})
-// Preview-only policy: leave the production analytics setting untouched.
-const previewHeaders="\n# Owner preview: no third-party scripts or analytics connections.\n/*\n  Cache-Control: public, no-transform\n  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; object-src 'none'\n"
+// The site-wide CSP in public/_headers already blocks third-party scripts; the preview only adds
+// no-transform so Cloudflare does not inject its analytics snippet at all.
+const previewHeaders="\n# Owner preview: no injected analytics snippet.\n/*\n  Cache-Control: public, no-transform\n"
 await writeFile(stage+'/public/_headers',(await readFile('public/_headers','utf8'))+previewHeaders)
 const env={...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG_PATH:'/private/tmp/bye-app-preview-build.log'}
 execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','pages','functions','build','functions','--outdir',stage+'/functions-build'],{env,stdio:'pipe'})

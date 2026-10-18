@@ -37,11 +37,36 @@ address may already have been supplied; it must stay out of Git.
 | `SUPABASE_URL` | Hosted project's `https://PROJECT.supabase.co` origin |
 | `SUPABASE_PUBLISHABLE_KEY` | Publishable key or legacy anon key; privileged keys are rejected |
 | `REVIEW_LOCAL_HTTP` | `true` only for loopback HTTP development; ignored on other hosts |
+| `TURNSTILE_SITE_KEY` | Optional. Public Turnstile site key; with the secret below, a bot check runs before each code email |
+| `TURNSTILE_SECRET_KEY` | Optional. Turnstile secret key, set as an encrypted Pages secret, never committed |
 | `LIVE_APP_ENABLED` | Keep `false`; review submission does not need the source API |
 
 All configuration is server-side. The browser talks only to `/api/reviews/*`.
 Deploy the owner email and keys through Cloudflare's environment settings, not a
 committed config file. SMTP credentials are entered in Supabase only.
+
+## Bot check before code emails (optional)
+
+Every code email counts against Brevo's 300 a day, which all students share. Without a bot check,
+someone using many IP addresses can use up that quota, or flood one student's inbox. The server
+limits each IP and each address, but those limits live in memory on each Cloudflare instance.
+
+To require a Cloudflare Turnstile check before a code is sent:
+
+1. In Cloudflare, open **Turnstile**, add a widget for `bye-before-you-enroll.pages.dev`
+   (Managed mode), and copy its site key and secret key. Turnstile is free.
+2. In the Pages project, under **Settings → Variables and secrets**, add `TURNSTILE_SITE_KEY` as
+   text and `TURNSTILE_SECRET_KEY` as an encrypted secret for Production. Redeploy.
+3. Open `/reviews/` and check that the widget appears above **Send a code** and that a code arrives.
+
+The server checks every token with Cloudflare, including that it was issued for this site and the
+`send-code` action. Verifying a code needs no new check. With either key missing, the check is off
+and the page loads nothing from Cloudflare. Turning it on means `/reviews/` loads a script from
+`challenges.cloudflare.com`, which `public/_headers` already allows on that page only. To roll back,
+delete the two variables and redeploy.
+
+Students with a `+` in their address (`name+tag@go.pasadena.edu`) are refused. Google Workspace
+delivers those to `name@`, so each tag would otherwise count as a separate student.
 
 ## Email setup for the first real test
 

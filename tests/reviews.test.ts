@@ -131,12 +131,61 @@ test('owner mode still reports a private test and keeps the test label',async()=
 })
 test('per-address limits stop repeated code requests before Supabase',async()=>{
   const f=reviewFixture();f.env.REVIEW_ACCESS='students'
-  const send=(ip:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/auth/send',{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json','CF-Connecting-IP':ip},body:JSON.stringify({email:TEST_EMAIL})}),f.env,f.outbound)
+  let n=0
+  const send=(ip:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/auth/send',{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json','CF-Connecting-IP':ip},body:JSON.stringify({email:`ip-limit-${n++}@go.pasadena.edu`})}),f.env,f.outbound)
   for(let i=0;i<5;i++)assert.equal((await send('203.0.113.9')).status,200)
   const limited=await send('203.0.113.9')
   assert.equal(limited.status,429);assert.ok(Number(limited.headers.get('Retry-After'))>0)
   assert.equal(f.state.otpRequests,5)
   assert.equal((await send('203.0.113.10')).status,200)
+})
+test('per-email limits hold when an attacker rotates IP addresses',async()=>{
+  const f=reviewFixture();f.env.REVIEW_ACCESS='students'
+  const call=(route:string,body:object,i:number)=>handleReviewRequest(new Request('https://bye.test/api/reviews/'+route,{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json','CF-Connecting-IP':'198.51.100.'+i},body:JSON.stringify(body)}),f.env,f.outbound)
+  const sends=[];for(let i=0;i<6;i++)sends.push((await call('auth/send',{email:'flooded@go.pasadena.edu'},i)).status)
+  assert.deepEqual(sends,[200,200,200,200,429,429]);assert.equal(f.state.otpRequests,4)
+  const guesses=[];for(let i=0;i<12;i++)guesses.push((await call('auth/verify',{email:'guessed@go.pasadena.edu',code:String(200000+i)},50+i)).status)
+  assert.deepEqual(guesses,[...Array(10).fill(400),429,429])
+  // Another student is unaffected.
+  assert.equal((await call('auth/send',{email:'someone-else@go.pasadena.edu'},99)).status,200)
+})
+test('plus-tagged school addresses are rejected so one inbox cannot act as many students',async()=>{
+  const f=reviewFixture();f.env.REVIEW_ACCESS='students'
+  for(const email of ['jdoe+1@go.pasadena.edu','JDOE+reviews@GO.PASADENA.EDU','+@go.pasadena.edu']){
+    const r=await f.request('auth/send',{email});assert.equal(r.status,403);assert.equal((await r.json() as any).error.code,'PCC_EMAIL_ALIAS')
+  }
+  assert.equal(f.state.otpRequests,0)
+  // An existing session for a plus address no longer counts as a student.
+  const s=reviewFixture();s.env.REVIEW_ACCESS='students'
+  const plus=async(input:any,init?:any)=>{const r=await s.outbound(input,init);const u=new URL(typeof input==='string'?input:input.url);if(u.pathname==='/auth/v1/user')return Response.json({...(await r.json() as object),email:'jdoe+2@go.pasadena.edu'});return r}
+  const r=await handleReviewRequest(new Request('https://bye.test/api/reviews/submit',{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json',Cookie:sessionCookie()},body:JSON.stringify(validForm)}),s.env,plus)
+  assert.equal(r.status,401);assert.equal(s.state.saves.length,0)
+})
+test('optional Turnstile bot check guards code requests only when both keys are set',async()=>{
+  const f=reviewFixture();f.env.REVIEW_ACCESS='students'
+  assert.equal((await(await f.request('status')).json() as any).data.turnstileSiteKey,undefined)
+  f.env.TURNSTILE_SITE_KEY='0x4AAAAAAAfixture';f.env.TURNSTILE_SECRET_KEY='0x4AAAAAAAsecret'
+  assert.equal((await(await f.request('status')).json() as any).data.turnstileSiteKey,'0x4AAAAAAAfixture')
+  const verdicts:Record<string,object>={good:{success:true,hostname:'bye.test',action:'send-code'},bad:{success:false},host:{success:true,hostname:'evil.test',action:'send-code'},action:{success:true,hostname:'bye.test',action:'other'}}
+  const seen:string[]=[]
+  const outbound:typeof fetch=async(input,init)=>{
+    const url=typeof input==='string'?input:input instanceof URL?input.href:input.url
+    if(url==='https://challenges.cloudflare.com/turnstile/v0/siteverify'){const body=init?.body as FormData;seen.push(String(body.get('secret')));const v=verdicts[String(body.get('response'))];return v?Response.json(v):new Response('',{status:500})}
+    return f.outbound(input,init)
+  }
+  const send=(email:string,turnstileToken?:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/auth/send',{method:'POST',headers:{Origin:'https://bye.test','Content-Type':'application/json'},body:JSON.stringify({email,turnstileToken})}),f.env,outbound)
+  const code=async(r:Response)=>(await r.json() as any).error?.code??'OK'
+  assert.equal(await code(await send('bot1@go.pasadena.edu')),'BOT_CHECK_REQUIRED')
+  // Failed checks don't use up the address's own send limit (4 per 30 minutes).
+  for(let i=0;i<6;i++)assert.equal(await code(await send('victim@go.pasadena.edu','bad')),'BOT_CHECK_FAILED')
+  assert.equal((await send('victim@go.pasadena.edu','good')).status,200);f.state.otpRequests=0
+  for(const t of ['bad','host','action'])assert.equal(await code(await send('bot2@go.pasadena.edu',t)),'BOT_CHECK_FAILED',t)
+  assert.equal(await code(await send('bot3@go.pasadena.edu','down')),'BOT_CHECK_UNAVAILABLE')
+  assert.equal(f.state.otpRequests,0)
+  assert.equal((await send('bot4@go.pasadena.edu','good')).status,200);assert.equal(f.state.otpRequests,1)
+  assert.ok(seen.every(s=>s==='0x4AAAAAAAsecret'))
+  // Verifying a code needs no new check.
+  assert.equal((await f.request('auth/verify',{email:'bot4@go.pasadena.edu',code:'123456'})).status,200)
 })
 
 test('course search ranks PCC course codes before title matches',async()=>{
