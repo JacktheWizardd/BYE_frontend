@@ -14,20 +14,22 @@ export function RatingBar({ value, max = 5, className = '' }: { value: number; m
   )
 }
 
-export function ProfessorCard({ p, selected = false }: { p: Professor; selected?: boolean }) {
+// compactOnPhone: name, score and bar only below 900px (used inside the pinned phone story).
+export function ProfessorCard({ p, selected = false, compactOnPhone = false }: { p: Professor; selected?: boolean; compactOnPhone?: boolean }) {
+  const phoneHide = compactOnPhone ? ' max-lg:hidden' : ''
   return (
-    <span data-prof-card className={`block rounded-2xl border p-4 transition-colors ${selected ? 'border-ink bg-card shadow-[var(--shadow-soft)]' : 'border-tile-line bg-tile/70 hover:border-line-strong'}`}>
+    <span data-prof-card className={`block rounded-2xl border transition-colors ${compactOnPhone ? 'p-3 lg:p-4' : 'p-4'} ${selected ? 'border-ink bg-card shadow-[var(--shadow-soft)]' : 'border-tile-line bg-tile/70 hover:border-line-strong'}`}>
       <span className="flex items-start justify-between gap-4">
         <span className="min-w-0">
           <span className="block truncate font-display text-[17px] font-bold leading-snug">{p.name}</span>
-          <span className="mt-1 block text-[13px] leading-snug text-ink-3">
+          <span className={`mt-1 block text-[13px] leading-snug text-ink-3${phoneHide}`}>
             Difficulty <Count value={p.difficulty} /> · <Count value={p.takeAgain} decimals={0} suffix="%" /> would take again
           </span>
-          <span className="block text-[13px] leading-snug text-ink-3"><Count value={p.ratings} decimals={0} /> ratings</span>
+          <span className={`block text-[13px] leading-snug text-ink-3${phoneHide}`}><Count value={p.ratings} decimals={0} /> ratings</span>
         </span>
         <span className="font-display text-[30px] font-bold leading-none tracking-tight"><Count value={p.rating} /></span>
       </span>
-      <RatingBar value={p.rating} className={`mt-3 ${selected ? '' : 'bg-card'}`} />
+      <RatingBar value={p.rating} className={`${compactOnPhone ? 'mt-2 lg:mt-3' : 'mt-3'} ${selected ? '' : 'bg-card'}`} />
     </span>
   )
 }

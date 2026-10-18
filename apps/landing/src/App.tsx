@@ -1,4 +1,5 @@
 import { About } from './sections/About'
+import { Feedback } from './sections/Feedback'
 import { FinalCta } from './sections/FinalCta'
 import { Footer } from './sections/Footer'
 import { Hero } from './sections/Hero'
@@ -18,6 +19,7 @@ export function App() {
         <Story />
         <Reviews />
         <About />
+        <Feedback />
         <Testimonials />
         <FinalCta />
       </main>

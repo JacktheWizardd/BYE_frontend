@@ -126,6 +126,10 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-17 fixes (not deployed):** Review course search now ranks course codes before title matches and understands PCC zero-padding ("math 5a" finds MATH 005A; `courseSearchPattern` in `server/reviews.ts`, unit-tested). Verify "Math" and "Coll" on the live `/reviews/` after deploy, since local tests use fixtures. The web demo typed hint no longer flashes the full placeholder between examples.
+
+- **2026-10-17 feedback + phone story fix (not deployed):** New "Help shape BYE." feedback section (`apps/landing/src/sections/Feedback.tsx`, `#feedback`): topic choices, an Email us button that opens a prefilled email to byebeforeyouenroll@gmail.com, and a copyable address (`FEEDBACK_EMAIL` in `content/site.ts`). Nav, footer and About link to it. On phones the pinned "how it works" window no longer scrolls inside; its screens are compact so they always fit (checked at 375×812 and 375×667). The owner chose to keep feedback on the home page (no separate page).
+
 - **2026-10-17 web demo redesign (not deployed):** `/demo/` (and the paused `/app/`, same code) now follows the home page look: a nav with Install, a loud black "Demo · Sample data for now" banner (sticky on desktop; on phones it scrolls away and results/reports keep "Sample data" tags), a "How the demo works" card beside the search, "Sample" labels on cards, reports, stats and reviews, a typed search hint, real PCC course suggestions (dimmed, not selectable) after the sample classes, and counting scores and growing bars. Testers had mistaken the demo for real data; keep these labels.
 
 - **2026-10-17 review page redesign (not deployed):** `/reviews/` now uses the home page design system (`apps/web/reviews/reviews.css` imports `apps/landing/src/styles.css`; Tailwind plugin in `vite.reviews.config.ts`). Steps with a progress bar (Verify → Class → Rate → Check), 1–5 tap tiles and tap choices instead of dropdowns, a calmer receipt, the landing footer, and the dead `/app/` link removed. API, validation, session and submit behavior are unchanged. Preview with fixtures only: `pnpm dev:reviews:preview` (tester address in `tests/review-fixtures.ts`, code 123456).
@@ -152,7 +156,6 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
   - Mac release 0.4.0-beta.1 is live.
   - Feedback link is still `#` (not set).
 - **Open items:**
-  - real feedback form URL
   - live PCC/RMP data for the web app (needs a decision on Rate My Professors access)
   - a nicer domain (must keep the current update address working)
   - remove `noindex` / `robots.txt` at public launch

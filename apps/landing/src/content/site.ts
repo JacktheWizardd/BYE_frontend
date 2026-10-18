@@ -6,8 +6,9 @@ export const DEMO_URL = '/demo/'
 export const DOWNLOAD_URL = '/download'
 // REVIEW LINK: the review form for @go.pasadena.edu students.
 export const REVIEWS_URL = '/reviews/'
-// FEEDBACK LINK: replace '#' with the real feedback form URL.
-export const FEEDBACK_URL = '#'
+// FEEDBACK LINK: feedback goes by email (see sections/Feedback.tsx); FEEDBACK_URL points at that section.
+export const FEEDBACK_EMAIL = 'byebeforeyouenroll@gmail.com'
+export const FEEDBACK_URL = '#feedback'
 
 export const DEMO_LABEL = 'Sample data for now'
 export const MAC_REQUIREMENTS = 'Apple Silicon · macOS 14 or newer'
@@ -17,6 +18,7 @@ export const nav = [
   { href: '#how', label: 'How it works' },
   { href: '#reviews', label: 'Reviews' },
   { href: '#download', label: 'Download' },
+  { href: '#feedback', label: 'Feedback' },
 ]
 
 export const footerLinks = [

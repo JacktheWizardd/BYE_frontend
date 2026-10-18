@@ -22,18 +22,25 @@ export function useCountUp(value: number | undefined, ms = 900) {
 }
 
 // Types and erases example searches as a placeholder while the field is empty and idle.
-export function useTypedHint(examples: string[], active: boolean) {
-  const [hint, setHint] = useState('')
+// Returns null when inactive (use the normal placeholder) and a string, possibly empty, while animating:
+// an empty string must stay blank, not fall back to the full placeholder between examples.
+export function useTypedHint(examples: string[], active: boolean): string | null {
+  const [hint, setHint] = useState<string | null>(null)
   useEffect(() => {
-    if (!active || reducedMotion()) { setHint(''); return }
-    let i = 0, n = 0, dir = 1, wait = 0
+    if (!active || reducedMotion()) { setHint(null); return }
+    // A "|" caret follows the text like a real cursor: steady while typing, blinking while it pauses.
+    // Typing goes one letter per tick; erasing goes two, so long titles don't drag.
+    let i = 0, n = 0, dir = 1, wait = 0, tick = 0
+    const show = (text: string, caret: boolean) => setHint(text + (caret ? '|' : ''))
+    show('', true)
     const id = setInterval(() => {
-      if (wait > 0) { wait -= 1; return }
+      tick += 1
       const word = examples[i % examples.length]
-      n += dir
-      if (n >= word.length) { dir = -1; wait = 14 }
-      if (n <= 0) { dir = 1; i += 1; wait = 4 }
-      setHint(word.slice(0, Math.max(0, n)))
+      if (wait > 0) { wait -= 1; show(word.slice(0, n), Math.floor(tick / 4) % 2 === 0); return }
+      n = Math.max(0, Math.min(word.length, n + (dir > 0 ? 1 : -2)))
+      if (n >= word.length) { dir = -1; wait = 16 }
+      if (n <= 0) { dir = 1; i += 1; wait = 5 }
+      show(word.slice(0, n), true)
     }, 110)
     return () => clearInterval(id)
   }, [active, examples.join('|')])

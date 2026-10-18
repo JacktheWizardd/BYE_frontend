@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { handleReviewRequest, validateReview } from '../server/reviews'
+import { courseSearchPattern, handleReviewRequest, mergeCourseRows, validateReview } from '../server/reviews'
 import { REVIEW_COMMENT_LIMIT } from '../packages/core/reviews'
 import { reviewFixture, TEST_EMAIL, validForm, REVIEW_ID, jwt } from './review-fixtures'
 const sessionCookie=()=>`__Secure-bye-review=${jwt()}`
@@ -137,4 +137,26 @@ test('per-address limits stop repeated code requests before Supabase',async()=>{
   assert.equal(limited.status,429);assert.ok(Number(limited.headers.get('Retry-After'))>0)
   assert.equal(f.state.otpRequests,5)
   assert.equal((await send('203.0.113.10')).status,200)
+})
+
+test('course search ranks PCC course codes before title matches',async()=>{
+  // PCC pads numbers: "math 5a" must find MATH 005A, and "math" must look at codes before titles.
+  assert.equal(courseSearchPattern('math'),'MATH%')
+  assert.equal(courseSearchPattern('Coll'),'COLL%')
+  assert.equal(courseSearchPattern('math 5'),'MATH 005%')
+  assert.equal(courseSearchPattern('math5a'),'MATH 005A%')
+  assert.equal(courseSearchPattern('MATH 005A'),'MATH 005A%')
+  assert.equal(courseSearchPattern('eth 14'),'ETH 014%')
+  assert.equal(courseSearchPattern('5a'),'% 005A%')
+  assert.equal(courseSearchPattern('abe 3002'),'ABE 3002%')
+  assert.equal(courseSearchPattern('engl c1001'),'ENGL C1001%')
+  const byCode=[{id:1,code:'MATH 005A'},{id:2,code:'MATH 005B'}],byTitle=[{id:9,code:'ABE 3002'},{id:2,code:'MATH 005B'}]
+  assert.deepEqual(mergeCourseRows(byCode,byTitle).map(r=>r.id),[1,2,9])
+  assert.equal(mergeCourseRows(Array.from({length:30},(_,i)=>({id:i})),[]).length,20)
+  // The handler queries codes and titles separately.
+  const f=reviewFixture(),cookie=sessionCookie()
+  assert.equal((await f.request('courses?q=math 5a',undefined,cookie)).status,200)
+  const urls=f.state.calls.filter(c=>c.url.includes('/rest/v1/courses')).map(c=>decodeURIComponent(c.url.replace(/\+/g,' ')))
+  assert.ok(urls.some(u=>u.includes('code.ilike.MATH 005A%') && u.includes('code.ilike.%math 5a%')),'code prefix or code-contains query')
+  assert.ok(urls.some(u=>u.includes('title=ilike.%math 5a%')),'title query')
 })

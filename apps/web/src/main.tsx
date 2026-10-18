@@ -15,6 +15,8 @@ import './styles.css'
 
 const empty: Snapshot = { operationId: '', professors: [], loading: false, previewPending: 0 }
 const EXAMPLES = ['MATH 5A', 'ETH 014', 'ENGL 1A']
+// The typed search hint cycles through more examples: codes and class titles, all of which find sample data.
+const HINTS = ['MATH 5A', 'Calculus', 'ETH 014', 'Ethnic studies', 'ENGL 1A', 'Reading and composition', 'math 5a', 'Composition']
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const PHONE = '(max-width: 759px)'
 type Screen = 'search' | 'list' | 'report'
@@ -83,7 +85,7 @@ function CourseField(props: { term: string; query: string; setQuery: (q: string)
   const { term, query, setQuery, onPick, recent } = props
   const [open, setOpen] = useState(false), [items, setItems] = useState<Suggestion[]>([]), [index, setIndex] = useState(-1)
   const sequence = useRef(0), input = useRef<HTMLInputElement>(null)
-  const hint = useTypedHint(EXAMPLES, !open && !query)
+  const hint = useTypedHint(HINTS, !open && !query)
   // Demo only: real PCC courses without sample data are listed after the sample matches, never selectable.
   const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadCourses>> | null>(null)
   useEffect(() => { if (isDemo && open && !catalog) loadCourses().then(setCatalog).catch(() => setCatalog([])) }, [open])
@@ -109,7 +111,7 @@ function CourseField(props: { term: string; query: string; setQuery: (q: string)
     <div className="field-box">
       <svg className="search-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" /></svg>
       <input ref={input} id="course" role="combobox" aria-autocomplete="list" aria-expanded={items.length > 0} aria-controls="course-options"
-        aria-activedescendant={index >= 0 ? `suggestion-${index}` : undefined} placeholder={hint || 'MATH 5A or a class title'} value={query}
+        aria-activedescendant={index >= 0 ? `suggestion-${index}` : undefined} placeholder={hint ?? 'MATH 5A or a class title'} value={query}
         autoComplete="off" autoCorrect="off" autoCapitalize="characters" spellCheck={false} enterKeyHint="search"
         onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 120)} onChange={e => { setQuery(e.target.value); setOpen(true) }}
         onKeyDown={e => {

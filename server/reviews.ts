@@ -22,6 +22,26 @@ const schoolEmail = (value: string) => /^[a-z0-9.!#$&'*+/=?^_`{|}~-]+@go\.pasade
 const invalid = (message: string) => new ReviewError(400, 'INVALID_INPUT', message)
 const sessionError = () => new ReviewError(401, 'SESSION_EXPIRED', 'Verify your school email again. Your open review is still here.')
 
+/** Course codes rank before title matches. PCC pads course numbers ("MATH 005A"), so "math 5a", "math5a"
+ *  and "MATH 005A" all become the code prefix "MATH 005A%"; "math" becomes "MATH%" and "5a" becomes "% 005A%".
+ *  Anything else (e.g. "engl c1001") is used as a plain code prefix. Input is already limited to letters,
+ *  numbers, spaces and .'- so it can't carry LIKE wildcards. */
+export function courseSearchPattern(q: string): string | null {
+  const text = q.trim().toUpperCase().replace(/\s+/g, ' ')
+  if (!text) return null
+  const m = text.match(/^([A-Z]+)? ?(\d+)?([A-Z]*)$/)
+  if (!m || (!m[1] && !m[2])) return text + '%'
+  const [, subject = '', digits = '', suffix = ''] = m
+  if (!digits) return subject + suffix + '%'
+  const number = digits.padStart(3, '0') + suffix
+  return subject ? `${subject} ${number}%` : `% ${number}%`
+}
+/** Code matches first, then title matches, without duplicates. */
+export function mergeCourseRows<T extends { id: string | number }>(byCode: T[], byTitle: T[], limit = 20): T[] {
+  const seen = new Set<string>()
+  return [...byCode, ...byTitle].filter(row => { const key = String(row.id); if (seen.has(key)) return false; seen.add(key); return true }).slice(0, limit)
+}
+
 function settings(env: ReviewEnv) {
   if (env.REVIEWS_ENABLED !== 'true') return null
   const open = env.REVIEW_ACCESS === 'students', email = normalizeEmail(env.REVIEW_TEST_EMAIL)
@@ -219,9 +239,15 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
     const q = (url.searchParams.get('q') ?? '').trim().replace(/\s+/g,' ')
     if (q.length < 2 || q.length > 80 || !/^[\p{L}\p{N} .'-]+$/u.test(q)) throw invalid('Search with 2 to 80 letters or numbers.')
     if (route === 'courses') {
-      const { data, error } = await supabase.from('courses').select('id,code,title').or(`code.ilike.%${q}%,title.ilike.%${q}%`).order('code').limit(20)
-      if (error) throw new ReviewError(503, 'CATALOG_UNAVAILABLE', 'Courses could not be loaded. Try again shortly.')
-      return reply((data ?? []).map(row => ({ ...row, id:String(row.id) })))
+      // Two small queries so a title like "MATHEMATICS" (ABE 3002) can't crowd out the MATH courses.
+      const pattern = courseSearchPattern(q)
+      const [byCode, byTitle] = await Promise.all([
+        // Code prefix (handles PCC's zero padding) or anywhere in the code (e.g. "c1001" finds ENGL C1001).
+        supabase.from('courses').select('id,code,title').or(`code.ilike.${pattern ?? q},code.ilike.%${q}%`).order('code').limit(20),
+        supabase.from('courses').select('id,code,title').ilike('title', `%${q}%`).order('code').limit(20),
+      ])
+      if (byCode.error || byTitle.error) throw new ReviewError(503, 'CATALOG_UNAVAILABLE', 'Courses could not be loaded. Try again shortly.')
+      return reply(mergeCourseRows(byCode.data ?? [], byTitle.data ?? []).map(row => ({ ...row, id:String(row.id) })))
     }
     let query = supabase.from('professors').select('id,first_name,last_name')
     for (const part of q.split(' ')) query = query.or(`first_name.ilike.%${part}%,last_name.ilike.%${part}%`)
