@@ -9,6 +9,9 @@ export interface ReviewEnv {
   REVIEW_ACCESS?: string
   SUPABASE_URL?: string
   SUPABASE_PUBLISHABLE_KEY?: string
+  /** Optional Cloudflare Turnstile bot check on code requests. Off unless both keys are set. */
+  TURNSTILE_SITE_KEY?: string
+  TURNSTILE_SECRET_KEY?: string
   /** Development only; ignored unless the request is loopback HTTP. */
   REVIEW_LOCAL_HTTP?: string
 }
@@ -18,7 +21,9 @@ export class ReviewError extends Error {
 const commonHeaders = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow', 'X-Content-Type-Options': 'nosniff', Vary: 'Cookie' }
 const reply = (data: unknown, cookie?: string) => Response.json({ data }, { headers: { ...commonHeaders, ...(cookie ? { 'Set-Cookie': cookie } : {}) } })
 const normalizeEmail = (value: unknown) => typeof value === 'string' ? value.trim().toLowerCase() : ''
-const schoolEmail = (value: string) => /^[a-z0-9.!#$&'*+/=?^_`{|}~-]+@go\.pasadena\.edu$/.test(value) && value.length <= 254
+// No "+": Google Workspace delivers jdoe+1@ to jdoe@, so a plus tag would let one inbox act as many students.
+// Workspace usernames can't contain "+", so no real PCC address is excluded.
+const schoolEmail = (value: string) => /^[a-z0-9.!#$&'*/=?^_`{|}~-]+@go\.pasadena\.edu$/.test(value) && value.length <= 254
 const invalid = (message: string) => new ReviewError(400, 'INVALID_INPUT', message)
 const sessionError = () => new ReviewError(401, 'SESSION_EXPIRED', 'Verify your school email again. Your open review is still here.')
 
@@ -50,10 +55,12 @@ function settings(env: ReviewEnv) {
     const url = new URL(env.SUPABASE_URL ?? '')
     if (url.protocol !== 'https:' || !url.hostname.endsWith('.supabase.co') || url.username || url.password || url.port || url.pathname !== '/' || url.search || url.hash) return null
     const key = env.SUPABASE_PUBLISHABLE_KEY?.trim() ?? ''
+    const site = env.TURNSTILE_SITE_KEY?.trim() ?? '', secret = env.TURNSTILE_SECRET_KEY?.trim() ?? ''
+    const turnstile = site && secret ? { site, secret } : undefined
     // Never accidentally run this app using a privileged key, including legacy JWT keys.
-    if (key.startsWith('sb_publishable_') && key.length > 16) return { email, open, url: url.origin, key }
+    if (key.startsWith('sb_publishable_') && key.length > 16) return { email, open, url: url.origin, key, turnstile }
     const payload = JSON.parse(atob(key.split('.')[1]?.replaceAll('-', '+').replaceAll('_', '/') ?? ''))
-    if (payload.role === 'anon') return { email, open, url: url.origin, key }
+    if (payload.role === 'anon') return { email, open, url: url.origin, key, turnstile }
   } catch { /* Fail closed; never expose configuration values in responses or logs. */ }
   return null
 }
@@ -98,6 +105,7 @@ async function jsonBody(request: Request): Promise<Record<string, unknown>> {
 type Access = { email: string; open: boolean }
 function emailInput(body: Record<string, unknown>, access: Access) {
   const email = normalizeEmail(body.email)
+  if (/^[^@]*\+[^@]*@go\.pasadena\.edu$/.test(email)) throw new ReviewError(403, 'PCC_EMAIL_ALIAS', 'Use your school email without a + tag, like you@go.pasadena.edu.')
   if (!schoolEmail(email)) throw new ReviewError(403, 'PCC_EMAIL_REQUIRED', 'Use your @go.pasadena.edu school email.')
   if (!access.open && email !== access.email) throw new ReviewError(403, 'OWNER_TEST_ONLY', 'This private test is available only to the configured tester.')
   return email
@@ -140,7 +148,9 @@ function eligible(user: User | null, access: Access) {
 }
 // Per-isolate abuse brake in front of Supabase's own limits; keyed by client address, never stored.
 const buckets = new Map<string, { count: number; until: number }>()
-const LIMITS: Record<string, { max: number; windowMs: number }> = { 'auth/send': { max: 5, windowMs: 10 * 60_000 }, 'auth/verify': { max: 20, windowMs: 10 * 60_000 }, submit: { max: 10, windowMs: 60 * 60_000 }, report: { max: 20, windowMs: 60 * 60_000 } }
+const LIMITS: Record<string, { max: number; windowMs: number }> = { 'auth/send': { max: 5, windowMs: 10 * 60_000 }, 'auth/verify': { max: 20, windowMs: 10 * 60_000 }, submit: { max: 10, windowMs: 60 * 60_000 }, report: { max: 20, windowMs: 60 * 60_000 },
+  // Per address, so rotating IPs can't flood one inbox or keep guessing one student's code.
+  'auth/send@email': { max: 4, windowMs: 30 * 60_000 }, 'auth/verify@email': { max: 10, windowMs: 15 * 60_000 } }
 export function rateLimit(route: string, client: string, now = Date.now()) {
   const rule = LIMITS[route]
   if (!rule) return
@@ -148,6 +158,20 @@ export function rateLimit(route: string, client: string, now = Date.now()) {
   const key = route + '|' + client, old = buckets.get(key), bucket = old && old.until > now ? old : { count: 0, until: now + rule.windowMs }
   if (++bucket.count > rule.max) throw new ReviewError(429, 'RATE_LIMITED', 'Too many attempts. Please wait and try again.', Math.max(1, Math.ceil((bucket.until - now) / 1000)))
   buckets.set(key, bucket)
+}
+/** Cloudflare Turnstile server check. The token is single-use and bound to this site and action. */
+async function botCheck(secret: string, token: unknown, request: Request, outbound: typeof fetch) {
+  if (typeof token !== 'string' || !token || token.length > 2048) throw new ReviewError(403, 'BOT_CHECK_REQUIRED', 'Complete the quick check above, then send the code again.')
+  const form = new FormData()
+  form.set('secret', secret); form.set('response', token)
+  const ip = request.headers.get('CF-Connecting-IP'); if (ip) form.set('remoteip', ip)
+  let result: { success?: boolean; hostname?: string; action?: string }
+  try {
+    const response = await outbound('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: form, redirect: 'manual', cache: 'no-store', signal: AbortSignal.timeout(10_000) })
+    if (!response.ok) { await response.body?.cancel(); throw new Error() }
+    result = await response.json()
+  } catch { throw new ReviewError(503, 'BOT_CHECK_UNAVAILABLE', 'The quick check could not be confirmed. Please try again shortly.') }
+  if (result.success !== true || result.hostname !== new URL(request.url).hostname || result.action !== 'send-code') throw new ReviewError(403, 'BOT_CHECK_FAILED', 'The quick check did not pass. Complete it again, then send the code.')
 }
 function authFailure(error: { status?: number } | null, verifying = false): never {
   if (error?.status === 429) throw new ReviewError(429, 'AUTH_RATE_LIMITED', 'Please wait before requesting or trying another code.', 60)
@@ -166,13 +190,16 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
     if (request.method === 'POST' && request.headers.get('Origin') !== url.origin) throw new ReviewError(403, 'ORIGIN_DENIED', 'Open the review form on this website before continuing.')
     if (url.protocol !== 'https:' && !(env.REVIEW_LOCAL_HTTP === 'true' && url.protocol === 'http:' && ['localhost','127.0.0.1','[::1]'].includes(url.hostname))) throw new ReviewError(400, 'HTTPS_REQUIRED', 'Use the secure BYE website to verify your email.')
     const config = settings(env)
-    if (route === 'status') return reply({ enabled: !!config, ownerTest: !config?.open })
+    if (route === 'status') return reply({ enabled: !!config, ownerTest: !config?.open, ...(config?.turnstile ? { turnstileSiteKey: config.turnstile.site } : {}) })
     if (!config) throw new ReviewError(503, 'REVIEWS_DISABLED', 'Reviews are not open yet.')
     const address = request.headers.get('CF-Connecting-IP')
     if (address) rateLimit(route, address)
     if (route === 'auth/signout') return reply({ signedIn:false }, cookie(request, env, '', 0))
     if (route === 'auth/send' || route === 'auth/verify') {
       const body = await jsonBody(request), email = emailInput(body, config), supabase = client(config, outbound)
+      // Bot check before the per-address count, so failed bots can't use up a student's sends.
+      if (route === 'auth/send' && config.turnstile) await botCheck(config.turnstile.secret, body.turnstileToken, request, outbound)
+      rateLimit(route + '@email', email)
       if (route === 'auth/send') {
         const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser:true } })
         if (error) authFailure(error)

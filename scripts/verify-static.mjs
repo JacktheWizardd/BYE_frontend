@@ -4,6 +4,13 @@ for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.h
   assert.match(await readFile(path, 'utf8'), /name="robots" content="noindex/)
 }
 assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/downloads\/BYE-0\.4\.0-beta\.1-AppleSilicon\.dmg 302/m)
+// Site-wide CSP: same-origin scripts and connections only (a script here could read a student's email
+// from /api/reviews/session), and no framing. /reviews/ may add only the Turnstile host.
+const headerRules = (await readFile('public/_headers', 'utf8')).split(/\n(?=\S)/)
+const csp = path => headerRules.find(rule => rule.startsWith(path + '\n'))?.match(/^\s+Content-Security-Policy: (.+)$/m)?.[1] ?? ''
+for (const [path, script] of [['/*', "script-src 'self';"], ['/reviews/*', "script-src 'self' https://challenges.cloudflare.com;"]]) {
+  for (const part of [script, "connect-src 'self';", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'"]) assert.ok(csp(path).includes(part), `${path} CSP must include ${part}`)
+}
 const routes = JSON.parse(await readFile('public/_routes.json', 'utf8'))
 assert.deepEqual(routes.include, ['/api/v1/*', '/api/reviews/*'])
 const landing = await readFile('public/index.html', 'utf8')

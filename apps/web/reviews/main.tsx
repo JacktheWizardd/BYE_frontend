@@ -100,6 +100,32 @@ function Steps({ current }: { current:number }) {
   </ol>
 }
 
+// Optional Cloudflare Turnstile check before a code is emailed. Loads only when the server sends a site key
+// (TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY set in Pages); otherwise the page makes no third-party request.
+declare global { interface Window { turnstile?: { render:(el:HTMLElement, options:Record<string,unknown>)=>string; remove:(id:string)=>void } } }
+let turnstileScript: Promise<void> | undefined
+const loadTurnstile = () => turnstileScript ??= new Promise<void>((resolve, reject) => {
+  const script = document.createElement('script')
+  script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'; script.async = true
+  script.onload = () => resolve(); script.onerror = () => { turnstileScript = undefined; script.remove(); reject(new Error('Turnstile unavailable')) }
+  document.head.appendChild(script)
+})
+function BotCheck({ siteKey, onToken }: { siteKey:string; onToken:(token:string)=>void }) {
+  const box = useRef<HTMLDivElement>(null), report = useRef(onToken), [failed,setFailed] = useState(false)
+  report.current = onToken
+  useEffect(() => {
+    let id: string | undefined, gone = false
+    loadTurnstile().then(() => {
+      if (gone || !box.current || !window.turnstile) return
+      id = window.turnstile.render(box.current, { sitekey:siteKey, action:'send-code', theme:'light', size:'flexible', callback:(t:string)=>report.current(t), 'expired-callback':()=>report.current(''), 'error-callback':()=>report.current('') })
+    }).catch(() => { if (!gone) setFailed(true) })
+    return () => { gone = true; if (id) window.turnstile?.remove(id); report.current('') }
+  }, [siteKey])
+  return failed
+    ? <p role="alert" className="text-[15px] text-ink-2">The quick check could not load. Check your connection, then reload the page.</p>
+    : <div ref={box} className="min-h-[65px]" />
+}
+
 function Notice({ children, action }: { children:ReactNode; action?:ReactNode }) {
   return <div className="review-notice rounded-xl border border-line-strong bg-tile/60 p-4 text-[15px]" role="alert">{children}{action}</div>
 }
@@ -112,14 +138,15 @@ function Reviews() {
   const [classDone,setClassDone] = useState(false)
   const [confirm,setConfirm] = useState(false), [receipt,setReceipt] = useState(''), [uncertain,setUncertain] = useState(false), [copyMessage,setCopyMessage] = useState('')
   const prefilled = useRef(false), [test,setTest] = useState(true)
+  const [siteKey,setSiteKey] = useState(''), [botToken,setBotToken] = useState(''), [botRound,setBotRound] = useState(0)
   const inFlight = useRef(false), heading = useRef<HTMLHeadingElement>(null)
   const authError = (e:unknown) => {
     if (e instanceof FormError && e.code === 'SESSION_EXPIRED') { setSession({signedIn:false}); setCodeSent(false); setCode(''); setError(e.message) }
   }
   useEffect(() => {
     const abort = new AbortController()
-    api<{enabled:boolean;ownerTest?:boolean}>('status',undefined,abort.signal).then(async status => {
-      setEnabled(status.enabled); setTest(status.ownerTest !== false)
+    api<{enabled:boolean;ownerTest?:boolean;turnstileSiteKey?:string}>('status',undefined,abort.signal).then(async status => {
+      setEnabled(status.enabled); setTest(status.ownerTest !== false); setSiteKey(status.turnstileSiteKey ?? '')
       if (status.enabled) { const user = await api<ReviewSession>('session',undefined,abort.signal); setSession(user); if (user.email) setEmail(user.email) }
     }).catch(e => { if (!abort.signal.aborted) { authError(e); setError(e.message) } })
     return () => abort.abort()
@@ -157,8 +184,10 @@ function Reviews() {
     } finally { inFlight.current=false; setBusy(false) }
   }
   const sendCode = () => run(async()=>{
-    const result=await api<{retryAfter:number}>('auth/send',{email:email.trim().toLowerCase()})
-    setEmail(email.trim().toLowerCase()); setCodeSent(true); setCode(''); setCooldown(result.retryAfter)
+    try {
+      const result=await api<{retryAfter:number}>('auth/send',{email:email.trim().toLowerCase(),...(siteKey ? {turnstileToken:botToken} : {})})
+      setEmail(email.trim().toLowerCase()); setCodeSent(true); setCode(''); setCooldown(result.retryAfter)
+    } finally { if (siteKey) { setBotToken(''); setBotRound(x=>x+1) } } // Each check token works once.
   })
   const answers = Object.fromEntries(Object.entries(draft.answers).filter(([,v])=>v !== 'skip').map(([k,v])=>[k,Number(v)])) as ReviewInput['answers']
   const save = () => run(async()=>{
@@ -229,10 +258,12 @@ function Reviews() {
                 {codeSent
                   ? <div className="flex flex-col gap-2"><label htmlFor="review-code" className="font-semibold">Email code</label><input id="review-code" className={`${field} code tracking-[0.3em]`} value={code} autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" minLength={6} maxLength={10} required onChange={e=>setCode(e.target.value.replace(/\D/g,''))} /></div>
                   : <div className="flex flex-col gap-2"><label htmlFor="review-email" className="font-semibold">School email</label><input id="review-email" className={field} type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} value={email} placeholder="you@go.pasadena.edu" maxLength={254} required onChange={e=>setEmail(e.target.value)} /></div>}
-                <button className="btn btn-primary w-full" type="submit" disabled={busy || (!codeSent && cooldown>0)}>{busy ? 'Please wait…' : codeSent ? <>Verify code →</> : cooldown>0 ? `Try again in ${cooldown}s` : <>Send a code →</>}</button>
+                {!codeSent && siteKey && <BotCheck key={botRound} siteKey={siteKey} onToken={setBotToken} />}
+                <button className="btn btn-primary w-full" type="submit" disabled={busy || (!codeSent && (cooldown>0 || (!!siteKey && !botToken)))}>{busy ? 'Please wait…' : codeSent ? <>Verify code →</> : cooldown>0 ? `Try again in ${cooldown}s` : <>Send a code →</>}</button>
               </form>
               {codeSent && <div className="flex flex-wrap justify-between gap-3">
-                <button className={textLink} type="button" disabled={busy || cooldown>0} onClick={sendCode}>{cooldown>0 ? `Resend in ${cooldown}s` : 'Send a new code'}</button>
+                {/* With the bot check on, a new code goes back to the email step, where the check runs again. */}
+                <button className={textLink} type="button" disabled={busy || cooldown>0} onClick={siteKey ? ()=>{setCodeSent(false);setCode('');setError('')} : sendCode}>{cooldown>0 ? `Resend in ${cooldown}s` : 'Send a new code'}</button>
                 <button className={textLink} type="button" disabled={busy} onClick={()=>{setCodeSent(false);setCode('');setError('')}}>Change email</button>
               </div>}
               <p className="text-[13px] text-ink-3">Email verification proves access to your school inbox. It does not verify enrollment or that you took a particular class.</p>
