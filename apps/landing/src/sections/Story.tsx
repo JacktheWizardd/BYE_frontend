@@ -123,10 +123,11 @@ export function Story() {
 
           <div className="min-w-0 lg:col-span-7">
             {/* The pinned block must keep one height for every step (the pin reserves its space once),
-                so the description gets two fixed lines and the screen a fixed height that scrolls inside. */}
+                so the description gets two fixed lines and the screen a fixed height. On phones the screens
+                are compact and never scroll inside, so a finger on the window always scrolls the page. */}
             <p className="mb-3 line-clamp-2 h-[3.1em] text-[15px] leading-[1.55] text-ink-2 lg:hidden">{steps[step].text}</p>
             <AppWindow title={course.code} meta={`${course.term} · ${steps[step].short}`}>
-              <div key={step} data-lenis-prevent className="story-screen h-[min(440px,calc(100svh-300px))] overflow-y-auto lg:h-[min(500px,calc(100svh-260px))]">{screen}</div>
+              <div key={step} data-lenis-prevent className="story-screen h-[min(400px,calc(100svh-290px))] overflow-hidden lg:h-[min(500px,calc(100svh-260px))] lg:overflow-y-auto">{screen}</div>
               <div className="hidden items-center justify-between gap-3 border-t border-line bg-paper px-4 py-3 lg:flex">
                 {step < steps.length - 1
                   ? <button type="button" onClick={() => go(step + 1)} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold">Next: {steps[step + 1].short.toLowerCase()} <ArrowRight className="size-4" /></button>

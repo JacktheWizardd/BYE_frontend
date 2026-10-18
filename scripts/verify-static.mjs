@@ -10,7 +10,7 @@ const landing = await readFile('public/index.html', 'utf8')
 // Web use stays on the labeled sample-data demo; the live /app/ is paused. Reviews are linked.
 assert.match(landing, /href="\/demo\/"/); assert.match(landing, /Sample data for now/); assert.match(landing, /href="\/reviews\/"/); assert.doesNotMatch(landing, /href="\/app\/"/)
 // The prerendered home page loads only its own hashed assets from /site/.
-assert.match(landing, /href="\/download"/); assert.doesNotMatch(landing, /REPLACE WITH/)
+assert.match(landing, /href="\/download"/); assert.match(landing, /href="mailto:byebeforeyouenroll@gmail\.com/); assert.doesNotMatch(landing, /REPLACE WITH/)
 for (const [, src] of landing.matchAll(/(?:src|href)="(\/site\/[^"]+)"/g)) await readFile('public' + src)
 for (const path of ['public/updates/appcast.xml', 'public/downloads/BYE-0.4.0-beta.1-AppleSilicon.dmg']) await readFile(path)
 const liveFiles = await readdir('public/app/assets')

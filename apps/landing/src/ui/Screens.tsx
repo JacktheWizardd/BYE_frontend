@@ -30,15 +30,15 @@ export function SearchScreen({ query, setQuery, onPick, typing = false }: { quer
         <span className="shrink-0 rounded-full border border-line px-2.5 py-1 text-xs text-ink-3">{course.term}</span>
       </label>
       <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line" aria-live="polite">
-        {matches.map(c => (
-          <li key={c.code}>
+        {matches.map((c, i) => (
+          <li key={c.code} className={i >= 4 ? 'max-lg:hidden' : ''}>
             {c.live
-              ? <button type="button" onClick={onPick} className="flex min-h-12 w-full items-center justify-between gap-3 bg-linen px-4 py-2.5 text-left text-sm hover:bg-tile">
-                  <span className="min-w-0"><span className="code">{c.code}</span> <span className="text-ink-2">· {c.title}</span></span>
+              ? <button type="button" onClick={onPick} className="flex min-h-11 w-full items-center justify-between gap-3 bg-linen px-3 py-2 lg:min-h-12 lg:px-4 lg:py-2.5 text-left text-sm hover:bg-tile">
+                  <span className="min-w-0 truncate"><span className="code">{c.code}</span> <span className="text-ink-2">· {c.title}</span></span>
                   <span className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold">3 professors <ArrowRight className="size-4" /></span>
                 </button>
-              : <p className="flex min-h-12 items-center justify-between gap-3 bg-card px-4 py-2.5 text-sm text-ink-3">
-                  <span className="min-w-0"><span className="code text-ink-2">{c.code}</span> · {c.title}</span><span className="shrink-0 text-xs">In the app</span>
+              : <p className="flex min-h-11 items-center justify-between gap-3 bg-card px-3 py-2 lg:min-h-12 lg:px-4 lg:py-2.5 text-sm text-ink-3">
+                  <span className="min-w-0 truncate"><span className="code text-ink-2">{c.code}</span> · {c.title}</span><span className="shrink-0 text-xs">In the app</span>
                 </p>}
           </li>
         ))}
@@ -51,13 +51,13 @@ export function SearchScreen({ query, setQuery, onPick, typing = false }: { quer
 
 export function DayChips({ picked, toggle }: { picked: Day[]; toggle?: (d: Day) => void }) {
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Class days">
+    <div className="flex flex-wrap gap-1.5 lg:gap-2" role="group" aria-label="Class days">
       {allDays.map(d => {
         const on = picked.includes(d)
         return (
           <button key={d} type="button" aria-pressed={on} onClick={() => toggle?.(d)}
-            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-colors ${on ? 'border-ink bg-ink text-paper' : 'border-line-strong bg-card text-ink hover:border-ink'}`}>
-            {on && <CheckIcon className="size-4" />}{d}
+            className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold lg:px-4 transition-colors ${on ? 'border-ink bg-ink text-paper' : 'border-line-strong bg-card text-ink hover:border-ink'}`}>
+            {on && <CheckIcon className="size-4 max-lg:hidden" />}{d}
           </button>
         )
       })}
@@ -72,13 +72,13 @@ export function DaysScreen({ picked, toggle }: { picked: Day[]; toggle: (d: Day)
       <DayChips picked={picked} toggle={toggle} />
       <p className="text-xs text-ink-3" aria-live="polite">{fitting} of {sections.length} sections fit your days · online sections always show</p>
       <ul className="divide-y divide-line overflow-hidden rounded-xl border border-line">
-        {sections.map(s => {
+        {sections.map((s, i) => {
           const ok = fits(s, picked)
           return (
-            <li key={s.crn} className={`grid grid-cols-[1fr_auto] gap-x-3 px-4 py-2.5 text-sm transition-colors ${ok ? 'bg-card' : 'bg-linen text-ink-3'}`}>
-              <span className={ok ? 'font-semibold' : 'line-through decoration-line-strong'}>{s.days === 'online' ? 'Online' : s.days.join(' · ')} · {s.time}</span>
+            <li key={s.crn} className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 px-3 py-2.5 text-sm transition-colors lg:px-4 ${ok ? 'bg-card' : 'bg-linen text-ink-3'} ${i >= 4 ? 'max-lg:hidden' : ''}`}>
+              <span className={`truncate ${ok ? 'font-semibold' : 'line-through decoration-line-strong'}`}>{s.days === 'online' ? 'Online' : s.days.join(' · ')} · {s.time}</span>
               <span className="text-right text-xs text-ink-3">{s.seats === 0 ? 'Full' : `${s.seats} seats`}</span>
-              <span className="col-span-2 text-xs text-ink-3"><span className="code">CRN {s.crn}</span> · {professors[s.prof].name}</span>
+              <span className="col-span-2 text-xs text-ink-3 max-lg:hidden"><span className="code">CRN {s.crn}</span> · {professors[s.prof].name}</span>
             </li>
           )
         })}
@@ -92,7 +92,7 @@ export function Select<T extends string>({ label, value, options, onChange }: { 
     <label className="relative inline-flex items-center">
       <span className="sr-only">{label}</span>
       <select value={value} onChange={e => onChange(e.target.value as T)}
-        className="min-h-10 cursor-pointer appearance-none rounded-full border border-line-strong bg-card py-1.5 pl-3.5 pr-8 text-sm font-semibold hover:border-ink">
+        className="min-h-11 cursor-pointer appearance-none rounded-full border border-line-strong bg-card py-1.5 pl-3.5 pr-8 text-sm font-semibold hover:border-ink">
         {options.map(o => <option key={o}>{o}</option>)}
       </select>
       <svg aria-hidden="true" viewBox="0 0 24 24" className="pointer-events-none absolute right-2.5 size-4 text-ink-3" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"><path d="M6 9l6 6 6-6" /></svg>
@@ -112,14 +112,14 @@ export function CompareScreen({ list, selected, onSelect, sort, setSort, onRead 
   }, [])
   if (list.length === 0) return <p className="p-6 text-sm text-ink-3">No professors teach on those days. Pick another day.</p>
   return (
-    <div ref={ref} className="space-y-3 p-4 md:p-5">
+    <div ref={ref} className="space-y-2.5 p-4 md:p-5 lg:space-y-3">
       <div className="flex items-center justify-between gap-3 text-xs text-ink-3">
         <span>{list.length} {list.length === 1 ? 'professor fits' : 'professors fit'} your days</span>
         <Select label="Sort professors" value={sort} options={professorSorts} onChange={setSort} />
       </div>
       {list.map(i => (
         <button key={i} type="button" aria-pressed={i === selected} onClick={() => onSelect(i)} className="block w-full text-left">
-          <ProfessorCard p={professors[i]} selected={i === selected} />
+          <ProfessorCard p={professors[i]} selected={i === selected} compactOnPhone />
         </button>
       ))}
       <button type="button" onClick={onRead} className="btn btn-primary w-full">Read reviews for {professors[selected].name} <ArrowRight className="size-5" /></button>
@@ -143,7 +143,7 @@ export function SummaryPanel({ text, className = '' }: { text: string; className
         <span className="inline-flex items-center gap-1.5"><SparkIcon className="size-4" /> AI review summary</span>
         <span className="rounded-full border border-dashed border-line-strong px-2 py-0.5 font-semibold text-ink-3">In development</span>
       </p>
-      <p className="mt-2 min-h-[4.5em] text-sm leading-relaxed text-ink-2" aria-label={text}>
+      <p className="mt-2 min-h-[4.5em] text-sm leading-relaxed text-ink-2 max-lg:line-clamp-3" aria-label={text}>
         <span aria-hidden="true">{text.slice(0, shown)}</span>
         {shown < text.length && <span aria-hidden="true" className="ml-0.5 inline-block h-3.5 w-px translate-y-0.5 animate-pulse bg-ink" />}
       </p>
@@ -155,22 +155,22 @@ export function ReviewsScreen({ prof, sort, setSort }: { prof: number; sort: Rev
   const p = professors[prof]
   return (
     <div className="space-y-4 p-4 md:p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-display text-[17px] font-bold">{p.name}</p>
-          <p className="text-xs text-ink-3"><span className="code">{course.code}</span> · {p.ratings} ratings · {p.rating.toFixed(1)} overall</p>
+          <p className="truncate font-display text-[17px] font-bold">{p.name}</p>
+          <p className="truncate text-xs text-ink-3"><span className="code">{course.code}</span> · {p.ratings} ratings · {p.rating.toFixed(1)} overall</p>
         </div>
         <Select label="Sort reviews" value={sort} options={reviewSorts} onChange={setSort} />
       </div>
       <SummaryPanel text={p.summary} />
       <ul className="divide-y divide-line">
-        {sortReviews(p.reviews, sort).map(r => (
-          <li key={r.date} className="py-3">
+        {sortReviews(p.reviews, sort).map((r, i) => (
+          <li key={r.date} className={`py-3 ${i >= 1 ? 'max-lg:hidden' : ''}`}>
             <div className="flex items-center gap-2 text-xs text-ink-3">
               <span className="rounded-md bg-tile px-1.5 py-0.5 font-semibold tabular-nums text-ink">{r.rating}.0</span>
               <span>Difficulty {r.difficulty}</span><span>·</span><span>{r.when}</span>
             </div>
-            <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{r.text}</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-ink-2 max-lg:line-clamp-2">{r.text}</p>
           </li>
         ))}
       </ul>
