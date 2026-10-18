@@ -6,6 +6,7 @@ Read the website-root AGENTS.md and docs/WEB_BETA.md first. This repository owns
 - `/demo/` is fictional and must make no API requests. `/app/` uses only the same-origin `/api/v1/*` API and never falls back to fictional data.
 - `reviews/` is the dedicated owner-only form, built with `vite.reviews.config.ts`. It uses only same-origin `/api/reviews/*`; no browser Supabase SDK or token storage. Read `docs/REVIEW_SUBMISSION.md` for its independent disabled-by-default rollout.
 - `packages/core` at the website root owns domain types and helpers. Preserve Mac semantics with regression fixtures.
+- Visuals follow the home page (apps/landing): see the "Home page look" block at the end of `src/styles.css` and `src/motion.ts`. In demo mode keep every "sample" label; testers mistook the demo for real data.
 - Keep mobile-first light styling, neutrality, no automatic professor selection, safe areas, 44px controls, and noindex. Re-test history and profile selection after UI changes.
 - Missing source fields are unknown. Stale schedules suppress seats and waitlists. Never infer a matching professor from department or scores.
 - Update docs/DATA_ACCESS.md and release-readiness.json with verified evidence, not guesses. Defaults must remain disabled until access and staging gates pass.

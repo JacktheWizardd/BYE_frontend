@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client'
 import { questionLabel, REVIEW_COMMENT_LIMIT, TEST_REVIEW_PREFIX, type ReviewCourse, type ReviewDimension, type ReviewInput, type ReviewProfessor, type ReviewSession } from '../../../packages/core/reviews'
 import { api, FormError } from './api'
 import { AppWindow } from '../../landing/src/ui/AppWindow'
-import { ArrowRight, CheckIcon, LockIcon, MailIcon } from '../../landing/src/ui/icons'
+import { CheckIcon, LockIcon, MailIcon } from '../../landing/src/ui/icons'
 import { Footer } from '../../landing/src/sections/Footer'
 import { DEMO_URL } from '../../landing/src/content/site'
 import './reviews.css'
@@ -216,7 +216,7 @@ function Reviews() {
           </section>
         </AppWindow>}
 
-        {enabled && <AppWindow title={course?.label ?? 'New review'} meta={receipt ? 'Saved' : `Step ${step + 1} of 4 · ${STEPS[step]}`}>
+        {enabled && <AppWindow title="Review" meta={receipt ? 'Saved' : `Step ${step + 1} of 4 · ${STEPS[step]}`}>
           {!receipt && <Steps current={step} />}
           <div key={receipt ? 'receipt' : step} className="story-screen p-5 md:p-7">
 
@@ -229,7 +229,7 @@ function Reviews() {
                 {codeSent
                   ? <div className="flex flex-col gap-2"><label htmlFor="review-code" className="font-semibold">Email code</label><input id="review-code" className={`${field} code tracking-[0.3em]`} value={code} autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" minLength={6} maxLength={10} required onChange={e=>setCode(e.target.value.replace(/\D/g,''))} /></div>
                   : <div className="flex flex-col gap-2"><label htmlFor="review-email" className="font-semibold">School email</label><input id="review-email" className={field} type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} value={email} placeholder="you@go.pasadena.edu" maxLength={254} required onChange={e=>setEmail(e.target.value)} /></div>}
-                <button className="btn btn-primary w-full" type="submit" disabled={busy || (!codeSent && cooldown>0)}>{busy ? 'Please wait…' : codeSent ? <>Verify code <ArrowRight className="size-5" /></> : cooldown>0 ? `Try again in ${cooldown}s` : <>Send a code <ArrowRight className="size-5" /></>}</button>
+                <button className="btn btn-primary w-full" type="submit" disabled={busy || (!codeSent && cooldown>0)}>{busy ? 'Please wait…' : codeSent ? <>Verify code →</> : cooldown>0 ? `Try again in ${cooldown}s` : <>Send a code →</>}</button>
               </form>
               {codeSent && <div className="flex flex-wrap justify-between gap-3">
                 <button className={textLink} type="button" disabled={busy || cooldown>0} onClick={sendCode}>{cooldown>0 ? `Resend in ${cooldown}s` : 'Send a new code'}</button>
@@ -270,7 +270,7 @@ function Reviews() {
                 <div><b className="font-semibold">Comment</b><p className="mt-1 whitespace-pre-wrap text-ink-2 [overflow-wrap:anywhere]">{(test ? TEST_REVIEW_PREFIX : '') + draft.body.trim() || 'No written comment.'}</p></div>
                 <p className="text-[13px] text-ink-3">Your school email is not shown in public review queries. Database administrators can link reviews to accounts.</p>
                 <div className="flex flex-col gap-3">
-                  <button type="button" className="btn btn-primary w-full" disabled={busy || uncertain} onClick={save}>{busy ? 'Saving…' : uncertain ? 'Check back before retrying' : test ? <>Submit test review <ArrowRight className="size-5" /></> : <>Submit review <ArrowRight className="size-5" /></>}</button>
+                  <button type="button" className="btn btn-primary w-full" disabled={busy || uncertain} onClick={save}>{busy ? 'Saving…' : uncertain ? 'Check back before retrying' : test ? <>Submit test review →</> : <>Submit review →</>}</button>
                   <button type="button" className="btn w-full" disabled={busy} onClick={()=>setConfirm(false)}>Back to edit</button>
                 </div>
               </section>
@@ -280,7 +280,7 @@ function Reviews() {
                 <SearchChoice label="Course" kind="courses" selected={course} onSelect={setCourse} onAuthError={authError}/>
                 <SearchChoice label="Professor" kind="professors" selected={professor} onSelect={setProfessor} onAuthError={authError}/>
                 <p className="text-[13px] text-ink-3">Choose a professor and course you actually took. BYE never picks a professor for you.</p>
-                <button type="button" className="btn btn-primary w-full" disabled={!professor || !course} onClick={()=>setClassDone(true)}>Next: rate the class <ArrowRight className="size-5" /></button>
+                <button type="button" className="btn btn-primary w-full" disabled={!professor || !course} onClick={()=>setClassDone(true)}>Next: rate the class →</button>
               </section>
 
               : <form className="space-y-6" onSubmit={e=>{e.preventDefault();if(formReady){setConfirm(true);setError('')}}}>
@@ -302,7 +302,7 @@ function Reviews() {
                   <span className="text-[13px] text-ink-3">{Array.from(draft.body).length} / {REVIEW_COMMENT_LIMIT} characters{test ? ' · A test label is added automatically.' : ''}</span>
                 </div>
                 <p className="text-[13px] text-ink-3">You can submit one review per professor and course. Keep your comment about the class and leave out personal information.</p>
-                <button type="submit" className="btn btn-primary w-full" disabled={!formReady || busy || uncertain}>Check your review <ArrowRight className="size-5" /></button>
+                <button type="submit" className="btn btn-primary w-full" disabled={!formReady || busy || uncertain}>Check your review →</button>
               </form>}
             </>}
           </div>

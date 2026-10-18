@@ -231,3 +231,101 @@ button.chip, .pill, .text-link { min-height: 44px; }
 .bye-reviews .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
 .bye-reviews a.button { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+
+/* ---------------------------------------------------------------------------
+   Home page look (2026-10-17). Same tokens, type scale, buttons and motion as apps/landing.
+   Later rules intentionally override the earlier ones above.
+   --------------------------------------------------------------------------- */
+:root { --radius-card: 18px; --shadow-float: 0 1px 0 rgba(22, 22, 24, 0.05), 0 24px 48px -28px rgba(22, 22, 24, 0.38); --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); }
+::selection { background: var(--highlight); color: var(--ink); }
+h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
+
+/* Demo banner: loud, complete on phones, always visible. */
+.demo-banner { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 10px; padding: 10px var(--safe-right) 10px var(--safe-left); font-size: 14px; line-height: 20px; text-align: left; }
+.demo-banner b { color: var(--brand-ink); }
+.demo-banner .demo-tag { flex: none; padding: 2px 9px; border: 1.5px solid var(--brand-ink); border-radius: var(--radius-pill); font-size: 12px; font-weight: 700; letter-spacing: 0.4px; }
+.demo-banner a { color: var(--brand-ink); font-weight: 600; text-underline-offset: 3px; min-height: 32px; display: inline-flex; align-items: center; }
+.sample-tag { display: inline-flex; align-items: center; width: fit-content; padding: 3px 10px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-pill); font-size: 12px; line-height: 16px; font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.sample-note { font-size: 13px; color: var(--ink-2); padding: 8px 12px; border: 1.5px dashed var(--line-strong); border-radius: var(--radius-md); }
+
+/* Nav, like the home page. */
+.topbar { position: sticky; top: var(--banner-h, 0px); z-index: 20; min-height: 64px; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(4px); }
+.home { min-height: 44px; align-items: center; }
+.wordmark b { font-size: 25px; }
+.nav-links { gap: 4px; }
+.nav-install { display: none; min-height: 44px; padding: 0 18px; font-size: 15px; text-decoration: none; }
+.nav-install:hover { background: var(--highlight); color: var(--highlight-ink); }
+.results-bar, .report-bar { top: var(--banner-h, 0px); }
+
+/* Buttons and controls. */
+.button { min-height: 52px; padding: 0 24px; }
+.button.primary { text-decoration: none; }
+.button:active:not(:disabled) { transform: translateY(1px); }
+.day { border-radius: var(--radius-pill); transition: background-color 150ms, border-color 150ms; }
+.day:hover { border-color: var(--ink); }
+button.chip { border-radius: var(--radius-pill); }
+.bare-select { border: 1.5px solid var(--line-strong); border-radius: var(--radius-pill); padding: 0 30px 0 14px; background-color: var(--card); background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%; }
+.bare-select:hover { border-color: var(--ink); }
+
+/* Search screen. */
+.search-main { padding-top: 32px; }
+.search-layout { display: grid; gap: 28px; max-width: 1120px; margin: 0 auto; }
+.search-form { max-width: none; margin: 0; }
+.search-form h1 { font-size: 44px; line-height: 1.04; letter-spacing: -0.035em; margin-bottom: 14px; }
+.search-form .lead { font-size: 17px; line-height: 1.55; }
+.field-box { border-radius: 14px; }
+.suggestions { border-radius: 14px; overflow: hidden; }
+.suggestions .group-label { padding: 10px 16px 4px; font-size: 12px; font-weight: 600; color: var(--ink-2); }
+.suggestions li.real { cursor: default; color: var(--ink-2); }
+.suggestions li.real:hover { background: none; }
+.suggestions li.real small { font-size: 12px; }
+.how-card { border: 1px solid var(--line); border-radius: 22px; background: var(--card); box-shadow: var(--shadow-float); overflow: hidden; align-self: start; }
+.window-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--paper-2); border-bottom: 1px solid var(--line); }
+.window-bar .dots { display: flex; gap: 6px; }
+.window-bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--tile-line); }
+.how-body { display: flex; flex-direction: column; gap: 18px; padding: 20px; }
+.how-body h2 { font-size: 24px; line-height: 1.2; }
+.how-list { list-style: none; margin: 0; padding: 0; counter-reset: how; display: flex; flex-direction: column; gap: 14px; }
+.how-list li { counter-increment: how; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 2px 10px; font-size: 15px; line-height: 1.5; }
+.how-list li::before { content: counter(how); grid-row: 1 / span 2; font: 700 18px/1.3 var(--display); }
+.how-list span { color: var(--ink-2); }
+.how-cta { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.how-cta .button { width: 100%; }
+
+/* Results and report. */
+.list-title, .report-name { letter-spacing: -0.03em; }
+.prof-card { border-radius: 16px; }
+.prof-card.selected { box-shadow: var(--shadow-float); }
+.section-card, .review-card, .stat, .callout, .candidate { border-radius: var(--radius-card); }
+.report-body > div:first-child { display: flex; flex-direction: column; gap: 8px; }
+.title-line .sample-tag { flex: none; }
+
+/* Motion: screens ease in, bars grow in. Off for reduced motion. */
+@keyframes screen-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .screen-in { animation: screen-in 0.55s var(--ease-out-expo) both; }
+  .bar i, .seats-bar i { transform-origin: left; animation: bar-in 1.1s var(--ease-out-expo) both; }
+}
+
+@media (min-width: 760px) {
+  .demo-banner { justify-content: center; }
+  .nav-install { display: inline-flex; margin-left: 8px; }
+  .search-main { display: block; padding: 56px var(--gutter) 72px; }
+  .search-form h1 { font-size: 64px; }
+  .search-form .lead { font-size: 19px; }
+  .list-pane { top: calc(var(--banner-h, 0px) + 61px); max-height: calc(100dvh - 61px - var(--banner-h, 0px)); }
+}
+@media (min-width: 1000px) {
+  .search-layout.with-card { grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr); gap: 56px; align-items: start; }
+  .search-layout:not(.with-card) { max-width: 600px; }
+  .how-body { padding: 28px; }
+}
+.suggestions li { grid-template-columns: 112px minmax(0, 1fr); }
+.demo-banner a { min-height: 44px; }
+/* Phones: the full banner scrolls away so it doesn't eat the screen; results and reports keep "Sample data" tags. */
+@media (max-width: 759px) {
+  .demo-banner { position: static; }
+  .topbar, .results-bar, .report-bar { top: 0; }
+  .report-bar .sample-tag { margin-left: auto; }
+}
