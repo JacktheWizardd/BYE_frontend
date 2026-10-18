@@ -4,7 +4,7 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-paper/92 backdrop-blur-sm">
       <div className="wrap flex h-16 items-center justify-between gap-4">
-        <a href="#top" aria-label="BYE, Before You Enroll, home" className="flex items-baseline gap-2.5 py-2 no-underline">
+        <a href="#top" aria-label="BYE, Before You Enroll, home" className="flex min-h-11 items-baseline gap-2.5 py-2.5 no-underline">
           <span className="swipe font-display text-[25px] font-bold leading-none">BYE</span>
           <span className="hidden text-sm text-ink-3 md:inline">Before You Enroll</span>
         </a>
