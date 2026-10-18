@@ -7,7 +7,7 @@ for (const mode of ['demo', 'live']) {
   if (mode === 'live') {
     const file = 'public/app/index.html'
     const html = await readFile(file, 'utf8')
-    await writeFile(file, html.replace('<title>BYE Demo</title>', '<title>BYE · PCC beta</title>').replace('Before You Enroll web demo. Compare PCC professors with sample data.', 'Before You Enroll. Compare PCC sections, professor ratings and student reviews.'))
+    await writeFile(file, html.replace('<title>BYE Demo · sample data</title>', '<title>BYE · PCC beta</title>').replace('Before You Enroll web demo. Compare PCC professors with sample data.', 'Before You Enroll. Compare PCC sections, professor ratings and student reviews.'))
   }
 }
 await build({ configFile: 'apps/web/vite.reviews.config.ts' })

@@ -9,6 +9,8 @@ import type { Command, Course, Professor, Section, Snapshot, Suggestion, Term } 
 import { filterReviews, orderProfessors, orderReviews, sameCourse } from '@shared/domain'
 import { bridge, isDemo } from './bridge'
 import { WEEKDAYS, fits, formatLabel, titleCase, type Weekday } from './schedule'
+import { useCountUp, useTypedHint } from './motion'
+import { loadCourses, searchCourses } from '../../landing/src/content/courseSearch'
 import './styles.css'
 
 const empty: Snapshot = { operationId: '', professors: [], loading: false, previewPending: 0 }
@@ -34,12 +36,60 @@ function Wordmark() { return <span className="wordmark"><b>BYE</b></span> }
 function Bar({ value, label, max = 5 }: { value?: number; label: string; max?: number }) {
   return <span className="bar" role="img" aria-label={`${label} ${value === undefined ? 'unknown' : value} out of ${max}`}><i style={{ width: `${((value ?? 0) / max) * 100}%` }} /></span>
 }
-function DemoBanner() { if (!isDemo) return <div className="demo-banner" role="note"><b>PCC beta</b> · Check source timestamps before enrolling.</div>; return <div className="demo-banner" role="note"><b>Demo</b> · sample data<span className="wide-only">, not real professors. Schedules, ratings and reviews are made up to show how BYE works.</span></div> }
+// Scores count up when they appear (off for reduced motion). Screen readers get the final value.
+function Num({ value, digits = 1, suffix = '' }: { value?: number; digits?: number; suffix?: string }) {
+  const shown = useCountUp(value)
+  if (value === undefined) return <>—</>
+  return <span aria-label={value.toFixed(digits) + suffix}><span aria-hidden="true">{(shown ?? value).toFixed(digits)}{suffix}</span></span>
+}
+// Testers mistook the demo for the real thing, so the demo banner is loud, complete on phones too,
+// and stays on screen. Its height is published as --banner-h so the sticky bars sit under it.
+function DemoBanner() {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const el = ref.current; if (!el) return
+    const set = () => document.documentElement.style.setProperty('--banner-h', el.offsetHeight + 'px')
+    set(); const ro = new ResizeObserver(set); ro.observe(el); return () => ro.disconnect()
+  }, [])
+  if (!isDemo) return <div ref={ref} className="demo-banner" role="note"><b>PCC beta</b> · Check source timestamps before enrolling.</div>
+  return <div ref={ref} className="demo-banner" role="note">
+    <span className="demo-tag">Demo</span>
+    <span><b>Sample data for now.</b> These professors, ratings and reviews are made up to show how BYE works.</span>
+    <a href="/#download">Get real PCC data →</a>
+  </div>
+}
+function SampleTag({ children }: { children: React.ReactNode }) { return isDemo ? <span className="sample-tag">{children}</span> : null }
+
+function HowItWorks() {
+  return <aside className="how-card" aria-labelledby="how-title">
+    <div className="window-bar" aria-hidden="true"><span className="dots"><i /><i /><i /></span><span className="chip">Web demo</span><span className="muted small">sample data</span></div>
+    <div className="how-body">
+      <h2 id="how-title">How the demo works</h2>
+      <ol className="how-list">
+        <li><b>The professors are made up.</b><span>Every professor, rating and review in this demo is sample data. None of them are real PCC instructors.</span></li>
+        <li><b>The course list is real.</b><span>Search shows real PCC Fall 2026 courses. Sample professors exist only for MATH 5A, ETH 014 and ENGL 1A.</span></li>
+        <li><b>Everything else works.</b><span>Pick class days, compare professors, sort reviews and open each section.</span></li>
+      </ol>
+      <div className="how-cta">
+        <p><b>Want real PCC data?</b> The app shows real professors, ratings and reviews.</p>
+        <a className="button primary" href="/#download">Install BYE →</a>
+        <span className="muted small">Mac now · Windows coming soon</span>
+      </div>
+    </div>
+  </aside>
+}
 
 function CourseField(props: { term: string; query: string; setQuery: (q: string) => void; onPick: (q: string) => void; recent: Recent[] }) {
   const { term, query, setQuery, onPick, recent } = props
   const [open, setOpen] = useState(false), [items, setItems] = useState<Suggestion[]>([]), [index, setIndex] = useState(-1)
   const sequence = useRef(0), input = useRef<HTMLInputElement>(null)
+  const hint = useTypedHint(EXAMPLES, !open && !query)
+  // Demo only: real PCC courses without sample data are listed after the sample matches, never selectable.
+  const [catalog, setCatalog] = useState<Awaited<ReturnType<typeof loadCourses>> | null>(null)
+  useEffect(() => { if (isDemo && open && !catalog) loadCourses().then(setCatalog).catch(() => setCatalog([])) }, [open])
+  const bare = (code: string) => code.toLowerCase().replace(/\s+/g, '').replace(/^([a-z]+)0+(?=\d)/, '$1')
+  const sampleCodes = new Set(items.map(s => bare(s.course.display)))
+  const real = isDemo && open && catalog && query.trim() ? searchCourses(catalog, query, 8).filter(c => !sampleCodes.has(bare(c.code))).slice(0, Math.max(2, 6 - items.length)) : []
   useEffect(() => {
     const id = ++sequence.current
     if (!open || !term || !query.trim()) { setItems([]); return }
@@ -59,7 +109,7 @@ function CourseField(props: { term: string; query: string; setQuery: (q: string)
     <div className="field-box">
       <svg className="search-glyph" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" /></svg>
       <input ref={input} id="course" role="combobox" aria-autocomplete="list" aria-expanded={items.length > 0} aria-controls="course-options"
-        aria-activedescendant={index >= 0 ? `suggestion-${index}` : undefined} placeholder="MATH 5A or a class title" value={query}
+        aria-activedescendant={index >= 0 ? `suggestion-${index}` : undefined} placeholder={hint || 'MATH 5A or a class title'} value={query}
         autoComplete="off" autoCorrect="off" autoCapitalize="characters" spellCheck={false} enterKeyHint="search"
         onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 120)} onChange={e => { setQuery(e.target.value); setOpen(true) }}
         onKeyDown={e => {
@@ -70,13 +120,15 @@ function CourseField(props: { term: string; query: string; setQuery: (q: string)
         }} />
       {query && <button type="button" className="clear" aria-label="Clear" onMouseDown={e => e.preventDefault()} onClick={() => { setQuery(''); input.current?.focus() }}>×</button>}
     </div>
-    {(items.length > 0 || showRecent) && <div className="suggestions">
-      {items.length > 0 && <><div className="eyebrow">Classes</div>
+    {(items.length > 0 || showRecent || real.length > 0) && <div className="suggestions">
+      {items.length > 0 && <><div className="group-label">{isDemo ? 'Sample classes' : 'Classes'}</div>
         <ul id="course-options" role="listbox">{items.map((s, i) =>
           <li id={`suggestion-${i}`} key={s.course.key} role="option" aria-selected={index === i} className={index === i ? 'active' : ''} onMouseDown={e => { e.preventDefault(); pick(s.course.display) }}>
             <span className="code">{s.course.display}</span><span>{mark(s.title)}</span>
           </li>)}</ul></>}
-      {showRecent && <><div className="eyebrow">Recent</div>
+      {real.length > 0 && <><div className="group-label">Real PCC courses · no sample data in the demo</div>
+        <ul aria-label="Real PCC courses without sample data">{real.map(c => <li key={c.code} className="real" aria-disabled="true"><span className="code">{c.code}</span><span>{c.title}<small> · in the app</small></span></li>)}</ul></>}
+      {showRecent && <><div className="group-label">Recent</div>
         <ul>{recent.map(r => <li key={r.display} onMouseDown={e => { e.preventDefault(); pick(r.display) }}><span className="code">{r.display}</span><span className="muted">{r.title}</span></li>)}</ul></>}
     </div>}
   </div>
@@ -85,17 +137,17 @@ function CourseField(props: { term: string; query: string; setQuery: (q: string)
 function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: string) => void; query: string; setQuery: (q: string) => void; days: Weekday[]; setDays: React.Dispatch<React.SetStateAction<Weekday[]>>; recent: Recent[]; search: (q?: string) => void; error: string }) {
   const { terms, termCode, setTermCode, query, setQuery, days, setDays, recent, search, error } = props
   const toggle = (d: Weekday) => setDays(prev => prev.includes(d) ? prev.filter(x => x !== d) : WEEKDAYS.map(w => w.key).filter(k => k === d || prev.includes(k)))
-  return <div className="screen search-screen">
+  return <div className="screen search-screen screen-in">
     <header className="topbar">
-      <a className="home" href="../" aria-label="BYE home"><Wordmark /><span className="tagline">Before You Enroll</span></a>
-      <span className="row"><a className="text-link" href="/reviews/">Write a review</a><a className="text-link" href="../">About</a></span>
+      <a className="home" href="/" aria-label="BYE home"><Wordmark /><span className="tagline">Before You Enroll</span></a>
+      <span className="row nav-links"><a className="text-link" href="/reviews/">Write a review</a><a className="text-link" href="/">Home</a><a className="button primary nav-install" href="/#download">Install</a></span>
     </header>
     <main className="search-main">
+      <div className={`search-layout${isDemo ? ' with-card' : ''}`}>
       <form className="search-form" onSubmit={e => { e.preventDefault(); search() }}>
         <div>
-          <span className="eyebrow wide-only">For PCC students · {isDemo ? 'web demo' : 'web beta'}</span>
           <h1>Find your <span className="swipe">professor.</span></h1>
-          <p className="muted">Every section of a PCC class, with ratings and reviews.</p>
+          <p className="lead muted">{isDemo ? <>A demo with <b className="ink">made-up professors and reviews</b>. The course list is real PCC Fall 2026.</> : 'Every section of a PCC class, with ratings and reviews.'}</p>
         </div>
         <div className="field">
           <label htmlFor="course">Class</label>
@@ -118,6 +170,8 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
         <div className="examples"><span className="muted small">Try</span>{EXAMPLES.map(x => <button key={x} type="button" className="chip" onClick={() => { setQuery(x); search(x) }}>{x}</button>)}</div>
         <div className="search-action"><button className="button primary wide" type="submit" disabled={!termCode || !query.trim()}>Find professors <span aria-hidden="true">→</span></button></div>
       </form>
+      {isDemo && <HowItWorks />}
+      </div>
     </main>
   </div>
 }
@@ -127,8 +181,8 @@ function ProfessorCard({ p, selected, onOpen }: { p: Professor; selected: boolea
   const where = `${plural(p.sections.length, 'section')} · ${formats}`
   const className = `prof-card${selected ? ' selected' : ''}${unnamed(p) ? ' dashed' : ''}`
   if (p.profile) return <button className={className} aria-pressed={selected} onClick={onOpen}>
-    <b className="name">{p.name}</b><span className="big">{score(p.profile.rating)}</span>
-    <small>{isDemo ? '' : 'RMP · '}Difficulty {score(p.profile.difficulty)}{p.profile.wouldTakeAgain === undefined ? '' : ` · ${Math.round(p.profile.wouldTakeAgain)}% would take again`}</small>
+    <b className="name">{p.name}</b><span className="big"><Num value={p.profile.rating} /></span>
+    <small>{isDemo ? 'Sample · ' : 'RMP · '}Difficulty {score(p.profile.difficulty)}{p.profile.wouldTakeAgain === undefined ? '' : ` · ${Math.round(p.profile.wouldTakeAgain)}% would take again`}</small>
     <small>{where}</small>
     <Bar value={p.profile.rating} label="Rating" />
   </button>
@@ -180,15 +234,15 @@ function Report({ p, course, days, back, command }: { p: Professor; course: Cour
   const thisCount = counts.find(x => sameCourse(course, x.label))?.count
   const chips = [{ value: 'this', label: `This class${thisCount === undefined ? '' : ` · ${thisCount}`}` }, { value: 'all', label: 'All' },
     ...counts.filter(x => !sameCourse(course, x.label)).map(x => ({ value: x.label, label: `${courseLabel(x.label)}${x.count === undefined ? '' : ` · ${x.count}`}` }))]
-  return <article className="report" aria-label={`Report for ${p.name}`}>
+  return <article key={p.id} className="report screen-in" aria-label={`Report for ${p.name}`}>
     <header className="report-bar">
       <button className="back" onClick={back}><span aria-hidden="true">←</span> Professors</button>
-      <span className="chip">{course.display}</span>
+      <span className="row"><SampleTag>Sample data</SampleTag><span className="chip">{course.display}</span></span>
     </header>
     <div className="report-body">
       <div>
-        <span className="eyebrow">Professor report</span>
         <h2 className="report-name">{p.name}</h2>
+        <SampleTag>Sample professor · not a real PCC instructor</SampleTag>
         <p className="meta">{profile?.department ? `${profile.department} · ` : ''}Pasadena City College
           {profile && (!isDemo || p.candidates.length > 1) && <button className="text-link" onClick={() => command({ kind: 'discover', professorId: p.id })}>Change profile</button>}</p>
       </div>
@@ -203,9 +257,9 @@ function Report({ p, course, days, back, command }: { p: Professor; course: Cour
 
       {profile && <section aria-label="Rate My Professors scores" className="block">
         <div className="stats">
-          <div className="stat"><b>{score(profile.rating)}<small>/5</small></b><span>RMP rating</span><Bar value={profile.rating} label="Rating" /></div>
-          <div className="stat"><b>{score(profile.difficulty)}<small>/5</small></b><span>Difficulty</span><Bar value={profile.difficulty} label="Difficulty" /></div>
-          <div className="stat"><b>{profile.wouldTakeAgain === undefined ? '—' : `${Math.round(profile.wouldTakeAgain)}%`}</b><span>Would take again</span></div>
+          <div className="stat"><b><Num value={profile.rating} /><small>/5</small></b><span>{isDemo ? 'Rating · sample' : 'RMP rating'}</span><Bar value={profile.rating} label="Rating" /></div>
+          <div className="stat"><b><Num value={profile.difficulty} /><small>/5</small></b><span>Difficulty</span><Bar value={profile.difficulty} label="Difficulty" /></div>
+          <div className="stat"><b><Num value={profile.wouldTakeAgain === undefined ? undefined : Math.round(profile.wouldTakeAgain)} digits={0} suffix="%" /></b><span>Would take again</span></div>
         </div>
         <p className="muted small">{profile.ratingCount === undefined ? 'Rating count unavailable' : plural(profile.ratingCount, 'rating')} across all courses · lower difficulty means easier {isDemo ? ' · sample data' : ''}</p>
       </section>}
@@ -217,7 +271,7 @@ function Report({ p, course, days, back, command }: { p: Professor; course: Cour
 
       {!isDemo && !unnamed(p) && <ByeReviews key={p.id+'|'+course.key} name={p.name} course={course.display} />}
       {profile && <section className="block">
-        <div className="row"><h3>{isDemo ? 'Student reviews' : 'Rate My Professors reviews'}</h3>
+        <div className="row"><h3>{isDemo ? 'Sample reviews' : 'Rate My Professors reviews'}</h3>
           <select className="bare-select" aria-label="Sort reviews" value={sort} onChange={e => setSort(e.target.value)}>
             <option value="recent">Newest</option><option value="oldest">Oldest</option><option value="highest">Highest rating</option><option value="lowest">Lowest rating</option><option value="difficulty">Lowest difficulty</option><option value="highestDifficulty">Highest difficulty</option>
           </select></div>
@@ -233,7 +287,7 @@ function Report({ p, course, days, back, command }: { p: Professor; course: Cour
         {!isDemo && profile && !p.detailLoading && <p className="muted small">Showing {reviews.length} retrieved reviews, up to 50 per filter. {profile.source && `RMP checked ${new Date(profile.source.retrievedAt).toLocaleString()}.`}</p>}
         {!reviews.length && !p.detailLoading && <p className="muted">No reviews match this filter. Try All.</p>}
         {visible < reviews.length && <button className="button secondary wide" onClick={() => setVisible(n => n + 6)}>Show more reviews</button>}
-        <p className="muted small center">Ratings reflect student feedback. They don't guarantee a grade.</p>
+        <p className="muted small center">{isDemo ? 'These reviews are made up for the demo. ' : ''}Ratings reflect student feedback. They don't guarantee a grade.</p>
       </section>}
       {!isDemo && <div className="source-links"><button className="text-link" onClick={() => command({ kind: 'source', target: 'pcc' })}>PCC schedule ↗</button>{profile && <button className="text-link" onClick={() => command({ kind: 'source', target: 'rmp', professorId: p.id })}>Rate My Professors ↗</button>}</div>}
     </div>
@@ -334,13 +388,13 @@ function App() {
   return <div className="app">
     <DemoBanner />
     {screen === 'search' ? <SearchView terms={terms} termCode={termCode} setTermCode={setTermCode} query={query} setQuery={setQuery} days={days} setDays={setDays} recent={recent} search={search} error={error} /> :
-      <div className={`screen results on-${screen}`}>
+      <div className={`screen results on-${screen} screen-in`}>
         <header className="results-bar">
           <div className="results-row">
             <button className="icon-button" onClick={back} aria-label="Change search"><span aria-hidden="true">←</span></button>
             <a className="home wide-only" href="../" aria-label="BYE home"><Wordmark /></a>
             <div className="results-title">
-              <span className="title-line">{course ? <span className="chip">{course.display}</span> : <span className="muted">Finding sections…</span>}{title && <span className="course-title">{title}</span>}</span>
+              <span className="title-line">{course ? <span className="chip">{course.display}</span> : <span className="muted">Finding sections…</span>}{title && <span className="course-title">{title}</span>}<SampleTag>Sample data</SampleTag></span>
               <span className="muted small">{state.term?.termName}{dayText}</span>
             </div>
             {state.loading ? <button className="text-link" onClick={() => command({ kind: 'stop' })}>Stop</button> : <button className="text-link" onClick={back}>Edit</button>}
@@ -353,6 +407,7 @@ function App() {
         <div className="panes">
           <aside className="list-pane" aria-label="Professors">
             <div className="row baseline"><h1 className="list-title">Professors</h1>{course && <span className="muted small">{plural(state.professors.length, 'professor')} · {plural(sections, 'section')}</span>}</div>
+            {isDemo && <p className="sample-note">Sample professors · made up for this demo</p>}
             <label className="online-filter"><input type="checkbox" checked={onlineOnly} onChange={e => setOnlineOnly(e.target.checked)} /> Fully online only</label>
             <div className="chip-row" role="group" aria-label="Sort professors">{[['rating', 'Rating'], ['difficulty', 'Difficulty'], ['reviews', 'Reviews']].map(([value, label]) =>
               <button key={value} type="button" className="pill" aria-pressed={sort === value} onClick={() => setSort(value)}>{isDemo ? label : 'RMP '+label}</button>)}</div>
