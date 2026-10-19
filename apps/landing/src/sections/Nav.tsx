@@ -1,4 +1,4 @@
-import { DEMO_URL, nav } from '../content/site'
+import { DEMO_URL, DOWNLOADS_OPEN, nav } from '../content/site'
 
 export function Nav() {
   return (
@@ -11,7 +11,7 @@ export function Nav() {
         <nav aria-label="Main" className="flex items-center gap-7">
           {nav.map(l => <a key={l.href} href={l.href} className="hidden text-[15px] text-ink-2 no-underline hover:text-ink lg:inline">{l.label}</a>)}
           <a href={DEMO_URL} className="btn btn-primary min-h-11 px-4 text-[15px] lg:hidden">Try the demo</a>
-          <a href="#download" className="btn btn-primary hidden min-h-11 px-5 text-[15px] lg:inline-flex">Install</a>
+          <a href="#download" className="btn btn-primary hidden min-h-11 px-5 text-[15px] lg:inline-flex">{DOWNLOADS_OPEN ? 'Install' : 'Available soon'}</a>
         </nav>
       </div>
     </header>

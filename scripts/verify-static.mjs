@@ -3,7 +3,8 @@ import { readFile, readdir } from 'node:fs/promises'
 for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.html', 'public/app/index.html', 'public/reviews/index.html']) {
   assert.match(await readFile(path, 'utf8'), /name="robots" content="noindex/)
 }
-assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/downloads\/BYE-0\.4\.0-beta\.1-AppleSilicon\.dmg 302/m)
+// Downloads are paused: /download must still exist and go to the install cards until DOWNLOADS_OPEN is true again.
+assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/#download 302/m)
 // Site-wide CSP: same-origin scripts and connections only (a script here could read a student's email
 // from /api/reviews/session), and no framing. /reviews/ may add only the Turnstile host.
 const headerRules = (await readFile('public/_headers', 'utf8')).split(/\n(?=\S)/)
@@ -17,7 +18,10 @@ const landing = await readFile('public/index.html', 'utf8')
 // Web use stays on the labeled sample-data demo; the live /app/ is paused. Reviews are linked.
 assert.match(landing, /href="\/demo\/"/); assert.match(landing, /Sample data for now/); assert.match(landing, /href="\/reviews\/"/); assert.doesNotMatch(landing, /href="\/app\/"/)
 // The prerendered home page loads only its own hashed assets from /site/.
-assert.match(landing, /href="\/download"/); assert.match(landing, /href="mailto:byebeforeyouenroll@gmail\.com/); assert.doesNotMatch(landing, /REPLACE WITH/)
+assert.doesNotMatch(landing, /href="\/download"/); assert.match(landing, /id="updates"/); assert.match(landing, /href="mailto:byebeforeyouenroll@gmail\.com/); assert.doesNotMatch(landing, /REPLACE WITH/)
+// The update signup posts straight to Kit (no Kit script), and the CSP must allow that form target.
+assert.match(landing, /<form[^>]* action="https:\/\/app\.kit\.com\/forms\/\d+\/subscriptions" method="post"/); assert.match(landing, /name="email_address"/)
+assert.ok(csp('/*').includes("form-action 'self' https://app.kit.com"), 'Site CSP must allow the Kit signup form')
 for (const [, src] of landing.matchAll(/(?:src|href)="(\/site\/[^"]+)"/g)) await readFile('public' + src)
 for (const path of ['public/updates/appcast.xml', 'public/downloads/BYE-0.4.0-beta.1-AppleSilicon.dmg']) await readFile(path)
 const liveFiles = await readdir('public/app/assets')

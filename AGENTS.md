@@ -10,7 +10,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get three ways to use BYE:
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
-  2. **Mac app:** a download for Apple Silicon Macs.
+  2. **Mac app:** a download for Apple Silicon Macs. **Paused since 2026-10-19** (`DOWNLOADS_OPEN = false`) while the app API is finished and the app is redesigned; the Mac card shows "Available soon" and a slim Kit email signup (`#updates`) sits under the install cards.
   3. **Windows app:** shown as "Coming soon" until the owner decides where to host the ZIP (it is too large for Cloudflare Pages).
 - The app's source code lives in a separate repository, `BYE_Before_You_Enroll`, usually checked out beside this one (`../BYE_Before_You_Enroll`).
 
@@ -36,7 +36,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 
 - **`/updates/appcast.xml` and everything in `public/updates/`.** Every installed Mac app checks this exact address daily, and it is built into each release. Don't move, rename, protect or hand-edit it.
 - **The Pages project name or domain.** The update address depends on it.
-- **The `/download` path.** Buttons and old links use it. Only the DMG file name on its line in `_redirects` changes.
+- **The `/download` path.** Buttons and old links use it. Only its target line in `_redirects` changes (the newest DMG, or `/#download` while downloads are paused).
 - **Release files** in `public/downloads/` and `public/updates/`. Only `scripts/publish-to-website.py` in the app repository writes them.
 - **Signing keys or private material.** None belong here; never add any.
 
@@ -49,7 +49,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - **No Rate My Professors branding in the design.** Its name appears only in the plain-text source and license credit in the footer.
 - **Testimonials** stay off (`apps/landing/src/content/testimonials.ts`, `enabled: false`) until there are real quotes from testers who agreed to be quoted. Never invent quotes or names.
 - **Neutrality.** BYE never ranks or recommends professors. Don't add "Top pick", "Best" or similar labels anywhere.
-- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`. Every page link comes from these constants; tools and people search for the markers.
+- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`, `NEWSLETTER LINK`. Every page link comes from these constants; tools and people search for the markers.
 - **Credits in the footer** (MIT client attribution, font licenses). Keep them when editing the footer.
 
 ## Safe to change or add
@@ -125,6 +125,13 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-19 downloads paused + Kit signup (not deployed):** The owner paused new Mac downloads until the app API is finished and the app is redesigned.
+  - `DOWNLOADS_OPEN = false` in `content/site.ts`: hero, nav and footer keep their Install/Download links to `#download`; the Mac card's button is a disabled "Available soon" with a note linking to the signup, and the hero/closing copy says the Mac app is coming soon. A first draft replaced the cards with a big signup section; the owner preferred this.
+  - `sections/Newsletter.tsx` is a slim "Get BYE news" strip (`#updates`) rendered under the install cards in `FinalCta.tsx`.
+  - `/download` now redirects to `/#download`; the DMG line stays commented in `_redirects`. Appcast, update zips and DMGs are untouched, so installed apps keep updating.
+  - Signup is a plain form post to Kit (`KIT_FORM_ID` at the `NEWSLETTER LINK` marker). No Kit script or cookies; the CSP `form-action` allows `https://app.kit.com`. Connected to the Kit form "BYE website signup" (ID `10068136`). Kit should redirect to `https://bye-before-you-enroll.pages.dev/?subscribed=1#updates`, where the strip shows "Check your inbox to confirm your email." `verify:static` checks the form action and CSP.
+  - **To reopen downloads:** ship the release, set `DOWNLOADS_OPEN = true`, restore the DMG line in `_redirects`, switch the two `/download` checks in `scripts/verify-static.mjs` back, rebuild, and email the Kit list.
 
 - **2026-10-18 security fixes (not deployed):** From a security review of the review sign-in; full report and owner checklist in `docs/SECURITY_REVIEW.md`.
   - **Plus aliases blocked:** sign-in rejects `name+tag@go.pasadena.edu`, which Google Workspace delivers to `name@` and would let one inbox act as many students (`server/reviews.ts`). The matching database change is `supabase/006_pcc_student_no_plus_alias.sql` in the app repo; the owner runs it in the Supabase SQL Editor.
