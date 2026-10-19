@@ -29,7 +29,7 @@ export function Newsletter() {
         <form action={KIT_FORM_URL} method="post" className="flex w-full flex-col gap-2 md:max-w-md md:flex-row">
           <label htmlFor="updates-email" className="sr-only">Email address</label>
           <input id="updates-email" type="email" name="email_address" required autoComplete="email" inputMode="email"
-            placeholder="you@go.pasadena.edu"
+            placeholder="example@email.com"
             className="min-h-12 w-full min-w-0 flex-1 rounded-full border-[1.5px] border-line bg-paper px-5 text-[16px] text-ink placeholder:text-ink-3 focus:border-ink focus:outline-none" />
           <button type="submit" className="btn btn-primary shrink-0">Subscribe <ArrowRight className="size-5" /></button>
         </form>
