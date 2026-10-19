@@ -1,4 +1,7 @@
 # The download buttons link to /download. To ship a new version:
 #   1. add the new DMG to public/downloads/
-#   2. change the file name on the line below
-/download /downloads/BYE-0.4.0-beta.1-AppleSilicon.dmg 302
+#   2. change the file name on the DMG line below
+# Downloads are paused (DOWNLOADS_OPEN in apps/landing/src/content/site.ts), so /download goes to the
+# install cards. To reopen, delete the /#download line and uncomment the DMG line.
+# /download /downloads/BYE-0.4.0-beta.1-AppleSilicon.dmg 302
+/download /#download 302

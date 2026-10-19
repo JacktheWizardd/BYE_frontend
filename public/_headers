@@ -4,9 +4,10 @@
 # Cloudflare Web Analytics), which keeps the "no tracking scripts" line in About.tsx true.
 # 'unsafe-inline' for styles only: the prerendered home page and 404 page use style attributes.
 # data: fonts: the demo and app builds inline a few small font files.
+# form-action allows app.kit.com for the update signup form only (a plain form post, no Kit script).
 # /reviews/ replaces these with its own stricter set below.
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self' https://app.kit.com
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

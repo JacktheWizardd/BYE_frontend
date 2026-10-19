@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { course, professors, professorSorts, sortProfessors, sortReviews } from '../content/sample'
 import type { ProfessorSort } from '../content/sample'
-import { DEMO_LABEL, DEMO_URL } from '../content/site'
+import { DEMO_LABEL, DEMO_URL, DOWNLOADS_OPEN } from '../content/site'
 import { AppWindow, Caption } from '../ui/AppWindow'
 import { ArrowRight } from '../ui/icons'
 import { ProfessorCard } from '../ui/ProfessorCard'
@@ -29,12 +29,12 @@ export function Hero() {
           {/* Phones and tablets lead with the web demo; desktop leads with Install (Mac now, Windows coming soon). */}
           <div className="mt-8 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <a href={DEMO_URL} className="btn btn-primary lg:hidden">Try the web demo <ArrowRight className="size-5" /></a>
-            <a href="#download" className="btn lg:hidden">Install on Mac or Windows</a>
-            <a href="#download" className="btn btn-primary hidden lg:inline-flex">Install <ArrowRight className="size-5" /></a>
+            <a href="#download" className="btn lg:hidden">{DOWNLOADS_OPEN ? 'Install on Mac or Windows' : 'Mac app · available soon'}</a>
+            <a href="#download" className="btn btn-primary hidden lg:inline-flex">{DOWNLOADS_OPEN ? 'Install' : 'Available soon'} <ArrowRight className="size-5" /></a>
             <a href={DEMO_URL} className="btn hidden lg:inline-flex">Try the web demo</a>
           </div>
           <p className="mt-4 text-[13px] text-ink-3">
-            Free · made by a PCC student<span className="hidden lg:inline"> · Mac now, Windows coming soon · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
+            Free · made by a PCC student<span className="hidden lg:inline"> · {DOWNLOADS_OPEN ? 'Mac now' : 'Mac soon'}, Windows coming soon · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
           </p>
         </div>
 
