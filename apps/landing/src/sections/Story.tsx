@@ -50,11 +50,15 @@ export function Story() {
       const desk = Boolean(ctx.conditions?.desk)
       trigger.current = ScrollTrigger.create({
         trigger: el, pin: true, anticipatePin: 1,
-        start: desk ? 'top 76px' : 'top 72px',
+        // Centered in the space under the nav; never higher than just below it when the block is tall.
+        start: () => {
+          const free = window.innerHeight - 64 - el.getBoundingClientRect().height
+          return 'top ' + Math.round(64 + Math.max(desk ? 12 : 8, free / 2)) + 'px'
+        },
         end: () => '+=' + Math.round(window.innerHeight * (desk ? 3.6 : 3.2)),
         // A hold on every step: when scrolling stops, settle on the nearest step start in the scroll
         // direction, so a quick flick lands on a step instead of sliding past it.
-        snap: { snapTo: [0, 0.25, 0.5, 0.75, 1], duration: { min: 0.2, max: 0.55 }, delay: 0.06, ease: 'power1.inOut' },
+        snap: { snapTo: [0, 0.25, 0.5, 0.75, 1], directional: false, duration: { min: 0.2, max: 0.55 }, delay: 0.06, ease: 'power1.inOut' },
         onUpdate: self => {
           const p = self.progress * steps.length
           const i = Math.min(steps.length - 1, Math.floor(p))
@@ -103,9 +107,9 @@ export function Story() {
       <div className="wrap">
         {/* The heading and intro are inside the pinned block, so they stay on screen while the steps advance. */}
         <div data-demo ref={demo}>
-        <div className="max-w-4xl">
-          <h2 className="text-[26px] leading-[1.1] md:text-4xl lg:text-[40px]">From a course code to a decision, in one tab.</h2>
-          <p className="mt-2 text-[14px] text-ink-2 lg:text-lg">Scroll to walk through it, or tap anything to try it. Everything works, with sample data.</p>
+        <div>
+          <h2 className="text-[28px] leading-[1.1] md:text-4xl lg:text-[clamp(40px,7.2svh,64px)]">From a course code to a decision, in one tab.</h2>
+          <p className="mt-2 text-[14px] text-ink-2 lg:text-[clamp(16px,2.4svh,20px)]">Scroll to walk through it, or tap anything to try it. Everything works, with sample data.</p>
         </div>
 
         <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:mt-6 lg:grid-cols-12 lg:items-start lg:gap-10">

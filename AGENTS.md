@@ -137,6 +137,9 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-20 Windows API support in shared screens:** Added the read-only `ByeReviewPanel`, optional independent BYE review state, source expiry metadata, and a shared seat-total freshness helper. Shared reports place BYE feedback before RMP scores/reviews. Web source freshness remains five minutes; Windows API sections supply a fifteen-minute deadline. API delivery formats can remain explicitly unknown, and official multi-letter course suffixes are preserved. The browser Bridge, sample-data restrictions and rollout flags are unchanged. Windows integration/configuration/verification are recorded in the sibling app repository's `docs/WINDOWS_API_INTEGRATION.md`; website handoff in `docs/WINDOWS_API_HANDOFF.md`. No deployment by Codex.
+
+
 - **2026-10-20 home page fixes from the Oct 19 bug list (branch `redesign/shared-foundations`, uncommitted):**
   - "How it works" now pins the heading and intro together with the walkthrough, so they stay on screen. Its screens are compact at every width and never scroll inside (the Lenis wheel exception is gone). The window height follows the viewport, a step hold (`snap` to each step start) stops quick scrolls from skipping steps, and the pin switches to desktop at 1024px to match Tailwind `lg`. On phones shorter than about 740px the bottom of the window can clip.
   - Hero "Latest review" card sits under the window instead of over the third professor row.

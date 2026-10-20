@@ -20,7 +20,7 @@ export function Hero() {
       <div data-ambient aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10" />
       <div className="wrap grid grid-cols-[minmax(0,1fr)] gap-12 pb-16 pt-12 md:pt-16 lg:grid-cols-12 lg:items-start lg:gap-8 lg:pb-28 lg:pt-24">
         <div className="min-w-0 lg:col-span-6 lg:pt-6">
-          <h1 data-hero-title className="text-[44px] leading-[1.04] tracking-[-0.035em] md:text-[60px] lg:text-[clamp(60px,6.4vw,88px)]">
+          <h1 data-hero-title className="text-[44px] leading-[1.12] tracking-[-0.035em] md:text-[60px] lg:text-[clamp(60px,6.4vw,88px)]">
             Know your professor <span data-swipe className="swipe">before you enroll.</span>
           </h1>
           <p className="mt-6 max-w-[30rem] text-lg leading-relaxed text-ink-2 lg:text-xl">
