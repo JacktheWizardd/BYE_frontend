@@ -14,11 +14,11 @@ export function RatingBar({ value, max = 5, className = '' }: { value: number; m
   )
 }
 
-// compactOnPhone: name, score and bar only below 900px (used inside the pinned phone story).
+// compactOnPhone: name, score and bar only (used inside the pinned story, so it never scrolls inside).
 export function ProfessorCard({ p, selected = false, compactOnPhone = false }: { p: Professor; selected?: boolean; compactOnPhone?: boolean }) {
-  const phoneHide = compactOnPhone ? ' max-lg:hidden' : ''
+  const phoneHide = compactOnPhone ? ' hidden' : ''
   return (
-    <span data-prof-card className={`block rounded-2xl border transition-colors ${compactOnPhone ? 'p-3 lg:p-4' : 'p-4'} ${selected ? 'border-ink bg-card shadow-[var(--shadow-soft)]' : 'border-tile-line bg-tile/70 hover:border-line-strong'}`}>
+    <span data-prof-card className={`block rounded-2xl border transition-colors ${compactOnPhone ? 'p-2.5' : 'p-4'} ${selected ? 'border-ink bg-card shadow-[var(--shadow-soft)]' : 'border-tile-line bg-tile/70 hover:border-line-strong'}`}>
       <span className="flex items-start justify-between gap-4">
         <span className="min-w-0">
           <span className="block truncate font-display text-[17px] font-bold leading-snug">{p.name}</span>
@@ -29,7 +29,7 @@ export function ProfessorCard({ p, selected = false, compactOnPhone = false }: {
         </span>
         <span className="font-display text-[30px] font-bold leading-none tracking-tight"><Count value={p.rating} /></span>
       </span>
-      <RatingBar value={p.rating} className={`${compactOnPhone ? 'mt-2 lg:mt-3' : 'mt-3'} ${selected ? '' : 'bg-card'}`} />
+      <RatingBar value={p.rating} className={`${compactOnPhone ? 'mt-2' : 'mt-3'} ${selected ? '' : 'bg-card'}`} />
     </span>
   )
 }

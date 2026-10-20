@@ -20,7 +20,7 @@ export const FEEDBACK_URL = '#feedback'
 
 export const DEMO_LABEL = 'Sample data for now'
 export const MAC_REQUIREMENTS = 'Apple Silicon · macOS 14 or newer'
-export const WINDOWS_STATUS = 'Windows · coming soon'
+export const WINDOWS_STATUS = 'Windows · available soon'
 
 export const nav = [
   { href: '#how', label: 'How it works' },
