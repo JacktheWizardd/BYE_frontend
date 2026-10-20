@@ -29,12 +29,12 @@ export function Hero() {
           {/* Phones and tablets lead with the web demo; desktop leads with Install (Mac now, Windows coming soon). */}
           <div className="mt-8 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <a href={DEMO_URL} className="btn btn-primary lg:hidden">Try the web demo <ArrowRight className="size-5" /></a>
-            <a href="#download" className="btn lg:hidden">{DOWNLOADS_OPEN ? 'Install on Mac or Windows' : 'Mac app · available soon'}</a>
+            <a href="#download" className="btn lg:hidden">{DOWNLOADS_OPEN ? 'Install on Mac or Windows' : 'Mac and Windows · available soon'}</a>
             <a href="#download" className="btn btn-primary hidden lg:inline-flex">{DOWNLOADS_OPEN ? 'Install' : 'Available soon'} <ArrowRight className="size-5" /></a>
             <a href={DEMO_URL} className="btn hidden lg:inline-flex">Try the web demo</a>
           </div>
           <p className="mt-4 text-[13px] text-ink-3">
-            Free · made by a PCC student<span className="hidden lg:inline"> · {DOWNLOADS_OPEN ? 'Mac now' : 'Mac soon'}, Windows coming soon · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
+            Free · made by a PCC student<span className="hidden lg:inline"> · {DOWNLOADS_OPEN ? 'Mac now, Windows coming soon' : 'Mac and Windows apps available soon'} · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
           </p>
         </div>
 
@@ -54,13 +54,14 @@ export function Hero() {
                 ))}
               </div>
             </AppWindow>
-            <div data-depth="0.6" aria-live="polite" className="absolute -bottom-6 -left-3 hidden w-64 rounded-2xl border border-line bg-card p-4 shadow-[var(--shadow-float)] md:block lg:-left-10">
+            {/* Sits under the window, never over a professor row, so every name stays readable. */}
+            <div data-depth="0.6" aria-live="polite" className="relative mt-4 hidden w-72 max-w-full rounded-2xl border border-line bg-card p-4 shadow-[var(--shadow-float)] md:block">
               <p className="text-xs font-semibold">Latest review · {latest.when}</p>
               <p key={selected} className="story-screen mt-1.5 text-[13px] leading-snug text-ink-2">“{latest.text}”</p>
               <p className="mt-2 text-[11px] text-ink-3">{professors[selected].name}</p>
             </div>
           </div>
-          <Caption className="mt-10 md:mt-12">Illustration with sample data, not real professors</Caption>
+          <Caption className="mt-10 md:mt-6">Illustration with sample data, not real professors</Caption>
         </figure>
       </div>
     </section>

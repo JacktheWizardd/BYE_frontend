@@ -45,12 +45,16 @@ export function Story() {
     if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     gsap.registerPlugin(ScrollTrigger)
     const mm = gsap.matchMedia()
-    mm.add({ desk: '(min-width: 900px)', phone: '(max-width: 899.98px)' }, ctx => {
+    // 1024px matches Tailwind's `lg`, where the layout switches to two columns.
+    mm.add({ desk: '(min-width: 1024px)', phone: '(max-width: 1023.98px)' }, ctx => {
       const desk = Boolean(ctx.conditions?.desk)
       trigger.current = ScrollTrigger.create({
         trigger: el, pin: true, anticipatePin: 1,
-        start: desk ? 'center center+=36' : 'top 72px',
-        end: () => '+=' + Math.round(window.innerHeight * (desk ? 3.2 : 2.8)),
+        start: desk ? 'top 76px' : 'top 72px',
+        end: () => '+=' + Math.round(window.innerHeight * (desk ? 3.6 : 3.2)),
+        // A hold on every step: when scrolling stops, settle on the nearest step start in the scroll
+        // direction, so a quick flick lands on a step instead of sliding past it.
+        snap: { snapTo: [0, 0.25, 0.5, 0.75, 1], duration: { min: 0.2, max: 0.55 }, delay: 0.06, ease: 'power1.inOut' },
         onUpdate: self => {
           const p = self.progress * steps.length
           const i = Math.min(steps.length - 1, Math.floor(p))
@@ -95,26 +99,28 @@ export function Story() {
   ][step]
 
   return (
-    <section id="how" className="border-t border-line py-20 lg:py-28">
+    <section id="how" className="border-t border-line py-12 lg:py-20">
       <div className="wrap">
-        <div className="max-w-2xl">
-          <h2 className="text-[34px] leading-[1.08] md:text-5xl lg:text-[56px]">From a course code to a decision, in one tab.</h2>
-          <p className="mt-5 text-lg text-ink-2">Scroll to walk through it, or tap anything to try it. Everything works, with sample data.</p>
+        {/* The heading and intro are inside the pinned block, so they stay on screen while the steps advance. */}
+        <div data-demo ref={demo}>
+        <div className="max-w-4xl">
+          <h2 className="text-[26px] leading-[1.1] md:text-4xl lg:text-[40px]">From a course code to a decision, in one tab.</h2>
+          <p className="mt-2 text-[14px] text-ink-2 lg:text-lg">Scroll to walk through it, or tap anything to try it. Everything works, with sample data.</p>
         </div>
 
-        <div data-demo ref={demo} className="mt-10 grid grid-cols-[minmax(0,1fr)] gap-6 lg:mt-14 lg:grid-cols-12 lg:items-start lg:gap-10">
+        <div className="mt-4 grid grid-cols-[minmax(0,1fr)] gap-4 lg:mt-6 lg:grid-cols-12 lg:items-start lg:gap-10">
           <ol className="grid min-w-0 grid-cols-4 gap-1 lg:col-span-5 lg:grid-cols-1 lg:gap-1" aria-label="Steps">
             {steps.map((s, i) => {
               const on = i === step
               return (
                 <li key={s.title}>
                   <button type="button" onClick={() => go(i)} aria-current={on ? 'step' : undefined}
-                    className={`relative block w-full min-w-0 overflow-hidden rounded-xl px-1 py-2.5 text-center transition-colors lg:rounded-none lg:border-l lg:py-5 lg:pl-7 lg:pr-2 lg:text-left ${on ? 'bg-card shadow-[var(--shadow-soft)] lg:border-ink lg:bg-transparent lg:shadow-none' : 'text-ink-3 hover:text-ink lg:border-line'}`}>
+                    className={`relative block w-full min-w-0 overflow-hidden rounded-xl px-1 py-2.5 text-center transition-colors lg:rounded-none lg:border-l lg:py-2 lg:pl-7 lg:pr-2 lg:text-left ${on ? 'bg-card shadow-[var(--shadow-soft)] lg:border-ink lg:bg-transparent lg:shadow-none' : 'text-ink-3 hover:text-ink lg:border-line'}`}>
                     {on && scrolling && <span aria-hidden="true" className="story-progress absolute bottom-0 left-0 h-0.5 bg-accent lg:left-[-1px] lg:top-0 lg:h-auto lg:w-0.5" />}
                     <span className="block font-display text-sm tabular-nums lg:text-xl">{i + 1}</span>
                     <span className="block truncate text-[12px] font-semibold lg:hidden">{s.short}</span>
-                    <span className={`hidden font-display text-[26px] font-bold leading-tight lg:block ${on ? 'text-ink' : ''}`}>{s.title}</span>
-                    <span className={`mt-2 hidden max-w-sm text-[15px] lg:block ${on ? 'text-ink-2' : ''}`}>{s.text}</span>
+                    <span className={`hidden font-display text-[22px] font-bold leading-tight lg:block ${on ? 'text-ink' : ''}`}>{s.title}</span>
+                    <span className={`mt-1 hidden max-w-sm text-[14px] lg:block ${on ? 'text-ink-2' : ''}`}>{s.text}</span>
                   </button>
                 </li>
               )
@@ -123,12 +129,12 @@ export function Story() {
 
           <div className="min-w-0 lg:col-span-7">
             {/* The pinned block must keep one height for every step (the pin reserves its space once),
-                so the description gets two fixed lines and the screen a fixed height. On phones the screens
-                are compact and never scroll inside, so a finger on the window always scrolls the page. */}
+                so the description gets two fixed lines and the screen a fixed height. The screens are compact and
+                never scroll inside, so a finger or wheel on the window always scrolls the page. */}
             <p className="mb-3 line-clamp-2 h-[3.1em] text-[15px] leading-[1.55] text-ink-2 lg:hidden">{steps[step].text}</p>
             <AppWindow title={course.code} meta={`${course.term} · ${steps[step].short}`}>
-              <div key={step} data-lenis-prevent className="story-screen h-[min(400px,calc(100svh-290px))] overflow-hidden lg:h-[min(500px,calc(100svh-260px))] lg:overflow-y-auto">{screen}</div>
-              <div className="hidden items-center justify-between gap-3 border-t border-line bg-paper px-4 py-3 lg:flex">
+              <div key={step} className="story-screen h-[clamp(350px,calc(100svh-440px),400px)] overflow-hidden lg:h-[clamp(340px,calc(100svh-372px),400px)]">{screen}</div>
+              <div className="hidden items-center justify-between gap-3 border-t border-line bg-paper px-4 py-0.5 lg:flex">
                 {step < steps.length - 1
                   ? <button type="button" onClick={() => go(step + 1)} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold">Next: {steps[step + 1].short.toLowerCase()} <ArrowRight className="size-4" /></button>
                   : <a href={DEMO_URL} className="inline-flex min-h-11 items-center gap-2 text-sm font-semibold no-underline">Open the full web demo <ArrowRight className="size-4" /></a>}
@@ -137,6 +143,7 @@ export function Story() {
             </AppWindow>
             <Caption>{DEMO_LABEL} · not real professors · <a href={DEMO_URL} className="font-semibold text-ink">open the full web demo</a></Caption>
           </div>
+        </div>
         </div>
       </div>
     </section>

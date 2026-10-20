@@ -137,6 +137,13 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-20 home page fixes from the Oct 19 bug list (branch `redesign/shared-foundations`, uncommitted):**
+  - "How it works" now pins the heading and intro together with the walkthrough, so they stay on screen. Its screens are compact at every width and never scroll inside (the Lenis wheel exception is gone). The window height follows the viewport, a step hold (`snap` to each step start) stops quick scrolls from skipping steps, and the pin switches to desktop at 1024px to match Tailwind `lg`. On phones shorter than about 740px the bottom of the window can clip.
+  - Hero "Latest review" card sits under the window instead of over the third professor row.
+  - Both install cards read "Available soon". While `DOWNLOADS_OPEN` is false they show only title, requirements and the button, left-aligned with the heading; the install steps and notes return when downloads open (the Windows steps are not shown until Windows has its own download).
+  - The news strip says BYE is coming to Mac, Windows, phones and the browser. The Kit-hosted form text is edited in Kit.
+  - Course search ignores extra leading zeros ("biol 0011" finds BIOL 011); test in `tests/landing-search.test.ts`. The Mac app's reported "BIOL 011 finds nothing" could not be reproduced by reading its code (Swift `CourseSuggestions.match` matches both); it needs a repro on the Mac.
+
 - **2026-10-20 Mac extras in the shared professor page (branch `claude/report-parity`, uncommitted):** The Windows app's own professor page moved into `packages/ui`, so Windows now uses the shared `Report`, `ProfessorRow` and `EmptyDetail`.
   - `Report` takes optional Mac extras: `reviewFilter="select"` (course menu with RMP counts), `findMore` ("Find more for this class"), `checking`, `writeReview`, a `summary` slot (AI note), `reviewPage` and `initial`/`onChange` (saved choices per professor). `back` is now optional. The web passes none of them and keeps its chips, 4 + 6 paging and the BYE reviews block.
   - For every surface: the heading uses the RMP profile name with "Listed at PCC as …" when it differs; the page opens on all courses when no review mentions this class (with a note saying so); reviews show "Rating 4.0/5 · Difficulty 2.0/5" and decoded text; the "more" button reads "View more reviews". Outside the demo, each review links to "Original on RMP ↗" and the page notes that reviews are excerpts. The page no longer remounts when the student switches professors; its three scores count up again for each professor (`Num` `restartKey`).

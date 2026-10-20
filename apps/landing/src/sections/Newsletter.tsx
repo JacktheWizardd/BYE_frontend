@@ -21,7 +21,7 @@ export function Newsletter() {
     <div id="updates" className="mx-auto mt-4 flex max-w-5xl flex-col gap-4 rounded-[var(--radius-card)] border border-line bg-card p-5 md:flex-row md:items-center md:justify-between md:p-6">
       <div>
         <h3 className="text-xl">Get BYE news</h3>
-        <p className="mt-1 text-[13px] text-ink-3">Know when the Mac app is back. A few emails a semester; unsubscribe anytime.</p>
+        <p className="mt-1 text-[13px] text-ink-3">Hear when BYE is ready on Mac, Windows, phones and the browser. A few emails a semester; unsubscribe anytime.</p>
       </div>
       {subscribed ? (
         <p role="status" className="flex items-center gap-2 text-[15px] font-semibold"><CheckIcon className="size-5 shrink-0" /> Check your inbox to confirm your email.</p>
