@@ -53,7 +53,8 @@ try {
         await page.getByRole('button', { name: 'All', exact: true }).click()
         await page.getByLabel('Sort reviews').selectOption('lowest')
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Overflow at ${width}`)
-        const small = await page.locator('button:visible').evaluateAll(elements => elements.filter(el => el.getBoundingClientRect().height < 43.9).map(el => ({ text: el.textContent, height: el.getBoundingClientRect().height })))
+        // Reviews re-render after the sort changes; a button removed in that instant measures 0, so only buttons still on the page count.
+        const small = await page.locator('button:visible').evaluateAll(elements => elements.filter(el => el.isConnected && el.getBoundingClientRect().height < 43.9).map(el => ({ text: el.textContent, height: el.getBoundingClientRect().height })))
         assert.deepEqual(small, [], 'Visible buttons meet the 44px target')
         await page.screenshot({ path: `test-results/${name}-${width}-report.png`, fullPage: true })
         await page.clock.fastForward(300_001)

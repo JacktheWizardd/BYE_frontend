@@ -73,8 +73,8 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - **Playful accents (approved 2026-10-19, for the desktop apps and shared screens):**
   - Yellow may also mark small celebratory moments: confetti, avatar initials, and the primary button's offset shadow. Never large surfaces, body text or backgrounds.
   - Ink sticker style: 1.5px ink outline with a hard 2–4px ink offset shadow (`--bye-shadow-sticker`), for stickers, the selected row, the section card, the command menu and the search box.
-  - Small tilts: ±0.3–0.6° on review notes, ±3–4° on stickers and the ID card; they straighten on hover.
-  - Springy motion uses `--bye-ease-spring`. Everything still turns off for reduced motion.
+  - Small tilts (±3–4°) on short stickers and the ID card only. Review notes and other body text sit straight, because tilted or moving text renders soft on Windows.
+  - Springy motion uses `--bye-ease-spring` for small things without body text: sliding thumbs, bubble pops, re-ordering and confetti. Selection highlights (sidebar class, open professor) glide over 0.28s with `--bye-ease-expo` and no overshoot, which the owner found calmer. Text blocks fade in rather than slide. Switching professors updates the page in place: numbers glide from the old value and bars glide to the new width, with no remount or flash. Everything still turns off for reduced motion.
   - Playful copy stays sentence case, with no emoji and no promised outcomes.
 - **Fonts:** Libre Baskerville (600/700) for headings and big numbers; Schibsted Grotesk for text; JetBrains Mono for course codes such as `MATH 5A`. Fonts are self-hosted, so don't add Google Fonts or any other third-party request.
 - **Buttons:** pills; the primary button is black and turns yellow on hover. Tap targets must be **at least 44px** tall.
@@ -136,6 +136,14 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-20 Mac extras in the shared professor page (branch `claude/report-parity`, uncommitted):** The Windows app's own professor page moved into `packages/ui`, so Windows now uses the shared `Report`, `ProfessorRow` and `EmptyDetail`.
+  - `Report` takes optional Mac extras: `reviewFilter="select"` (course menu with RMP counts), `findMore` ("Find more for this class"), `checking`, `writeReview`, a `summary` slot (AI note), `reviewPage` and `initial`/`onChange` (saved choices per professor). `back` is now optional. The web passes none of them and keeps its chips, 4 + 6 paging and the BYE reviews block.
+  - For every surface: the heading uses the RMP profile name with "Listed at PCC as …" when it differs; the page opens on all courses when no review mentions this class (with a note saying so); reviews show "Rating 4.0/5 · Difficulty 2.0/5" and decoded text; the "more" button reads "View more reviews". Outside the demo, each review links to "Original on RMP ↗" and the page notes that reviews are excerpts. The page no longer remounts when the student switches professors; its three scores count up again for each professor (`Num` `restartKey`).
+  - `SectionCard` notes "Some meetings not announced", hides the campus for fully online sections and says "1 unit". `EmptyDetail` takes `sections` for a section count and format/term facts; in the demo the counts say "· sample" like the others.
+  - Every "Sample" label is unchanged. Checks: typecheck, `pnpm test` 84/84, build, `test:browser` 6/6, `test:app:browser` 4/4.
+
+- **2026-10-19 v3 polish from Windows testing (uncommitted):** `packages/ui` text entrances fade instead of sliding, review cards no longer tilt, and `useCountUp` glides from the number on screen instead of restarting at zero. Owner testing on Windows found moving or tilted text blurry. This also applies to `/demo/`. Checks: typecheck, `pnpm test` 84/84, build, `test:browser` 6/6.
 
 - **2026-10-19 app redesign Phase 3, website side (branch `redesign/shared-foundations`, uncommitted):** The Windows app (app repository branch `redesign/windows-app-v3`) now vendors `packages/{tokens,core,ui}` and the Schibsted Grotesk and JetBrains Mono fonts through the app repo's `scripts/sync-bye-shared.mjs`.
   - Website changes for it: `ProfessorList` takes an optional `renderRow`, so Windows can draw Mac-style rows inside the shared list. `useFlip` and the list's ↑ ↓ handler use `Array.from` so they compile with the Windows TypeScript settings.

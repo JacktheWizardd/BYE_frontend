@@ -267,7 +267,7 @@ function App() {
             {!onlineOnly && otherDays.length > 0 && <p className="muted small other-note">{plural(otherDays.length, 'professor')} only {otherDays.length === 1 ? 'teaches' : 'teach'} on other days. <button className="text-link" onClick={() => setShowOther(v => !v)}>{showOther ? 'Hide' : 'Show'}</button></p>}
           </aside>
           <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} byeReviews={<ByeReviews key={p.id + '|' + course.key} name={p.name} course={course.display} />} /> :
-            !state.loading && <EmptyDetail professors={list.length} openSeats={openSeats} />}</section>
+            !state.loading && <EmptyDetail professors={list.length} openSeats={openSeats} sections={list.flatMap(x => x.sections.filter(s => fits(s, days)))} />}</section>
         </div>
       </div>}
     <Chooser p={chooser} course={course} command={command} onSelect={profileId => {
