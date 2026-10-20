@@ -7,7 +7,8 @@ for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.h
 assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/#download 302/m)
 // Site-wide CSP: same-origin scripts and connections only (a script here could read a student's email
 // from /api/reviews/session), and no framing. /reviews/ may add only the Turnstile host.
-const headerRules = (await readFile('public/_headers', 'utf8')).split(/\n(?=\S)/)
+// Git may check _headers out with CRLF on Windows; compare rules, not line endings.
+const headerRules = (await readFile('public/_headers', 'utf8')).replace(/\r\n/g, '\n').split(/\n(?=\S)/)
 const csp = path => headerRules.find(rule => rule.startsWith(path + '\n'))?.match(/^\s+Content-Security-Policy: (.+)$/m)?.[1] ?? ''
 for (const [path, script] of [['/*', "script-src 'self';"], ['/reviews/*', "script-src 'self' https://challenges.cloudflare.com;"]]) {
   for (const part of [script, "connect-src 'self';", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'"]) assert.ok(csp(path).includes(part), `${path} CSP must include ${part}`)
@@ -39,3 +40,10 @@ for (const path of reviewFiles.filter(x => x.endsWith('.js'))) {
 }
 }
 console.log('Review and app browser assets contain no Supabase client, API keys or fixture tokens.')
+
+// Windows "Check for updates" reads /windows/latest.json: a version and a download link that stays on this website.
+const latest = JSON.parse(await readFile('public/windows/latest.json', 'utf8'))
+assert.match(latest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?$/, 'Windows latest.json needs a version like 0.4.0-beta.1')
+assert.ok(latest.downloadUrl.startsWith('https://bye-before-you-enroll.pages.dev/'), 'Windows downloadUrl must stay on the BYE website')
+assert.ok(headerRules.some(rule => rule.startsWith('/windows/latest.json\n') && /max-age=300/.test(rule)), 'Windows latest.json must be cached for at most 5 minutes')
+console.log('Windows update file passed.')

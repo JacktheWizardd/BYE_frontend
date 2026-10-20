@@ -1,0 +1,5 @@
+{
+  "about": "Newest BYE for Windows. The Windows app reads this only when a student presses Check for updates. Raise version when a new Windows build is published; downloadUrl must stay on this website.",
+  "version": "0.4.0-beta.1",
+  "downloadUrl": "https://bye-before-you-enroll.pages.dev/#download"
+}

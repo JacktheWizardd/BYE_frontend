@@ -5,45 +5,29 @@ import '@fontsource/schibsted-grotesk/400.css'
 import '@fontsource/schibsted-grotesk/600.css'
 import '@fontsource/schibsted-grotesk/700.css'
 import '@fontsource/jetbrains-mono/500.css'
-import type { Command, Course, Professor, Section, Snapshot, Suggestion, Term } from '@shared/types'
-import { filterReviews, orderProfessors, orderReviews, sameCourse } from '@shared/domain'
+import type { Command, Professor, Snapshot, Suggestion, Term } from '@shared/types'
+import { orderProfessors } from '@shared/domain'
 import { bridge, isDemo } from './bridge'
 import { WEEKDAYS, fits, formatLabel, titleCase, type Weekday } from './schedule'
-import { useCountUp, useTypedHint } from './motion'
+import { Chooser, DayBubbles, EmptyDetail, LoadingRows, ProfessorList, Report, SampleTag, Segmented, SurfaceProvider, Wordmark, plural, useTypedHint } from '../../../packages/ui'
 import { loadCourses, searchCourses } from '../../landing/src/content/courseSearch'
 import './styles.css'
+import '../../../packages/ui/styles.css'
 
 const empty: Snapshot = { operationId: '', professors: [], loading: false, previewPending: 0 }
 const EXAMPLES = ['MATH 5A', 'ETH 014', 'ENGL 1A']
 // The typed search hint cycles through more examples: codes and class titles, all of which find sample data.
 const HINTS = ['MATH 5A', 'Calculus', 'ETH 014', 'Ethnic studies', 'ENGL 1A', 'Reading and composition', 'math 5a', 'Composition']
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const PHONE = '(max-width: 759px)'
 type Screen = 'search' | 'list' | 'report'
 interface Recent { display: string; title: string }
 
-const score = (n?: number) => n === undefined ? '—' : n.toFixed(1)
-const day = (s: string) => { const [, m, d] = s.slice(0, 10).split('-').map(Number); return m ? `${MONTHS[m - 1]} ${d}` : '' }
-const monthYear = (s: string) => { const [y, m] = s.slice(0, 7).split('-').map(Number); return y && m ? `${MONTHS[m - 1]} ${y}` : 'Date unavailable' }
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
-const courseLabel = (label: string) => label.replace(/^([A-Z]+)(\d)/, '$1 $2')
 const isPhone = () => typeof matchMedia === 'function' && matchMedia(PHONE).matches
-const unnamed = (p: Professor) => p.issue?.startsWith('PCC has not') ?? false
 
 // Recent searches stay in this browser only; storage can be unavailable (private mode), so failures are ignored.
 function loadRecent(): Recent[] { try { return (JSON.parse(localStorage.getItem(isDemo ? 'bye-recent' : 'bye-live-recent') ?? '[]') as Recent[]).filter(r => typeof r?.display === 'string' && typeof r?.title === 'string').slice(0, 3) } catch { return [] } }
 function saveRecent(list: Recent[]) { try { localStorage.setItem(isDemo ? 'bye-recent' : 'bye-live-recent', JSON.stringify(list)) } catch { /* not available */ } }
 
-function Wordmark() { return <span className="wordmark"><b>BYE</b></span> }
-function Bar({ value, label, max = 5 }: { value?: number; label: string; max?: number }) {
-  return <span className="bar" role="img" aria-label={`${label} ${value === undefined ? 'unknown' : value} out of ${max}`}><i style={{ width: `${((value ?? 0) / max) * 100}%` }} /></span>
-}
-// Scores count up when they appear (off for reduced motion). Screen readers get the final value.
-function Num({ value, digits = 1, suffix = '' }: { value?: number; digits?: number; suffix?: string }) {
-  const shown = useCountUp(value)
-  if (value === undefined) return <>—</>
-  return <span aria-label={value.toFixed(digits) + suffix}><span aria-hidden="true">{(shown ?? value).toFixed(digits)}{suffix}</span></span>
-}
 // Testers mistook the demo for the real thing, so the demo banner is loud, complete on phones too,
 // and stays on screen. Its height is published as --banner-h so the sticky bars sit under it.
 function DemoBanner() {
@@ -60,7 +44,6 @@ function DemoBanner() {
     <a href="/#download">Get real PCC data →</a>
   </div>
 }
-function SampleTag({ children }: { children: React.ReactNode }) { return isDemo ? <span className="sample-tag">{children}</span> : null }
 
 function HowItWorks() {
   return <aside className="how-card" aria-labelledby="how-title">
@@ -178,148 +161,6 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
   </div>
 }
 
-function ProfessorCard({ p, selected, onOpen }: { p: Professor; selected: boolean; onOpen: () => void }) {
-  const formats = [...new Set(p.sections.map(formatLabel))].join(', ')
-  const where = `${plural(p.sections.length, 'section')} · ${formats}`
-  const className = `prof-card${selected ? ' selected' : ''}${unnamed(p) ? ' dashed' : ''}`
-  if (p.profile) return <button className={className} aria-pressed={selected} onClick={onOpen}>
-    <b className="name">{p.name}</b><span className="big"><Num value={p.profile.rating} /></span>
-    <small>{isDemo ? 'Sample · ' : 'RMP · '}Difficulty {score(p.profile.difficulty)}{p.profile.wouldTakeAgain === undefined ? '' : ` · ${Math.round(p.profile.wouldTakeAgain)}% would take again`}</small>
-    <small>{where}</small>
-    <Bar value={p.profile.rating} label="Rating" />
-  </button>
-  if (p.state === 'choose') return <button className={className} aria-pressed={selected} onClick={onOpen}>
-    <b className="name">{p.name}</b><span className="side-action">Choose →</span>
-    <small className="ink">{p.candidates.length > 1 ? `${p.candidates.length} RMP profiles match` : 'Choose an RMP profile'}</small><small>{where}</small>
-  </button>
-  if (p.state === 'unavailable') return <button className={className} aria-pressed={selected} onClick={onOpen}>
-    <b className="name">{p.name}</b>{!unnamed(p) && <span className="big muted">—</span>}
-    <small>{unnamed(p) ? "PCC hasn't named an instructor yet" : <><span className="signal">{p.issue?.includes('access is pending') ? 'RMP access pending.' : 'Cannot retrieve RMP info.'}</span> {isDemo ? 'Tap to view sections.' : 'Open sections and BYE reviews.'}</>}</small><small>{where}</small>
-  </button>
-  return <button className={className} aria-pressed={selected} aria-busy="true" onClick={onOpen}>
-    <b className="name">{p.name}</b><span className="big muted">—</span><small>Checking RMP…</small><small>{where}</small>
-  </button>
-}
-
-function SectionCard({ s, days }: { s: Section; days: Weekday[] }) {
-  const [clock, setClock] = useState(Date.now)
-  useEffect(() => {
-    if (!s.source || isDemo) return
-    const timer = setTimeout(() => setClock(Date.now()), Math.max(0, 300_000 - (Date.now() - s.source.retrievedAt)))
-    return () => clearTimeout(timer)
-  }, [s.source?.retrievedAt])
-  const stale = s.source?.stale || (!!s.source && clock - s.source.retrievedAt >= 300_000)
-  const seats = stale ? undefined : s.details, full = seats?.seatsOpen === 0, other = !fits(s, days)
-  return <article className={`section-card${other ? ' other-days' : ''}`}>
-    <div>
-      <div className="tags"><span className="chip">CRN {s.crn}</span><span className="tag">{formatLabel(s)}</span>{other && <span className="tag outline">Other days</span>}</div>
-      {s.meetings.length ? s.meetings.map(m => <p className="when" key={m}>{m}</p>) : <p className="when">{formatLabel(s) === 'Online · async' ? 'No scheduled meetings' : 'Meeting schedule not announced'}</p>}
-      <p className="muted small">{s.start && s.end ? `${day(s.start)} – ${day(s.end)}` : 'Dates not announced'}</p>
-      {s.details && <p className="muted small">{[s.details.termPart, s.details.campus, s.details.units && `${s.details.units} units`].filter(Boolean).join(' · ')}</p>}
-      {s.source && <p className="muted small">PCC checked {new Date(s.source.retrievedAt).toLocaleString()}{stale ? ' · Older schedule · seat counts hidden' : ''}</p>}
-      {!isDemo && seats?.seatsOpen === undefined && !stale && <p className="muted small">Seat availability not published.</p>}
-    </div>
-    {seats?.seatsOpen !== undefined && <div className={`seats${full ? ' full' : ''}`}>
-      <div className="seats-label"><b>{seats.seatsOpen}</b> of {seats.capacity ?? '—'} seats open</div>
-      <div className="seats-bar"><i style={{ width: `${(seats.capacity ? Math.min(1, seats.seatsOpen / seats.capacity) : 0) * 100}%` }} /></div>
-      <div className="seats-wait">{full ? `Full · waitlist ${seats.waitlistCount ?? '—'} of ${seats.waitlistCapacity ?? '—'}` : `Waitlist ${seats.waitlistCount ?? '—'} of ${seats.waitlistCapacity ?? '—'}`}</div>
-    </div>}
-  </article>
-}
-
-function Report({ p, course, days, back, command }: { p: Professor; course: Course; days: Weekday[]; back: () => void; command: (c: Command) => void }) {
-  const [filter, setFilter] = useState('this'), [sort, setSort] = useState('recent'), [visible, setVisible] = useState(4)
-  useEffect(() => { setFilter('this'); setVisible(4) }, [p.id, p.profile?.id])
-  const profile = p.profile
-  const reviews = profile ? orderReviews(filterReviews(profile, course, filter), sort) : []
-  const counts = profile?.courseCounts.filter(x => x.label) ?? []
-  const thisCount = counts.find(x => sameCourse(course, x.label))?.count
-  const chips = [{ value: 'this', label: `This class${thisCount === undefined ? '' : ` · ${thisCount}`}` }, { value: 'all', label: 'All' },
-    ...counts.filter(x => !sameCourse(course, x.label)).map(x => ({ value: x.label, label: `${courseLabel(x.label)}${x.count === undefined ? '' : ` · ${x.count}`}` }))]
-  return <article key={p.id} className="report screen-in" aria-label={`Report for ${p.name}`}>
-    <header className="report-bar">
-      <button className="back" onClick={back}><span aria-hidden="true">←</span> Professors</button>
-      <span className="row"><SampleTag>Sample data</SampleTag><span className="chip">{course.display}</span></span>
-    </header>
-    <div className="report-body">
-      <div>
-        <h2 className="report-name">{p.name}</h2>
-        <SampleTag>Sample professor · not a real PCC instructor</SampleTag>
-        <p className="meta">{profile?.department ? `${profile.department} · ` : ''}Pasadena City College
-          {profile && (!isDemo || p.candidates.length > 1) && <button className="text-link" onClick={() => command({ kind: 'discover', professorId: p.id })}>Change profile</button>}</p>
-      </div>
-
-      {(p.state === 'loading' || p.state === 'pending') && <p className="placeholder" role="status">Checking RMP for {p.name}…</p>}
-      {p.state === 'choose' && <div className="callout"><p><b>{p.candidates.length} RMP profiles match {p.name}.</b> Pick the one that teaches {course.display}. BYE keeps them separate and never guesses.</p>
-        <button className="button primary wide" onClick={() => command({ kind: 'discover', professorId: p.id })}>Choose profile <span aria-hidden="true">→</span></button></div>}
-      {p.state === 'unavailable' && (unnamed(p)
-        ? <div className="callout"><p><b>No instructor named yet.</b> PCC hasn't announced who teaches this section. Check back closer to the start of the semester.</p></div>
-        : <div className="callout card" role="status"><p><b className="signal">{p.issue?.includes('access is pending') ? 'RMP access pending.' : 'Cannot retrieve RMP info.'}</b> {p.issue?.includes('access is pending') ? 'PCC sections and BYE reviews are available in this preview.' : <>{p.issue} The PCC sections below remain available; check their retrieval times.</>}</p>
-          {!p.issue?.includes('access is pending') && <button className="button secondary wide" onClick={() => command({ kind: 'retry', professorId: p.id })}>Try again</button>}</div>)}
-
-      {profile && <section aria-label="Rate My Professors scores" className="block">
-        <div className="stats">
-          <div className="stat"><b><Num value={profile.rating} /><small>/5</small></b><span>{isDemo ? 'Rating · sample' : 'RMP rating'}</span><Bar value={profile.rating} label="Rating" /></div>
-          <div className="stat"><b><Num value={profile.difficulty} /><small>/5</small></b><span>Difficulty</span><Bar value={profile.difficulty} label="Difficulty" /></div>
-          <div className="stat"><b><Num value={profile.wouldTakeAgain === undefined ? undefined : Math.round(profile.wouldTakeAgain)} digits={0} suffix="%" /></b><span>Would take again</span></div>
-        </div>
-        <p className="muted small">{profile.ratingCount === undefined ? 'Rating count unavailable' : plural(profile.ratingCount, 'rating')} across all courses · lower difficulty means easier {isDemo ? ' · sample data' : ''}</p>
-      </section>}
-
-      <section className="block">
-        <h3>Sections <span className="muted">· {p.sections.length}</span></h3>
-        <div className="section-list">{p.sections.map(s => <SectionCard key={s.crn} s={s} days={days} />)}</div>
-      </section>
-
-      {!isDemo && !unnamed(p) && <ByeReviews key={p.id+'|'+course.key} name={p.name} course={course.display} />}
-      {profile && <section className="block">
-        <div className="row"><h3>{isDemo ? 'Sample reviews' : 'Rate My Professors reviews'}</h3>
-          <select className="bare-select" aria-label="Sort reviews" value={sort} onChange={e => setSort(e.target.value)}>
-            <option value="recent">Newest</option><option value="oldest">Oldest</option><option value="highest">Highest rating</option><option value="lowest">Lowest rating</option><option value="difficulty">Lowest difficulty</option><option value="highestDifficulty">Highest difficulty</option>
-          </select></div>
-        <div className="chip-row" role="group" aria-label="Review course">{chips.map(c =>
-          <button key={c.value} type="button" className="pill" aria-pressed={filter === c.value} onClick={() => { setFilter(c.value); setVisible(4); if (!isDemo) command({ kind: 'details', professorId: p.id, filter: c.value }) }}>{c.label}</button>)}</div>
-        {p.detailLoading && <p className="muted small" role="status">Loading more reviews…</p>}
-        {reviews.slice(0, visible).map(r => <article className="review-card" key={r.id}>
-          <div className="row"><span className="chip">{courseLabel(r.course) || 'Course unspecified'}</span><span className="muted small">Posted {monthYear(r.date)}</span></div>
-          <p>{r.text}</p>
-          <p className="muted small">Rating {r.rating ?? '—'} · Difficulty {r.difficulty ?? '—'}</p>
-        </article>)}
-        {p.reviewIssue && <div className="notice" role="status"><p>{p.reviewIssue}</p><button className="text-link" onClick={() => command({ kind: 'details', professorId: p.id, filter })}>Try reviews again</button></div>}
-        {!isDemo && profile && !p.detailLoading && <p className="muted small">Showing {reviews.length} retrieved reviews, up to 50 per filter. {profile.source && `RMP checked ${new Date(profile.source.retrievedAt).toLocaleString()}.`}</p>}
-        {!reviews.length && !p.detailLoading && <p className="muted">No reviews match this filter. Try All.</p>}
-        {visible < reviews.length && <button className="button secondary wide" onClick={() => setVisible(n => n + 6)}>Show more reviews</button>}
-        <p className="muted small center">{isDemo ? 'These reviews are made up for the demo. ' : ''}Ratings reflect student feedback. They don't guarantee a grade.</p>
-      </section>}
-      {!isDemo && <div className="source-links"><button className="text-link" onClick={() => command({ kind: 'source', target: 'pcc' })}>PCC schedule ↗</button>{profile && <button className="text-link" onClick={() => command({ kind: 'source', target: 'rmp', professorId: p.id })}>Rate My Professors ↗</button>}</div>}
-    </div>
-  </article>
-}
-
-function Chooser({ p, course, command, onSelect }: { p?: Professor; course?: Course; command: (c: Command) => void; onSelect: (profileId: string) => void }) {
-  const ref = useRef<HTMLDialogElement>(null)
-  useEffect(() => {
-    const dialog = ref.current
-    if (p?.choosing && dialog && !dialog.open) dialog.showModal()
-    if (!p?.choosing && dialog?.open) dialog.close()
-  }, [p?.choosing, p?.id])
-  const close = () => { if (p) command({ kind: 'dismiss', professorId: p.id }) }
-  return <dialog ref={ref} className="sheet" aria-labelledby="chooser-title" onCancel={e => { e.preventDefault(); close() }} onClick={e => { if (e.target === ref.current) close() }}>
-    <span className="grabber" aria-hidden="true" />
-    <h2 id="chooser-title">Which {p?.name} teaches {course?.display ?? 'this class'}?</h2>
-    <p className="muted">{p && p.candidates.length > 1 ? `${p.candidates.length} Rate My Professors profiles share this name.` : 'Confirm the Rate My Professors profile.'} Pick one and BYE will remember it for {course?.subject ?? 'this subject'} classes.</p>
-    {p?.issue && <p role="status" className="notice">{p.issue}<button className="text-link" onClick={() => command({ kind: 'discover', professorId: p.id })}>Try again</button></p>}
-    {!p?.candidates.length && !p?.issue && <p className="muted" role="status">Looking for profiles…</p>}
-    {p?.candidates.map(c => <div className="candidate" key={c.id}>
-      <b>{c.firstName} {c.lastName}</b>
-      <span>{c.department || 'Department unavailable'}</span>
-      <span className="muted small">Pasadena City College · {c.ratingCount === undefined ? 'Rating count unavailable' : plural(c.ratingCount, 'rating')}</span>
-      <button className="button secondary wide" onClick={() => onSelect(c.id)}>Use this profile</button>
-    </div>)}
-    <button className="button ghost wide" onClick={close}>Not now</button>
-  </dialog>
-}
-
 function App() {
   const [state, setState] = useState(empty), [terms, setTerms] = useState<Term[]>([]), [termCode, setTermCode] = useState('')
   const [query, setQuery] = useState(''), [screen, setScreen] = useState<Screen>('search'), [error, setError] = useState('')
@@ -385,9 +226,11 @@ function App() {
   const back = () => history.back()
   const checked = state.professors.filter(x => x.state !== 'pending' && x.state !== 'loading').length
   const sections = state.professors.reduce((n, x) => n + x.sections.length, 0)
-  const dayText = days.length ? ` · ${days.join(', ')}` : ''
+  // Open seats across the listed sections, when PCC published them and the schedule isn't stale.
+  const seatCounts = list.flatMap(x => x.sections).filter(s => fits(s, days) && !s.source?.stale).map(s => s.details?.seatsOpen).filter((n): n is number => n !== undefined)
+  const openSeats = seatCounts.length ? seatCounts.reduce((a, b) => a + b, 0) : undefined
 
-  return <div className="app">
+  return <SurfaceProvider demo={isDemo}><div className="app">
     <DemoBanner />
     {screen === 'search' ? <SearchView terms={terms} termCode={termCode} setTermCode={setTermCode} query={query} setQuery={setQuery} days={days} setDays={setDays} recent={recent} search={search} error={error} /> :
       <div className={`screen results on-${screen} screen-in`}>
@@ -397,7 +240,7 @@ function App() {
             <a className="home wide-only" href="../" aria-label="BYE home"><Wordmark /></a>
             <div className="results-title">
               <span className="title-line">{course ? <span className="chip">{course.display}</span> : <span className="muted">Finding sections…</span>}{title && <span className="course-title">{title}</span>}<SampleTag>Sample data</SampleTag></span>
-              <span className="muted small">{state.term?.termName}{dayText}</span>
+              <span className="muted small">{state.term?.termName}</span>
             </div>
             {state.loading ? <button className="text-link" onClick={() => command({ kind: 'stop' })}>Stop</button> : <button className="text-link" onClick={back}>Edit</button>}
           </div>
@@ -410,17 +253,21 @@ function App() {
           <aside className="list-pane" aria-label="Professors">
             <div className="row baseline"><h1 className="list-title">Professors</h1>{course && <span className="muted small">{plural(state.professors.length, 'professor')} · {plural(sections, 'section')}</span>}</div>
             {isDemo && <p className="sample-note">Sample professors · made up for this demo</p>}
-            <label className="online-filter"><input type="checkbox" checked={onlineOnly} onChange={e => setOnlineOnly(e.target.checked)} /> Fully online only</label>
-            <div className="chip-row" role="group" aria-label="Sort professors">{[['rating', 'Rating'], ['difficulty', 'Difficulty'], ['reviews', 'Reviews']].map(([value, label]) =>
-              <button key={value} type="button" className="pill" aria-pressed={sort === value} onClick={() => setSort(value)}>{isDemo ? label : 'RMP '+label}</button>)}</div>
+            <div className="results-filters">
+              <DayBubbles days={days} onChange={setDays} disabled={onlineOnly} />
+              <button type="button" className="pill online-toggle" aria-pressed={onlineOnly} onClick={() => setOnlineOnly(v => !v)}>Online only</button>
+            </div>
+            <Segmented label={isDemo ? 'Sort professors' : 'Sort professors by RMP scores'} value={sort} onChange={setSort}
+              options={[['rating', 'Rating'], ['difficulty', 'Difficulty'], ['reviews', 'Reviews']] as const} />
+            {!isDemo && <p className="muted small">Sorting uses Rate My Professors scores.</p>}
             {state.issue && <p className="notice" role="status"><b>Problem</b> {state.issue}</p>}
             {error && <p className="notice" role="alert"><b>Problem</b> {error}</p>}
-            {!course && state.loading && <p className="placeholder" role="status">Reading the PCC schedule…</p>}
-            <div className="card-list">{list.map(x => <ProfessorCard key={x.id} p={x} selected={!isPhone() && p?.id === x.id} onOpen={() => open(x)} />)}</div>
+            {!course && state.loading && <LoadingRows />}
+            <ProfessorList list={list} selectedId={isPhone() ? undefined : p?.id} onOpen={open} openOnArrow={!isPhone()} />
             {!onlineOnly && otherDays.length > 0 && <p className="muted small other-note">{plural(otherDays.length, 'professor')} only {otherDays.length === 1 ? 'teaches' : 'teach'} on other days. <button className="text-link" onClick={() => setShowOther(v => !v)}>{showOther ? 'Hide' : 'Show'}</button></p>}
           </aside>
-          <section className="report-pane">{p && course ? <Report p={p} course={course} days={days} back={back} command={command} /> :
-            !state.loading && <div className="empty"><h2>{list.length ? 'Compare professors' : 'No sections to show'}</h2><p className="muted">{list.length ? 'Choose a professor to view their sections, ratings and reviews.' : 'Try another class or change your filters.'}</p></div>}</section>
+          <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} byeReviews={<ByeReviews key={p.id + '|' + course.key} name={p.name} course={course.display} />} /> :
+            !state.loading && <EmptyDetail professors={list.length} openSeats={openSeats} sections={list.flatMap(x => x.sections.filter(s => fits(s, days)))} />}</section>
         </div>
       </div>}
     <Chooser p={chooser} course={course} command={command} onSelect={profileId => {
@@ -428,7 +275,7 @@ function App() {
       command({ kind: 'select', professorId: chooser.id, profileId }); setSelected(chooser.id)
       if (isPhone() && screen === 'list') go('report')
     }} />
-  </div>
+  </div></SurfaceProvider>
 }
 
 createRoot(document.getElementById('root')!).render(<App />)

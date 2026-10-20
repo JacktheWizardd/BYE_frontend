@@ -9,33 +9,8 @@
 @font-face { font-family: "Libre Baskerville"; src: url("/fonts/LibreBaskerville-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "JetBrains Mono"; src: url("/fonts/jetbrains-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
 
-@theme {
-  --breakpoint-md: 600px;
-  --breakpoint-lg: 900px;
-  --breakpoint-xl: 1200px;
-
-  --color-paper: #faf8f3;   /* ivory page */
-  --color-linen: #f2eee6;   /* panels */
-  --color-card: #ffffff;
-  --color-tile: #eae5db;    /* stone */
-  --color-tile-line: #ddd6c9;
-  --color-ink: #161618;     /* Jet Black */
-  --color-ink-2: #5f5a52;   /* body text, 6.6:1 on paper */
-  --color-ink-3: #6b665e;   /* fine print, 5.4:1 on paper */
-  --color-line: #e2dcd0;
-  --color-line-strong: #8c857a;
-  --color-accent: #f2c14e;  /* the one accent: ratings, counters, swipe, CTA hover */
-
-  --font-display: "Libre Baskerville", Baskerville, Georgia, serif;
-  --font-sans: "Schibsted Grotesk", system-ui, -apple-system, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
-
-  --radius-card: 18px;
-  --radius-window: 22px;
-  --shadow-float: 0 1px 0 rgb(22 22 24 / 0.05), 0 24px 48px -28px rgb(22 22 24 / 0.38);
-  --shadow-soft: 0 1px 0 rgb(22 22 24 / 0.04), 0 12px 28px -20px rgb(22 22 24 / 0.3);
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-}
+/* Colors, fonts, radii, shadows and easing come from the shared BYE tokens (packages/tokens/tokens.json). */
+@import "../../../packages/tokens/generated/theme.css";
 
 @keyframes screen-in { from { opacity: 0; transform: translateY(10px); clip-path: inset(0 0 12% 0); } to { opacity: 1; transform: none; clip-path: inset(0 0 0 0); } }
 

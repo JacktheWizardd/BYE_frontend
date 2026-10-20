@@ -19,6 +19,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 | Path | What it is | Edit by hand? |
 | --- | --- | --- |
 | `apps/landing/` | **Source of the home page** (React + Tailwind + GSAP + Lenis, Three.js lazy). `src/sections/` one file per section, `src/content/` copy, links and fictional sample data, `src/ui/` product mockups, `src/motion/` all animation | Yes |
+| `packages/tokens/tokens.json` | **Single source of the BYE design tokens** (colors, type, radii, shadows, tilts, motion) for the website, web app, Windows and Mac apps. Run `pnpm build:tokens` after editing; `pnpm build` and `tests/tokens.test.ts` fail if `generated/` is stale | Yes (then rebuild) |
+| `packages/tokens/generated/` | **Generated** `tokens.css`, Tailwind `theme.css` (imported by `apps/landing`) and `BYETokens.swift` (copied into the Mac app) | **No** |
+| `packages/core/` | Shared domain logic and types; `vectors/` holds JSON test cases every app must pass | Yes |
+| `packages/ui/` | Shared React screens (professor card, report, sections, chooser, motion) used by `apps/web` and vendored by the Windows app | Yes |
 | `public/index.html`, `public/site/` | **Generated** prerendered home page and its hashed assets. Rebuild with `pnpm build:landing` | **No** |
 | `public/404.html` | Not-found page; standalone with its own inline CSS | Yes |
 | `archive/landing-ivory/` | Backup of the previous hand-written landing page (2026-10-17). Not deployed | Only to restore it |
@@ -64,7 +68,14 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - **Colors (light mode only):**
   - Surfaces: ivory `--paper` page, linen `--paper-2` panels, stone `--tile` cards.
   - Text and buttons: Jet Black `--ink`; warm grey `--ink-2` for paragraphs.
-  - **Yellow `--highlight` only** for the wordmark swipe, the one highlighted phrase in a headline, rating bars and progress meters. Never use yellow for anything else, and no blue.
+  - **Yellow `--highlight` only** for the wordmark swipe, the one highlighted phrase in a headline, rating bars and progress meters, plus the playful accents below. Never use yellow for anything else, and no blue.
+  - Values come from `packages/tokens/tokens.json`; don't hard-code new colors, radii, shadows or durations.
+- **Playful accents (approved 2026-10-19, for the desktop apps and shared screens):**
+  - Yellow may also mark small celebratory moments: confetti, avatar initials, and the primary button's offset shadow. Never large surfaces, body text or backgrounds.
+  - Ink sticker style: 1.5px ink outline with a hard 2–4px ink offset shadow (`--bye-shadow-sticker`), for stickers, the selected row, the section card, the command menu and the search box.
+  - Small tilts (±3–4°) on short stickers and the ID card only. Review notes and other body text sit straight, because tilted or moving text renders soft on Windows.
+  - Springy motion uses `--bye-ease-spring` for small things without body text: sliding thumbs, bubble pops, re-ordering and confetti. Selection highlights (sidebar class, open professor) glide over 0.28s with `--bye-ease-expo` and no overshoot, which the owner found calmer. Text blocks fade in rather than slide. Switching professors updates the page in place: numbers glide from the old value and bars glide to the new width, with no remount or flash. Everything still turns off for reduced motion.
+  - Playful copy stays sentence case, with no emoji and no promised outcomes.
 - **Fonts:** Libre Baskerville (600/700) for headings and big numbers; Schibsted Grotesk for text; JetBrains Mono for course codes such as `MATH 5A`. Fonts are self-hosted, so don't add Google Fonts or any other third-party request.
 - **Buttons:** pills; the primary button is black and turns yellow on hover. Tap targets must be **at least 44px** tall.
 - **Writing:**
@@ -125,6 +136,32 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-20 Mac extras in the shared professor page (branch `claude/report-parity`, uncommitted):** The Windows app's own professor page moved into `packages/ui`, so Windows now uses the shared `Report`, `ProfessorRow` and `EmptyDetail`.
+  - `Report` takes optional Mac extras: `reviewFilter="select"` (course menu with RMP counts), `findMore` ("Find more for this class"), `checking`, `writeReview`, a `summary` slot (AI note), `reviewPage` and `initial`/`onChange` (saved choices per professor). `back` is now optional. The web passes none of them and keeps its chips, 4 + 6 paging and the BYE reviews block.
+  - For every surface: the heading uses the RMP profile name with "Listed at PCC as …" when it differs; the page opens on all courses when no review mentions this class (with a note saying so); reviews show "Rating 4.0/5 · Difficulty 2.0/5" and decoded text; the "more" button reads "View more reviews". Outside the demo, each review links to "Original on RMP ↗" and the page notes that reviews are excerpts. The page no longer remounts when the student switches professors; its three scores count up again for each professor (`Num` `restartKey`).
+  - `SectionCard` notes "Some meetings not announced", hides the campus for fully online sections and says "1 unit". `EmptyDetail` takes `sections` for a section count and format/term facts; in the demo the counts say "· sample" like the others.
+  - Every "Sample" label is unchanged. Checks: typecheck, `pnpm test` 84/84, build, `test:browser` 6/6, `test:app:browser` 4/4.
+
+- **2026-10-19 v3 polish from Windows testing (uncommitted):** `packages/ui` text entrances fade instead of sliding, review cards no longer tilt, and `useCountUp` glides from the number on screen instead of restarting at zero. Owner testing on Windows found moving or tilted text blurry. This also applies to `/demo/`. Checks: typecheck, `pnpm test` 84/84, build, `test:browser` 6/6.
+
+- **2026-10-19 app redesign Phase 3, website side (branch `redesign/shared-foundations`, uncommitted):** The Windows app (app repository branch `redesign/windows-app-v3`) now vendors `packages/{tokens,core,ui}` and the Schibsted Grotesk and JetBrains Mono fonts through the app repo's `scripts/sync-bye-shared.mjs`.
+  - Website changes for it: `ProfessorList` takes an optional `renderRow`, so Windows can draw Mac-style rows inside the shared list. `useFlip` and the list's ↑ ↓ handler use `Array.from` so they compile with the Windows TypeScript settings.
+  - New `public/windows/latest.json` (version `0.4.0-beta.1`, link to `/#download`). The Windows app reads it only when a student presses Check for updates. It's cached for 5 minutes in `_headers`, and `verify:static` checks it. When a Windows build ships, raise `version` there. `public/updates/` is untouched.
+  - After committing, re-run the sync in the app repository so its `vendor/bye-shared/SOURCE.json` names the commit.
+
+- **2026-10-19 app redesign Phase 2, v3 look for the shared screens (same branch, not committed or deployed):** `/demo/` and the paused `/app/` now use the approved playful v3 look on the results and professor screens. The search screen is unchanged.
+  - New shared pieces in `packages/ui`: "I'm free" day bubbles that filter instantly, an online toggle and a sliding segmented sort at the top of the professor list. Rows have initials avatars, and an ink "sticker" highlight slides to the open professor. Rows glide into place when sorted or filtered, and ↑ ↓ moves between professors (opening them on desktop). Skeleton rows show with playful loading copy.
+  - The detail pane starts on "Pick a professor." with a hand-drawn arrow and counts. It still never opens anyone automatically.
+  - Professor page: yellow-initial avatar (playful accent), sticker-style section cards, and reviews as slightly tilted notes that glide when the sort changes.
+  - Styles live in `packages/ui/styles.css` (tokens only); the old professor-card rules were removed from `apps/web/src/styles.css`. Every "Sample" label is kept; all controls are 44px or more; motion is off for reduced motion.
+  - `scripts/browser-acceptance.ts` now waits for the "Pick a professor." heading instead of "Compare professors".
+
+- **2026-10-19 app redesign Phase 1, shared foundations (branch `redesign/shared-foundations`, not committed or deployed):** The owner approved a playful, search-first redesign of the Mac and Windows apps (mockup v3; plan in `docs/APP_REDESIGN_PLAN.md`). The Windows app will reuse the web app's React screens; the Mac stays SwiftUI. This phase changes no visuals:
+  - `packages/tokens/`: one token source; the landing `@theme` and the web app's `:root` now read the generated files. The landing build output was byte-identical before and after.
+  - `packages/core/`: added the display helpers the Windows renderer uses (`fits`, `filterSections`, `formatLabel`, `dateLabel`, `displayTitle`, `visibleText`, `preferredFilter`, `filterFinished`, `reviewURL` …); `orderReviews` now matches the Mac (`Ordering.reviews`), including RMP date strings. Types are a superset of Electron's. `vectors/` holds shared test cases; the Electron `src/shared` passes them too. `professors()`/`sectionDetails()` are unchanged (server-facing; aligning them is Phase 5).
+  - `packages/ui/`: `ProfessorCard`, `Report`, `SectionCard`, `Chooser`, `Bar`, `Num`, `Wordmark` and `motion.ts` moved out of `apps/web/src/main.tsx` unchanged. Demo mode comes from `SurfaceProvider`; the class-days rule and the BYE reviews block are passed in. Their CSS still lives in `apps/web/src/styles.css` until Phase 2.
+  - `scripts/verify-static.mjs` now ignores CRLF line endings in `public/_headers` (it failed on Windows checkouts).
 
 - **2026-10-19 downloads paused + Kit signup (not deployed):** The owner paused new Mac downloads until the app API is finished and the app is redesigned.
   - `DOWNLOADS_OPEN = false` in `content/site.ts`: hero, nav and footer keep their Install/Download links to `#download`; the Mac card's button is a disabled "Available soon" with a note linking to the signup, and the hero/closing copy says the Mac app is coming soon. A first draft replaced the cards with a big signup section; the owner preferred this.
