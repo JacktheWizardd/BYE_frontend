@@ -15,7 +15,7 @@ October 16, 2026. This is a locally verified implementation, **not a released li
 | Generated live bundle excludes fictional instructor data | Passed |
 | noindex and protected distribution-route checks | Passed |
 | Download/update files, redirect, landing HTML, backup Worker | Unchanged from repository baseline |
-| Local public PCC Winter 2027 probe | Passed; see DATA_ACCESS.md |
+| Local public PCC Winter 2027 probe | Passed; see [Data access](DATA_ACCESS.md) |
 | Live release gate | Correctly blocked |
 | Deployed Cloudflare source verification and free-tier capacity | Not performed; account not authenticated |
 | Authorized live RMP retrieval | Not performed; permission not supplied |
@@ -36,4 +36,4 @@ pnpm test:browser
 pnpm verify:release  # expected to exit nonzero while release gates remain unmet
 ```
 
-Screenshots are local artifacts under ignored `test-results/`. Source-access evidence and remaining gates are in DATA_ACCESS.md and release-readiness.json. No commit, push, production activation, or paid-plan change was performed.
+Screenshots are local artifacts under ignored `test-results/`. Source-access evidence and remaining gates are in [Data access](DATA_ACCESS.md) and [release-readiness.json](../release-readiness.json). No commit, push, production activation, or paid-plan change was performed.

@@ -63,7 +63,7 @@ everyone), and guessing one student's 6-digit code (posting or reporting as them
   the per-IP limits. Rotating IPs no longer helps against one student. Trade-off: someone can briefly lock one
   student out, which is the usual cost of a guess limit. These limits still live in memory per instance.
 - **Optional Turnstile bot check** before each code email. Off until `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`
-  are set in Pages (setup in `docs/REVIEW_SUBMISSION.md`). The server confirms every token with Cloudflare, including
+  are set in Pages (setup in `docs/reviews/REVIEW_SUBMISSION.md`). The server confirms every token with Cloudflare, including
   its hostname and the `send-code` action, before counting the address. Turning it on loads a Cloudflare script on
   `/reviews/` only, an exception to the "no third-party requests" rule that is the owner's call.
 

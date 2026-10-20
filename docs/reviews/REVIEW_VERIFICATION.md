@@ -60,7 +60,7 @@ local implementation checks. See [setup and test procedure](REVIEW_SUBMISSION.md
 ## Full-app integration follow-up
 
 The integrated reading, prefilling and reporting implementation is locally verified;
-see [full-app preview evidence](LIVE_APP_PREVIEW.md). A later public read found no
+see [full-app preview evidence](../web-app/LIVE_APP_PREVIEW.md). A later public read found no
 visible review for the earlier test professor. This alone does not prove deletion
 because RLS hides moderated rows; administrator cleanup confirmation is pending.
 
