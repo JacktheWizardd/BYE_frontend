@@ -241,5 +241,5 @@ feed, download assets, database schema, or intentional `submit_review` access.
 
 The form can now be opened from `/app/` with verified professor/course prefilling.
 Professor pages read BYE ratings/reviews independently of RMP and offer owner-only
-reporting. See [full-app owner preview](LIVE_APP_PREVIEW.md) for new API routes,
+reporting. See [full-app owner preview](../web-app/LIVE_APP_PREVIEW.md) for new API routes,
 source separation, identity limitations, tests and deployment preparation.

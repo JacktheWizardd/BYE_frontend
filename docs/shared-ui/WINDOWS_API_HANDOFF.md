@@ -15,4 +15,4 @@ During implementation this checkout advanced externally to `20519cc`, which incl
 **Description:**
 Document shared BYE-first review presentation and separate web/Windows freshness policies. Add source-deadline and deduplicated/unknown seat-total regression tests. Preserve browser transport, sample disclosures, noindex and release gates. Typecheck, 87 tests, build/static, six browser scenarios, four combined app scenarios and local runtime acceptance pass. Shared source is already present in externally created commit 20519cc; review only remaining local changes. No commit, push, deployment or release by Codex.
 
-Full Windows behavior, configuration, limitations and desktop commit text are in the sibling repository's `docs/WINDOWS_API_INTEGRATION.md`.
+Full Windows behavior, configuration, limitations and desktop commit text are in the sibling repository's `docs/windows/WINDOWS_API_INTEGRATION.md`.

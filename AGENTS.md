@@ -6,7 +6,7 @@ Read this before changing anything in this repository. It is written for any AI 
 
 The public website for **BYE (Before You Enroll)**, a free tool that helps Pasadena City College (PCC) students compare class sections, professor ratings and student reviews before they enroll.
 
-- Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, currently serving `public/`; the prepared web-beta build and Pages Functions configuration require owner rollout (see `docs/WEB_BETA.md`).
+- Live at **https://bye-before-you-enroll.pages.dev**. Cloudflare Pages deploys every push to `main`, currently serving `public/`; the prepared web-beta build and Pages Functions configuration require owner rollout (see `docs/web-app/WEB_BETA.md`).
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get three ways to use BYE:
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
@@ -102,8 +102,8 @@ pnpm test:browser
 The canonical source is `apps/web/` here; read its `AGENTS.md` before editing.
 The build generates `public/demo/` (fictional), `public/app/` (gated live API), and `public/reviews/` (owner-only review form).
 Do not import from the desktop checkout or hand-edit either generated folder.
-Live rollout is gated by `docs/DATA_ACCESS.md`, `docs/release-readiness.json`, and
-`docs/WEB_BETA.md`. Keep live/RMP flags disabled until their gates pass.
+Live rollout is gated by `docs/operations/DATA_ACCESS.md`, `docs/release-readiness.json`, and
+`docs/web-app/WEB_BETA.md`. Keep live/RMP flags disabled until their gates pass.
 
 **Build or preview the home page:**
 ```sh
@@ -137,7 +137,10 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
-- **2026-10-20 Windows API support in shared screens:** Added the read-only `ByeReviewPanel`, optional independent BYE review state, source expiry metadata, and a shared seat-total freshness helper. Shared reports place BYE feedback before RMP scores/reviews. Web source freshness remains five minutes; Windows API sections supply a fifteen-minute deadline. API delivery formats can remain explicitly unknown, and official multi-letter course suffixes are preserved. The browser Bridge, sample-data restrictions and rollout flags are unchanged. Windows integration/configuration/verification are recorded in the sibling app repository's `docs/WINDOWS_API_INTEGRATION.md`; website handoff in `docs/WINDOWS_API_HANDOFF.md`. No deployment by Codex.
+- **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
+
+
+- **2026-10-20 Windows API support in shared screens:** Added the read-only `ByeReviewPanel`, optional independent BYE review state, source expiry metadata, and a shared seat-total freshness helper. Shared reports place BYE feedback before RMP scores/reviews. Web source freshness remains five minutes; Windows API sections supply a fifteen-minute deadline. API delivery formats can remain explicitly unknown, and official multi-letter course suffixes are preserved. The browser Bridge, sample-data restrictions and rollout flags are unchanged. Windows integration/configuration/verification are recorded in the sibling app repository's `docs/windows/WINDOWS_API_INTEGRATION.md`; website handoff in `docs/shared-ui/WINDOWS_API_HANDOFF.md`. No deployment by Codex.
 
 
 - **2026-10-20 home page fixes from the Oct 19 bug list (branch `redesign/shared-foundations`, uncommitted):**
@@ -167,7 +170,7 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
   - Styles live in `packages/ui/styles.css` (tokens only); the old professor-card rules were removed from `apps/web/src/styles.css`. Every "Sample" label is kept; all controls are 44px or more; motion is off for reduced motion.
   - `scripts/browser-acceptance.ts` now waits for the "Pick a professor." heading instead of "Compare professors".
 
-- **2026-10-19 app redesign Phase 1, shared foundations (branch `redesign/shared-foundations`, not committed or deployed):** The owner approved a playful, search-first redesign of the Mac and Windows apps (mockup v3; plan in `docs/APP_REDESIGN_PLAN.md`). The Windows app will reuse the web app's React screens; the Mac stays SwiftUI. This phase changes no visuals:
+- **2026-10-19 app redesign Phase 1, shared foundations (branch `redesign/shared-foundations`, not committed or deployed):** The owner approved a playful, search-first redesign of the Mac and Windows apps (mockup v3; plan in `docs/web-app/APP_REDESIGN_PLAN.md`). The Windows app will reuse the web app's React screens; the Mac stays SwiftUI. This phase changes no visuals:
   - `packages/tokens/`: one token source; the landing `@theme` and the web app's `:root` now read the generated files. The landing build output was byte-identical before and after.
   - `packages/core/`: added the display helpers the Windows renderer uses (`fits`, `filterSections`, `formatLabel`, `dateLabel`, `displayTitle`, `visibleText`, `preferredFilter`, `filterFinished`, `reviewURL` …); `orderReviews` now matches the Mac (`Ordering.reviews`), including RMP date strings. Types are a superset of Electron's. `vectors/` holds shared test cases; the Electron `src/shared` passes them too. `professors()`/`sectionDetails()` are unchanged (server-facing; aligning them is Phase 5).
   - `packages/ui/`: `ProfessorCard`, `Report`, `SectionCard`, `Chooser`, `Bar`, `Num`, `Wordmark` and `motion.ts` moved out of `apps/web/src/main.tsx` unchanged. Demo mode comes from `SurfaceProvider`; the class-days rule and the BYE reviews block are passed in. Their CSS still lives in `apps/web/src/styles.css` until Phase 2.
@@ -180,7 +183,7 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
   - Signup is a plain form post to Kit (`KIT_FORM_ID` at the `NEWSLETTER LINK` marker). No Kit script or cookies; the CSP `form-action` allows `https://app.kit.com`. Connected to the Kit form "BYE website signup" (ID `10068136`). Kit should redirect to `https://bye-before-you-enroll.pages.dev/?subscribed=1#updates`, where the strip shows "Check your inbox to confirm your email." `verify:static` checks the form action and CSP.
   - **To reopen downloads:** ship the release, set `DOWNLOADS_OPEN = true`, restore the DMG line in `_redirects`, switch the two `/download` checks in `scripts/verify-static.mjs` back, rebuild, and email the Kit list.
 
-- **2026-10-18 security fixes (not deployed):** From a security review of the review sign-in; full report and owner checklist in `docs/SECURITY_REVIEW.md`.
+- **2026-10-18 security fixes (not deployed):** From a security review of the review sign-in; full report and owner checklist in `docs/operations/SECURITY_REVIEW.md`.
   - **Plus aliases blocked:** sign-in rejects `name+tag@go.pasadena.edu`, which Google Workspace delivers to `name@` and would let one inbox act as many students (`server/reviews.ts`). The matching database change is `supabase/006_pcc_student_no_plus_alias.sql` in the app repo; the owner runs it in the Supabase SQL Editor.
   - **Per-email limits:** 4 code requests per 30 minutes and 10 code checks per 15 minutes for each address, on top of the per-IP limits, so rotating IPs can't flood one inbox or keep guessing one code. These limits are in memory per Cloudflare instance, so they slow attacks rather than stop them.
   - **Optional Turnstile bot check:** set `TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` in Pages to require it before a code is emailed. It loads a Cloudflare script on `/reviews/` only. With no keys set, the page makes no third-party request.
@@ -200,14 +203,14 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 - **2026-10-17 web app paused (supersedes the go-live entry below):** "Use on the web" links back to the sample-data `/demo/` ("Sample data for now"); the live `/app/` is unlinked and disabled. The landing page links `/reviews/` (open to `@go.pasadena.edu` students; it needs a verified Resend domain and Supabase Pages variables before sign-in works). All PCC/RMP flags are off. Test only with repo fixtures.
 
-- **2026-10-16 go-live prepared (not deployed):** Landing links now point to the live app `/app/` and the review form `/reviews/`; fictional `/demo/` stays built but unlinked. Production/preview config enables the live app, RMP (owner decision without RMP permission, 24h cache) and student review sign-in (`REVIEW_ACCESS=students`). See the owner decision in `docs/DATA_ACCESS.md`. Before pushing: verified Resend sending domain, Supabase variables in Pages, source Worker deploys, and hosted preview checks.
+- **2026-10-16 go-live prepared (not deployed):** Landing links now point to the live app `/app/` and the review form `/reviews/`; fictional `/demo/` stays built but unlinked. Production/preview config enables the live app, RMP (owner decision without RMP permission, 24h cache) and student review sign-in (`REVIEW_ACCESS=students`). See the owner decision in `docs/operations/DATA_ACCESS.md`. Before pushing: verified Resend sending domain, Supabase variables in Pages, source Worker deploys, and hosted preview checks.
 
-- **2026-10-16 review submission:** Dedicated `/reviews/` source, same-origin Pages API, short-lived HttpOnly sessions, Supabase RPC submission, and owner-only preview tooling are implemented locally. Defaults remain disabled. Real email delivery, live submission/cleanup, and deployment are pending. See `docs/REVIEW_SUBMISSION.md` and `docs/REVIEW_VERIFICATION.md`. Never commit `.dev.vars`, tester addresses, keys, codes, or review content.
+- **2026-10-16 review submission:** Dedicated `/reviews/` source, same-origin Pages API, short-lived HttpOnly sessions, Supabase RPC submission, and owner-only preview tooling are implemented locally. Defaults remain disabled. Real email delivery, live submission/cleanup, and deployment are pending. See `docs/reviews/REVIEW_SUBMISSION.md` and `docs/reviews/REVIEW_VERIFICATION.md`. Never commit `.dev.vars`, tester addresses, keys, codes, or review content.
 
 - **2026-10-16:** Browser source moved into this repository; dual demo/live builds,
   typed Pages API and a separate Durable Object source Worker are prepared.
   Live release stays disabled pending authorized RMP access and deployed staging.
-  The landing page still links to sample data. See `docs/WEB_BETA.md` for verification.
+  The landing page still links to sample data. See `docs/web-app/WEB_BETA.md` for verification.
 
 - **2026-10-15:**
   - Landing page redesigned mobile first.
@@ -226,14 +229,14 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 Live PCC/BYE browsing, separate BYE/RMP review sections, validated submission
 prefilling, and owner-only BYE reporting are implemented locally. All six review
 sorts match the Mac feature set. Summaries and statistical comparisons remain
-disabled. See `docs/LIVE_APP_PREVIEW.md` from the website root. Production/demo
+disabled. See `docs/web-app/LIVE_APP_PREVIEW.md` from the website root. Production/demo
 navigation and default flags remain unchanged; hosted acceptance is pending.
 
 
 Owner preview deployed on October 16: https://full-app-owner-test.bye-before-you-enroll.pages.dev/reviews/ . BYE review routes
 are enabled for the owner; PCC/RMP remain disabled. Hosted routing and phone/desktop
 browser checks passed. Production settings and files were verified unchanged.
-Hosted real owner login/source activation remain pending; see docs/LIVE_APP_PREVIEW.md
+Hosted real owner login/source activation remain pending; see docs/web-app/LIVE_APP_PREVIEW.md
 from the website root.
 
 

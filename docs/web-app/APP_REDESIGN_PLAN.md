@@ -1,6 +1,6 @@
 # Plan: BYE app redesign (Mac and Windows): playful, search-first, one design everywhere
 
-Status (2026-10-19): **approved. Phases 1–2 are committed on the website branch `redesign/shared-foundations` (not deployed). Phase 3 (Windows) is done locally on the app repository branch `redesign/windows-app-v3`, with small website changes on the website branch; not committed.** Phases 4–6 not started. The approved interactive mockup is `docs/design/app-mockup-v3.html` in the app repository, and `docs/UI_PARITY.md` there maps every screen across web, Windows and Mac.
+Status (2026-10-19): **approved. Phases 1–2 are committed on the website branch `redesign/shared-foundations` (not deployed). Phase 3 (Windows) is done locally on the app repository branch `redesign/windows-app-v3`, with small website changes on the website branch; not committed.** Phases 4–6 not started. The approved interactive mockup is `docs/design/app-mockup-v3.html` in the app repository, and `docs/windows/UI_PARITY.md` there maps every screen across web, Windows and Mac.
 
 ## Context
 
@@ -20,7 +20,7 @@ We iterated on three inline mockups:
 - v2 used a static app shell
 - **v3 was approved**, built on the references Raycast, Arc, Linear and Things 3
 
-This plan supersedes `BYE_website/docs/APP_REDESIGN_PLAN.md` (2026-10-17).
+This plan supersedes `BYE_website/docs/web-app/APP_REDESIGN_PLAN.md` (2026-10-17).
 
 ## Decisions (owner, 2026-10-19)
 1. **Approved direction: mockup v3.** Search-first like Raycast, a ⌘K menu and keyboard lists like Linear, a sidebar with an inset panel and a personality-filled first run like Arc, and springy details like Things 3. The copy is playful and student-flavored.
@@ -100,7 +100,7 @@ Add these to `tokens.json` and to the Design rules in both repos' AGENTS.md:
 | Data | BYE API (Phase 5) | `LiveBridge` | Bridge → API | API client behind `AppModel` |
 
 - `BYE_Before_You_Enroll/scripts/sync-bye-shared.mjs` copies `../BYE_website/packages/{tokens,core,ui}` into `vendor/bye-shared/`. It stamps `SOURCE.json` with the website commit and regenerates `Sources/Classwise/Views/Tokens.swift`. One command updates both apps, with no submodules.
-- `docs/UI_PARITY.md` (app repo) maps each shared component and app screen to its SwiftUI view. Every UI handoff names the Mac counterpart.
+- `docs/windows/UI_PARITY.md` (app repo) maps each shared component and app screen to its SwiftUI view. Every UI handoff names the Mac counterpart.
 - The approved mockup is saved as a reference file in `BYE_Before_You_Enroll/docs/design/app-mockup-v3.html`.
 
 ## Phases
@@ -173,7 +173,7 @@ Add these to `tokens.json` and to the Design rules in both repos' AGENTS.md:
   - Read the AGENTS.md files.
   - `git fetch` both repos and compare with `origin/main`. Pull only with the owner's OK.
   - Claim files on `scripts/agents.py` as `claude`. **Python is not installed on this Windows PC**, so install it or run the board elsewhere.
-- Update the website AGENTS.md (Current state, Design rules with playful accents) and replace `docs/APP_REDESIGN_PLAN.md` with this plan. Add a pointer in the app repo's `docs/PROJECT_STATUS.md`.
+- Update the website AGENTS.md (Current state, Design rules with playful accents) and replace `docs/web-app/APP_REDESIGN_PLAN.md` with this plan. Add a pointer in the app repo's `docs/project/PROJECT_STATUS.md`.
 - Each phase ends with changed files, checks run, limitations, and a GitHub Desktop Summary/Description per repo. Nothing is committed, pushed or deployed without the owner's OK.
 
 ## Verification (end to end)

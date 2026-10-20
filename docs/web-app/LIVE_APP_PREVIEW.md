@@ -179,7 +179,7 @@ while PCC is disabled; the existing demo remains usable.
 
 ## Go-live preview deployment — October 16, 2026 (Claude)
 
-- Source Worker `bye-sources-preview` version `1ea68688`: `LIVE_APP_ENABLED=true`, `RMP_AUTHORIZED=true` (owner decision, see DATA_ACCESS.md), `RMP_CACHE_SECONDS=86400`.
+- Source Worker `bye-sources-preview` version `1ea68688`: `LIVE_APP_ENABLED=true`, `RMP_AUTHORIZED=true` (owner decision, see [Data access](../operations/DATA_ACCESS.md)), `RMP_CACHE_SECONDS=86400`.
 - Pages branch `full-app-owner-test` deployment `7b8f86ce`: live app, `REVIEWS_ENABLED=true`, `REVIEW_ACCESS=students`.
 - Hosted `/api/v1/status` and `/api/reviews/status` report enabled; landing page shows `/app/` and `/reviews/` links.
 - A small number of real source requests were made during this check (PCC terms + one MATH 005A schedule; RMP candidates/profile for MATH 005A professors from one search). Jack then directed fixture-only testing; no further live checks. Future verification uses repo fixtures only.
