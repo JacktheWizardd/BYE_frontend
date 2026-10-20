@@ -7,7 +7,8 @@ for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.h
 assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/#download 302/m)
 // Site-wide CSP: same-origin scripts and connections only (a script here could read a student's email
 // from /api/reviews/session), and no framing. /reviews/ may add only the Turnstile host.
-const headerRules = (await readFile('public/_headers', 'utf8')).split(/\n(?=\S)/)
+// Git may check _headers out with CRLF on Windows; compare rules, not line endings.
+const headerRules = (await readFile('public/_headers', 'utf8')).replace(/\r\n/g, '\n').split(/\n(?=\S)/)
 const csp = path => headerRules.find(rule => rule.startsWith(path + '\n'))?.match(/^\s+Content-Security-Policy: (.+)$/m)?.[1] ?? ''
 for (const [path, script] of [['/*', "script-src 'self';"], ['/reviews/*', "script-src 'self' https://challenges.cloudflare.com;"]]) {
   for (const part of [script, "connect-src 'self';", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'"]) assert.ok(csp(path).includes(part), `${path} CSP must include ${part}`)

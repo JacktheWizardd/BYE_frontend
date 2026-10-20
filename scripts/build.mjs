@@ -2,6 +2,8 @@ import { build } from 'vite'
 import { readFile, writeFile, copyFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
 execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit'], { stdio: 'inherit' })
+// Generated design tokens must match packages/tokens/tokens.json (run `pnpm build:tokens` after editing it).
+execFileSync(process.execPath, ['scripts/build-tokens.mjs', '--check'], { stdio: 'inherit' })
 for (const mode of ['demo', 'live']) {
   await build({ configFile: 'apps/web/vite.config.ts', mode })
   if (mode === 'live') {

@@ -45,7 +45,7 @@ try {
         await page.getByRole('combobox', { name: 'Class', exact: true }).press('ArrowDown')
         await page.getByRole('combobox', { name: 'Class', exact: true }).press('Enter')
         await page.locator('.prof-card').filter({ hasText: 'Lena Whitcombe' }).waitFor()
-        if (width >= 760) await page.getByRole('heading', { name: 'Compare professors' }).waitFor()
+        if (width >= 760) await page.getByRole('heading', { name: 'Pick a professor.' }).waitFor()
         assert.equal(await page.locator('.report-name').count(), 0, 'No report selected automatically')
         await page.locator('.prof-card').filter({ hasText: 'Lena Whitcombe' }).click()
         await page.getByRole('heading', { name: 'Lena Whitcombe', exact: true }).waitFor()

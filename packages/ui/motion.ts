@@ -1,6 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react'
+import tokens from '../tokens/tokens.json'
 
-// Small motion helpers shared by the demo and the live app. Everything is off for reduced motion.
+// Timings and curves come from the shared design tokens, so the web, Windows and Mac apps move the same way.
+export const MOTION = {
+  slide: tokens.motion.durationMs.slide,
+  spring: `cubic-bezier(${tokens.motion.easing.spring.join(', ')})`,
+  expo: `cubic-bezier(${tokens.motion.easing.expo.join(', ')})`,
+}
+
+// Small motion helpers shared by the web app (demo and live) and the Windows app. Everything is off for reduced motion.
 export const reducedMotion = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
 // Counts a number up from zero once when it first appears (or changes), like the home page.
@@ -45,4 +53,24 @@ export function useTypedHint(examples: string[], active: boolean): string | null
     return () => clearInterval(id)
   }, [active, examples.join('|')])
   return hint
+}
+
+// Items marked `data-flip="<id>"` inside `container` glide from their old place to their new one when `order` changes
+// (re-sorting, filtering). New items fade in through CSS instead. Skipped for reduced motion.
+export function useFlip(container: RefObject<HTMLElement | null>, order: string) {
+  const last = useRef(new Map<string, number>())
+  useLayoutEffect(() => {
+    const el = container.current
+    if (!el) return
+    const items = [...el.querySelectorAll<HTMLElement>('[data-flip]')]
+    const next = new Map(items.map(item => [item.dataset.flip!, item.offsetTop]))
+    if (!reducedMotion() && last.current.size) {
+      for (const item of items) {
+        const before = last.current.get(item.dataset.flip!)
+        const dy = before === undefined ? 0 : before - next.get(item.dataset.flip!)!
+        if (dy && typeof item.animate === 'function') item.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: MOTION.slide, easing: MOTION.spring })
+      }
+    }
+    last.current = next
+  }, [order])
 }

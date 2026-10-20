@@ -1,17 +1,20 @@
 /* BYE web app. Mobile first: base styles are for phones; 760px and up adds the desktop sidebar layout.
-   Tokens come from the BYE design system (light only). */
+   Tokens come from the shared BYE design tokens (packages/tokens/tokens.json, light only);
+   the names below are this app's aliases for them. */
+@import '../../../packages/tokens/generated/tokens.css';
 @font-face { font-family: 'Libre Baskerville'; src: url('./fonts/LibreBaskerville-SemiBold.ttf') format('truetype'); font-weight: 600; font-display: swap; }
 @font-face { font-family: 'Libre Baskerville'; src: url('./fonts/LibreBaskerville-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 
 :root {
-  --paper: #faf8f3; --paper-2: #f2eee6; --card: #ffffff; --tile: #eae5db; --tile-line: #ddd6c9;
-  --ink: #161618; --ink-2: #6b665e; --line: #e2dcd0; --line-strong: #8c857a;
-  --brand: #161618; --brand-ink: #faf8f3; --brand-soft: #efe9dd;
-  --highlight: #f2c14e; --highlight-ink: #161618; --signal: #b8401a;
-  --display: 'Libre Baskerville', Baskerville, Georgia, serif;
+  --paper: var(--bye-paper); --paper-2: var(--bye-linen); --card: var(--bye-card); --tile: var(--bye-tile); --tile-line: var(--bye-tile-line);
+  /* This app's secondary text has always been the fine-print grey (--bye-ink-3). */
+  --ink: var(--bye-ink); --ink-2: var(--bye-ink-3); --line: var(--bye-line); --line-strong: var(--bye-line-strong);
+  --brand: var(--bye-ink); --brand-ink: var(--bye-paper); --brand-soft: var(--bye-brand-soft);
+  --highlight: var(--bye-accent); --highlight-ink: var(--bye-ink); --signal: var(--bye-signal);
+  --display: var(--bye-font-display);
   --sans: 'Schibsted Grotesk', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
-  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px; --radius-xl: 24px; --radius-pill: 999px;
+  --mono: var(--bye-font-mono);
+  --radius-sm: var(--bye-radius-sm); --radius-md: var(--bye-radius-md); --radius-lg: var(--bye-radius-lg); --radius-xl: 24px; --radius-pill: var(--bye-radius-pill);
   --shadow-card: 0 1px 0 rgba(22, 22, 24, 0.06), 0 8px 24px -16px rgba(22, 22, 24, 0.3);
   --shadow-pop: 0 12px 32px -12px rgba(22, 22, 24, 0.3);
   --gutter: 20px;
@@ -123,16 +126,6 @@ button.chip { min-height: 40px; padding: 0 12px; background: var(--card); border
 .progress { display: flex; align-items: center; gap: 10px; padding: 0 var(--safe-right) 10px var(--safe-left); font-size: 13px; color: var(--ink-2); }
 .list-pane { padding: 16px var(--safe-right) calc(32px + var(--safe-bottom)) var(--safe-left); display: flex; flex-direction: column; gap: 12px; }
 .list-title { font-size: 24px; line-height: 28px; letter-spacing: -0.3px; }
-.card-list { display: flex; flex-direction: column; gap: 12px; }
-.prof-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; align-items: center; width: 100%; padding: 14px 16px; text-align: left; background: var(--tile); border: 1.5px solid var(--tile-line); border-radius: var(--radius-md); cursor: pointer; transition: border-color 150ms; }
-.prof-card:hover { border-color: var(--line-strong); }
-.prof-card.selected { background: var(--card); border-color: var(--ink); box-shadow: var(--shadow-card); }
-.prof-card.dashed { background: none; border-style: dashed; border-color: var(--line-strong); }
-.prof-card .name { font: 600 18px/24px var(--display); letter-spacing: -0.2px; }
-.prof-card .big { grid-row: 1 / span 2; grid-column: 2; font: 600 30px/1 var(--display); letter-spacing: -0.5px; }
-.prof-card .side-action { grid-row: 1 / span 2; grid-column: 2; font-weight: 600; font-size: 15px; }
-.prof-card small { grid-column: 1; font-size: 13px; line-height: 19px; color: var(--ink-2); }
-.prof-card .bar { grid-column: 1 / -1; margin-top: 8px; }
 .other-note { padding-top: 4px; }
 .results.on-list .report-pane, .results.on-report .list-pane, .results.on-report .results-bar { display: none; }
 
@@ -192,7 +185,6 @@ button.chip { min-height: 40px; padding: 0 12px; background: var(--card); border
   .results.on-list .report-pane, .results.on-report .list-pane { display: block; }
   .results.on-report .results-bar { display: block; }
   .list-pane { position: sticky; top: 61px; max-height: calc(100dvh - 61px); overflow-y: auto; background: var(--paper-2); border-right: 1px solid var(--line); padding: 24px; }
-  .list-pane .prof-card:not(.selected):not(.dashed) { background: var(--tile); }
   .chip-row { margin-right: 0; padding-right: 0; flex-wrap: wrap; }
   .report-bar { display: none; }
   .report { max-width: 850px; margin: 0 auto; }
@@ -236,7 +228,7 @@ button.chip, .pill, .text-link { min-height: 44px; }
    Home page look (2026-10-17). Same tokens, type scale, buttons and motion as apps/landing.
    Later rules intentionally override the earlier ones above.
    --------------------------------------------------------------------------- */
-:root { --radius-card: 18px; --shadow-float: 0 1px 0 rgba(22, 22, 24, 0.05), 0 24px 48px -28px rgba(22, 22, 24, 0.38); --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); }
+:root { --radius-card: var(--bye-radius-card); --shadow-float: var(--bye-shadow-float); --ease-out-expo: var(--bye-ease-expo); }
 ::selection { background: var(--highlight); color: var(--ink); }
 h1, h2, h3 { font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
 
@@ -294,8 +286,6 @@ button.chip { border-radius: var(--radius-pill); }
 
 /* Results and report. */
 .list-title, .report-name { letter-spacing: -0.03em; }
-.prof-card { border-radius: 16px; }
-.prof-card.selected { box-shadow: var(--shadow-float); }
 .section-card, .review-card, .stat, .callout, .candidate { border-radius: var(--radius-card); }
 .report-body > div:first-child { display: flex; flex-direction: column; gap: 8px; }
 .title-line .sample-tag { flex: none; }
@@ -329,3 +319,11 @@ button.chip { border-radius: var(--radius-pill); }
   .topbar, .results-bar, .report-bar { top: 0; }
   .report-bar .sample-tag { margin-left: auto; }
 }
+
+/* v3 results (2026-10-19): class-day bubbles and the online toggle sit at the top of the professor list. */
+.results-filters { display: flex; flex-direction: column; gap: 10px; }
+.results-filters .day-bubbles { flex-direction: column; align-items: stretch; gap: 8px; }
+.results-filters .day-bubbles-row { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.results-filters .online-toggle { align-self: flex-start; }
+.list-pane .prof-list { margin: 0 -12px; }
+@media (min-width: 1100px) { .panes { grid-template-columns: 380px minmax(0, 1fr); } }
