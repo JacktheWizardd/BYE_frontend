@@ -1,6 +1,6 @@
 # Plan: BYE app redesign (Mac and Windows): playful, search-first, one design everywhere
 
-Status (2026-10-19): **approved. Phases 1 (foundations) and 2 (v3 look for the shared screens) are done locally on branch `redesign/shared-foundations`, not committed or deployed.** Phases 3–6 not started. The approved interactive mockup (v3) will be saved in the app repository as `docs/design/app-mockup-v3.html`.
+Status (2026-10-19): **approved. Phases 1–2 are committed on the website branch `redesign/shared-foundations` (not deployed). Phase 3 (Windows) is done locally on the app repository branch `redesign/windows-app-v3`, with small website changes on the website branch; not committed.** Phases 4–6 not started. The approved interactive mockup is `docs/design/app-mockup-v3.html` in the app repository, and `docs/UI_PARITY.md` there maps every screen across web, Windows and Mac.
 
 ## Context
 

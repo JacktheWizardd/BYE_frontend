@@ -36,7 +36,11 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
 
 // The professor list. The open professor gets an outlined highlight that slides between rows; re-sorting and filtering
 // glide rows into place. ↑ and ↓ move between professors (and open them when `openOnArrow`, as on desktop).
-export function ProfessorList({ list, selectedId, onOpen, openOnArrow = false }: { list: Professor[]; selectedId?: string; onOpen: (p: Professor) => void; openOnArrow?: boolean }) {
+// `renderRow` lets a host draw its own row (the Windows app adds Mac-style row actions); its main button must have class `prof-card`.
+export function ProfessorList({ list, selectedId, onOpen, openOnArrow = false, renderRow }: {
+  list: Professor[]; selectedId?: string; onOpen: (p: Professor) => void; openOnArrow?: boolean
+  renderRow?: (p: Professor, selected: boolean, open: () => void) => React.ReactNode
+}) {
   const box = useRef<HTMLDivElement>(null), [mark, setMark] = useState<{ top: number; height: number } | null>(null)
   const order = list.map(p => p.id).join('|')
   useFlip(box, order)
@@ -46,7 +50,7 @@ export function ProfessorList({ list, selectedId, onOpen, openOnArrow = false }:
   }, [selectedId, order, list])
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return
-    const rows = [...(box.current?.querySelectorAll<HTMLButtonElement>('.prof-card') ?? [])], at = rows.indexOf(document.activeElement as HTMLButtonElement)
+    const rows = Array.from(box.current?.querySelectorAll<HTMLButtonElement>('.prof-card') ?? []), at = rows.indexOf(document.activeElement as HTMLButtonElement)
     if (at < 0) return
     e.preventDefault()
     const next = Math.max(0, Math.min(rows.length - 1, at + (e.key === 'ArrowDown' ? 1 : -1)))
@@ -56,7 +60,7 @@ export function ProfessorList({ list, selectedId, onOpen, openOnArrow = false }:
   return <div ref={box} className="prof-list" onKeyDown={onKeyDown}>
     <span className={`prof-mark${mark ? ' on' : ''}`} aria-hidden="true" style={mark ? { transform: `translateY(${mark.top}px)`, height: mark.height } : undefined} />
     {list.map((p, i) => <div key={p.id} data-flip={p.id} className="prof-slot" style={{ '--n': i } as React.CSSProperties}>
-      <ProfessorCard p={p} selected={p.id === selectedId} onOpen={() => onOpen(p)} />
+      {renderRow ? renderRow(p, p.id === selectedId, () => onOpen(p)) : <ProfessorCard p={p} selected={p.id === selectedId} onOpen={() => onOpen(p)} />}
     </div>)}
   </div>
 }

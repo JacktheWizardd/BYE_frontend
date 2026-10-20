@@ -137,6 +137,11 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-19 app redesign Phase 3, website side (branch `redesign/shared-foundations`, uncommitted):** The Windows app (app repository branch `redesign/windows-app-v3`) now vendors `packages/{tokens,core,ui}` and the Schibsted Grotesk and JetBrains Mono fonts through the app repo's `scripts/sync-bye-shared.mjs`.
+  - Website changes for it: `ProfessorList` takes an optional `renderRow`, so Windows can draw Mac-style rows inside the shared list. `useFlip` and the list's ↑ ↓ handler use `Array.from` so they compile with the Windows TypeScript settings.
+  - New `public/windows/latest.json` (version `0.4.0-beta.1`, link to `/#download`). The Windows app reads it only when a student presses Check for updates. It's cached for 5 minutes in `_headers`, and `verify:static` checks it. When a Windows build ships, raise `version` there. `public/updates/` is untouched.
+  - After committing, re-run the sync in the app repository so its `vendor/bye-shared/SOURCE.json` names the commit.
+
 - **2026-10-19 app redesign Phase 2, v3 look for the shared screens (same branch, not committed or deployed):** `/demo/` and the paused `/app/` now use the approved playful v3 look on the results and professor screens. The search screen is unchanged.
   - New shared pieces in `packages/ui`: "I'm free" day bubbles that filter instantly, an online toggle and a sliding segmented sort at the top of the professor list. Rows have initials avatars, and an ink "sticker" highlight slides to the open professor. Rows glide into place when sorted or filtered, and ↑ ↓ moves between professors (opening them on desktop). Skeleton rows show with playful loading copy.
   - The detail pane starts on "Pick a professor." with a hand-drawn arrow and counts. It still never opens anyone automatically.

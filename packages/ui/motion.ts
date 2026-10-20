@@ -62,7 +62,7 @@ export function useFlip(container: RefObject<HTMLElement | null>, order: string)
   useLayoutEffect(() => {
     const el = container.current
     if (!el) return
-    const items = [...el.querySelectorAll<HTMLElement>('[data-flip]')]
+    const items = Array.from(el.querySelectorAll<HTMLElement>('[data-flip]'))
     const next = new Map(items.map(item => [item.dataset.flip!, item.offsetTop]))
     if (!reducedMotion() && last.current.size) {
       for (const item of items) {

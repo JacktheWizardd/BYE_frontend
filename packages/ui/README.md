@@ -10,7 +10,7 @@ React screens shared by the web app (`apps/web`, demo and live) and the Windows 
 | `SectionCard` | One PCC section with seats; stale schedules hide seats |
 | `Chooser` | Explicit RMP profile choice; BYE never guesses |
 | `DayBubbles`, `Segmented` | "I'm free" class-day toggles; sliding segmented control |
-| `ProfessorList` | Rows with a sliding highlight on the open professor, glide re-ordering, ↑ ↓ keys |
+| `ProfessorList` | Rows with a sliding highlight on the open professor, glide re-ordering, ↑ ↓ keys. Optional `renderRow` lets a host draw its own row (Windows adds Mac-style actions); its main button needs class `prof-card` |
 | `LoadingRows`, `EmptyDetail` | Skeleton rows with playful copy; "Pick a professor." with the drawn arrow (never auto-opens) |
 | `Wordmark`, `Avatar`, `Bar`, `Num` | Brand mark, initials avatar, rating bar, count-up number |
 | `useCountUp`, `useTypedHint`, `useFlip`, `reducedMotion`, `MOTION` | Motion helpers using the token timings; all off for reduced motion |

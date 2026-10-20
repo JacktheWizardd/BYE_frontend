@@ -40,3 +40,10 @@ for (const path of reviewFiles.filter(x => x.endsWith('.js'))) {
 }
 }
 console.log('Review and app browser assets contain no Supabase client, API keys or fixture tokens.')
+
+// Windows "Check for updates" reads /windows/latest.json: a version and a download link that stays on this website.
+const latest = JSON.parse(await readFile('public/windows/latest.json', 'utf8'))
+assert.match(latest.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?$/, 'Windows latest.json needs a version like 0.4.0-beta.1')
+assert.ok(latest.downloadUrl.startsWith('https://bye-before-you-enroll.pages.dev/'), 'Windows downloadUrl must stay on the BYE website')
+assert.ok(headerRules.some(rule => rule.startsWith('/windows/latest.json\n') && /max-age=300/.test(rule)), 'Windows latest.json must be cached for at most 5 minutes')
+console.log('Windows update file passed.')
