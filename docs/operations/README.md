@@ -8,8 +8,9 @@ Access gates, security boundaries and dated verification keep live-source rollou
 
 - [Data access and rollout requirements](DATA_ACCESS.md)
 - [Security review](SECURITY_REVIEW.md)
-- [Browser implementation verification](VERIFICATION.md)
-- [Existing contributor/commit handoff](COMMIT_HANDOFF.md)
+- [October 16 browser implementation verification](../history/operations/VERIFICATION.md)
+- [Historical website-source migration handoff](../history/operations/COMMIT_HANDOFF.md)
+- [Historical documentation](../history/README.md)
 - [Machine-consumed readiness record](../release-readiness.json)
 - [Web beta commands and runtime checks](../web-app/WEB_BETA.md)
 
