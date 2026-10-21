@@ -26,6 +26,7 @@ export function fits(s: Section, picked: readonly Weekday[]): boolean {
 }
 
 export function formatLabel(s: Section): string {
+  if (!s.formats.length) return 'Format not announced'
   if (fullyOnline(s)) return 'Online · async'
   if (s.formats.includes('HY')) return 'Hybrid'
   if (s.formats.length && s.formats.every(f => ['OD', 'OL', 'OS', 'ON'].includes(f))) return 'Online · live'

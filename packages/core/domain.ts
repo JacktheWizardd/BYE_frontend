@@ -99,7 +99,7 @@ export function orderReviews(reviews: Review[], by = 'recent') {
 export const fullyOnline = (s: Section) => !s.formatUnknown && s.formats.length > 0 && s.formats.every(f => f === 'OD')
 /** Short format label for tags: In person, Hybrid, Online · live or Online · async. Mirrors Section.formatLabel. */
 export function formatLabel(s: Section) {
-  if (s.formatUnknown) return 'Format not announced'
+  if (s.formatUnknown || !s.formats.length) return 'Format not announced'
   if (fullyOnline(s)) return 'Online · async'
   if (s.formats.includes('HY')) return 'Hybrid'
   if (s.formats.length && s.formats.every(f => ['OD', 'OL', 'OS', 'ON'].includes(f))) return 'Online · live'
