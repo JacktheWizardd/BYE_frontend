@@ -137,6 +137,15 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-20 one Reviews section for BYE + RMP (branch `claude/merged-reviews`, not deployed):** The shared professor page (`packages/ui/report.tsx`) now takes `bye` (host state + `load`/`write`/`actions`) instead of a `byeReviews` block.
+  - Scores: a BYE row (tag "BYE") above the RMP row (tag "RMP"); never blended.
+  - One "Reviews" section: a Both · BYE · RMP toggle (starts on Both), one course filter and one sort for both sources. In Both, all BYE reviews come first, then RMP. Every card carries a source tag. "View more reviews" loads BYE pages first. Courses only BYE has appear in the filter. `byeFilter` in `packages/core/domain.ts` maps the filter to a BYE course by code.
+  - "Find more for this class" is gone. `findMore` became `preloaded` (the Windows app loads reviews on open; filters use saved reviews).
+  - Web: `apps/web/src/bye-reviews.tsx` is now the `useByeReviews` hook (same `/api/reviews/*` calls and report flow). `/demo/` is unchanged.
+  - Seat bar: fills by seats taken (`seatLevel`): ink, yellow at 15% or fewer open ("Almost full"), red when full.
+  - Source marks sit at the bottom right of each card's score line. RMP is a plain outline tag. BYE is a collectible postage stamp (`ByeStamp`): common ink 55%, uncommon framed 25%, rare yellow 12%, epic postmarked 6%, legendary yellow in ink 2%. `stampTier` picks the tier from the review ID only, never its scores, so no review looks "featured"; `packages/core/vectors/stamp-tier.json` keeps every app in step.
+  - Windows wiring is on the app repo's `redesign/windows-app-v3`, synced from this commit.
+
 - **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
 
 

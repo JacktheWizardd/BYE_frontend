@@ -1,4 +1,4 @@
-import { ByeReviews } from './bye-reviews'
+import { useByeReviews } from './bye-reviews'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource/schibsted-grotesk/400.css'
@@ -204,6 +204,8 @@ function App() {
   const list = showOther ? [...fitting, ...otherDays] : fitting
   const p = list.find(x => x.id === selected)
   const chooser = state.professors.find(x => x.choosing)
+  // BYE student reviews follow the open professor and class; the demo has none.
+  const bye = useByeReviews(isDemo ? undefined : p?.name, course?.display)
 
   // Load every review once a report is open and the quick previews have settled, like the desktop app.
   useEffect(() => {
@@ -266,7 +268,7 @@ function App() {
             <ProfessorList list={list} selectedId={isPhone() ? undefined : p?.id} onOpen={open} openOnArrow={!isPhone()} />
             {!onlineOnly && otherDays.length > 0 && <p className="muted small other-note">{plural(otherDays.length, 'professor')} only {otherDays.length === 1 ? 'teaches' : 'teach'} on other days. <button className="text-link" onClick={() => setShowOther(v => !v)}>{showOther ? 'Hide' : 'Show'}</button></p>}
           </aside>
-          <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} byeReviews={<ByeReviews key={p.id + '|' + course.key} name={p.name} course={course.display} />} /> :
+          <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} bye={bye} /> :
             !state.loading && <EmptyDetail professors={list.length} openSeats={openSeats} sections={list.flatMap(x => x.sections.filter(s => fits(s, days)))} />}</section>
         </div>
       </div>}
