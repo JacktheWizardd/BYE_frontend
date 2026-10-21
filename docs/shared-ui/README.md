@@ -12,7 +12,7 @@ Canonical React screens, domain helpers and design tokens live in this repositor
 - [Shared domain types and helpers](../../packages/core/README.md)
 - [Design tokens](../../packages/tokens/tokens.json)
 - [Windows integration handoff](WINDOWS_API_HANDOFF.md)
-- [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/windows/UI_PARITY.md)
+- [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/UI_PARITY.md)
 
 Edit canonical packages here, then use the desktop repo's existing `scripts/sync-bye-shared.mjs` workflow. Keep sample disclosures and web freshness behavior distinct from Windows API freshness.
 
