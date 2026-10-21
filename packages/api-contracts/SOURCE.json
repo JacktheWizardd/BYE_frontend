@@ -1,0 +1,11 @@
+{
+  "repository": "JacktheWizardd/BYE_Before_You_Enroll",
+  "package": "@bye/contracts",
+  "version": "1.0.0-preview.1",
+  "files": {
+    "api.ts": "894c5e6f74b8a6cc25a956090a83dd83090570b414975e37441dcc2c3e1cbe93",
+    "types.ts": "2cc3c09d0418ca20c6d3a34beee9124e02cad15eb0dcd8c8581ce37440793498",
+    "reviews.ts": "7e67cb4b14f9dc066c192f1a55896cd6f7fe3a2e52138e619aa374d73ce03643",
+    "schedule.openapi.json": "aebe1764a1998b78a3f805c7fd5efe82cb29b1957cbc5cf1dbbfefe328ac43b0"
+  }
+}

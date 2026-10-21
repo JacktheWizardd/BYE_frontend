@@ -1,0 +1,58 @@
+{
+  "desktopBaseline": "c137d3922d4a3105691d2461ebf47a02a7486245",
+  "websiteBaseline": "6f9ebb3b5fb0c81c4c8fc8ef406114e02156020e",
+  "sources": [
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/app.css",
+      "sha256": "22ed23f31a278c7d38b2b4054653f82138e58d2ab1c0ad39fba7d4905df99a04"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/command-menu.tsx",
+      "sha256": "9f88e7efbcde5931572d020726ad54944b516b96ec4a7e4a440f41eae6c47366"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/confetti.ts",
+      "sha256": "507ad2ac2a962ffa57274d45e679ab46a1d9a5709c6b1a450e9f34a671077664"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/home.tsx",
+      "sha256": "4bb4fd352ac0b2b34cfc29f6fe32254c93f6b8dd09d34b3769910ec51e6b8e16"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/onboarding.tsx",
+      "sha256": "e0daf2c947ef4808ca41153a8c7e36daa647773b7dc8dd2bea704fa44781352c"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/report.tsx",
+      "sha256": "66792bbea43ad706845646aff1373f691d787fce605d07fa06b2f5a35cb8b279"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/results.tsx",
+      "sha256": "80bb5cbfb85b0a5f37711fd7ff388fdfa8083e0387873dfff73b6daaba26ce03"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/settings-sheet.tsx",
+      "sha256": "287d1491048d178c89aab2690a96b2803286ec625a8590c914bce913c318d082"
+    },
+    {
+      "source": "BYE_Before_You_Enroll/apps/cross-platform/src/renderer/src/app/types.ts",
+      "sha256": "c1560cfb8ffcad91c659174325380cf23efe3f34c44538d8ff1d52b9c1b13fb7"
+    },
+    {
+      "source": "local BYE_website/apps/web/src/live-bridge.ts",
+      "sha256": "e0163b67d9d5b0c73cdbbffa105688b5a83275196660c0adc268c8bef2615068",
+      "status": "uncommitted source snapshot; original unchanged"
+    },
+    {
+      "source": "local BYE_website/packages/core/schedule-api.ts",
+      "sha256": "8acfcfd69b4902ff3e41059750935e88000b11b28c954be0aebd3e33aec42b04",
+      "status": "uncommitted portable API integration snapshot; original unchanged"
+    },
+    {
+      "source": "local BYE_website/tests/live-bridge.test.ts",
+      "sha256": "6701a74375e9c9fde4ac912da602db194b694094339a7c3452b44260caf5879e",
+      "status": "uncommitted source fixtures copied and redirected to extracted controller; original unchanged"
+    }
+  ],
+  "note": "Extraction into frontend-owned packages; no runtime imports from sibling repo and no modifications to original working trees."
+}

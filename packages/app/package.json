@@ -1,0 +1,20 @@
+{
+  "name": "@bye/app",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/App.tsx",
+    "./runtime": "./src/runtime.tsx",
+    "./adapters/*": "./src/adapters/*.ts",
+    "./styles.css": "./src/app/app.css"
+  },
+  "dependencies": {
+    "@bye/core": "workspace:*",
+    "@bye/tokens": "workspace:*",
+    "@bye/ui": "workspace:*",
+    "@bye/api-client": "workspace:*",
+    "react": "19.2.0",
+    "@tauri-apps/api": "2.12.4"
+  }
+}

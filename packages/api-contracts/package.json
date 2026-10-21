@@ -1,0 +1,11 @@
+{
+  "name": "@bye/contracts",
+  "version": "1.0.0-preview.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": "./src/api.ts",
+    "./types": "./src/types.ts",
+    "./reviews": "./src/reviews.ts"
+  }
+}

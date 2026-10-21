@@ -1,5 +1,9 @@
 # Shared UI
 
+The [shared application trial](SHARED_APP_TRIAL.md) adds an isolated browser/Tauri
+preview using canonical workspace packages. It records extraction provenance,
+verification and the remaining real-Mac acceptance gate.
+
 ## What we built and why
 
 Canonical React screens, domain helpers and design tokens live in this repository so browser and Windows behavior can evolve together. Windows vendors an explicit snapshot rather than importing browser code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
