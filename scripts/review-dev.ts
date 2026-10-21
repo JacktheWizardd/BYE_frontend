@@ -7,9 +7,9 @@ import { resolve, extname, sep } from 'node:path'
 const appMode=process.argv.includes('--app')
 const root=resolve('public'),out=resolve('.wrangler/review-dev')
 await readFile(root+'/reviews/index.html');await mkdir(out,{recursive:true})
-execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','pages','functions','build','functions','--compatibility-date','2025-10-11','--compatibility-flags','nodejs_compat','--outdir',out],{env:{...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG_PATH:'/private/tmp/bye-review-dev-build.log'},stdio:'pipe'})
+execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','pages','functions','build','functions','--outdir',out],{env:{...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG_PATH:'/private/tmp/bye-review-dev-build.log'},stdio:'pipe'})
 const vars:Record<string,string>={REVIEWS_ENABLED:'false',LIVE_APP_ENABLED:'false',REVIEW_LOCAL_HTTP:'true'}
-const keys=['REVIEWS_ENABLED','REVIEW_TEST_EMAIL','SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','REVIEW_LOCAL_HTTP','REVIEW_ACCESS','REVIEW_IDENTITY_SECRET','REVIEW_DATABASE_URL','BREVO_API_KEY','REVIEW_SENDER_EMAIL','TURNSTILE_SITE_KEY','TURNSTILE_SECRET_KEY']
+const keys=['REVIEWS_ENABLED','REVIEW_TEST_EMAIL','SUPABASE_URL','SUPABASE_PUBLISHABLE_KEY','REVIEW_LOCAL_HTTP']
 try {
   for(const line of (await readFile('.dev.vars','utf8')).split(/\r?\n/)) {
     const match=line.match(/^\s*([A-Z_]+)\s*=\s*(.*?)\s*$/)
@@ -21,7 +21,7 @@ vars.LIVE_APP_ENABLED=appMode?'true':'false'
 if(appMode)execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','deploy','--config','workers/source/wrangler.jsonc','--env','preview','--dry-run','--outdir',out+'/sources'],{env:{...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG_PATH:'/private/tmp/bye-app-dev-build.log'},stdio:'pipe'})
 const mf=new Miniflare({workers:[
   ...(appMode?[{name:'sources',modules:true,scriptPath:out+'/sources/index.js',compatibilityDate:'2025-10-11',durableObjects:{SOURCES:{className:'Sources',useSQLite:true}},bindings:{LIVE_APP_ENABLED:'true',RMP_AUTHORIZED:'false',RMP_CACHE_SECONDS:'0'}}]:[]),
-  {name:'pages',compatibilityFlags:['nodejs_compat'],modules:true,scriptPath:out+'/index.js',compatibilityDate:'2025-10-11',bindings:vars,...(appMode?{durableObjects:{SOURCES:{className:'Sources',scriptName:'sources',useSQLite:true}}}:{})},
+  {name:'pages',modules:true,scriptPath:out+'/index.js',compatibilityDate:'2025-10-11',bindings:vars,...(appMode?{durableObjects:{SOURCES:{className:'Sources',scriptName:'sources',useSQLite:true}}}:{})},
 ]})
 const worker=await mf.getWorker('pages')
 const server=createServer(async(req,res)=>{
@@ -31,7 +31,7 @@ const server=createServer(async(req,res)=>{
       const parts:Buffer[]=[];let length=0
       for await(const part of req) {const chunk=Buffer.from(part);length+=chunk.length;if(length>16384){res.writeHead(413);res.end('Form too large');return}parts.push(chunk)}
       const requestInit={method:req.method,headers:Object.fromEntries(Object.entries(req.headers).filter(([,v])=>typeof v==='string')) as Record<string,string>,...(['POST','PUT','PATCH'].includes(req.method??'')?{body:Buffer.concat(parts)}:{})}
-      const response=await worker.fetch(url.href,requestInit);res.writeHead(response.status,{...Object.fromEntries(response.headers),...(response.headers.has('set-cookie')?{'set-cookie':response.headers.getSetCookie()}:{})});res.end(Buffer.from(await response.arrayBuffer()));return
+      const response=await worker.fetch(url.href,requestInit);res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()));return
     }
     const file=resolve(root,'.'+decodeURIComponent(url.pathname)+(url.pathname.endsWith('/')?'index.html':''))
     if(!file.startsWith(root+sep)){res.writeHead(403);res.end();return}

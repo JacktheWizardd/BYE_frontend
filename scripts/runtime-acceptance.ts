@@ -8,7 +8,7 @@ import { demoData, demoSeats, FALL } from '../apps/web/src/demo-data'
 const out = resolve('.wrangler/test-build'); await mkdir(out, { recursive: true })
 const env = { ...process.env, WRANGLER_SEND_METRICS: 'false', WRANGLER_LOG_PATH: '/private/tmp/bye-runtime-wrangler.log' }
 execFileSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'deploy', '--config', 'workers/source/wrangler.jsonc', '--env', 'preview', '--dry-run', '--outdir', out + '/sources'], { env, stdio: 'pipe' })
-execFileSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'pages', 'functions', 'build', 'functions', '--compatibility-date', '2025-10-11', '--compatibility-flags', 'nodejs_compat', '--outdir', out + '/pages'], { env, stdio: 'pipe' })
+execFileSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'pages', 'functions', 'build', 'functions', '--outdir', out + '/pages'], { env, stdio: 'pipe' })
 let schedules = 0, rmpRequests = 0
 const rows = demoData.schedules[FALL.termCode].map(row => { const seats = demoSeats[String(row.crn)]; return { ...row, ...(seats ? { seatsAvail: seats.open, maxEnrl: seats.capacity, waitCount: seats.waitlist, waitCapacity: seats.waitCapacity } : {}) } })
 const mf = new Miniflare({
@@ -35,9 +35,9 @@ const mf = new Miniflare({
       if(url.hostname!=='prod-apiweb.pasadena.edu')throw new Error('PCC-only worker must not contact RMP')
       return Response.json(url.pathname.endsWith('getClassScheduleTerms')?demoData.terms:rows)
     } },
-    { compatibilityFlags:['nodejs_compat'], name: 'pages-pcc', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources-pcc', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true' } },
-    { compatibilityFlags:['nodejs_compat'], name: 'disabled', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'false' } },
-    { compatibilityFlags:['nodejs_compat'], name: 'pages', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true' } }
+    { name: 'pages-pcc', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources-pcc', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true' } },
+    { name: 'disabled', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'false' } },
+    { name: 'pages', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true' } }
   ]
 })
 try {

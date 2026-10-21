@@ -14,8 +14,8 @@ const server=createServer(async(req,res)=>{
     if(url.pathname.startsWith('/api/reviews/')) {
       const chunks:Buffer[]=[];for await(const chunk of req)chunks.push(Buffer.from(chunk))
       const request=new Request(url,{method:req.method,headers:Object.fromEntries(Object.entries(req.headers).filter(([,v])=>typeof v==='string')) as Record<string,string>,...(['POST','PUT','PATCH'].includes(req.method??'')?{body:Buffer.concat(chunks)}:{})})
-      const response=await handleReviewRequest(request,fixture.env,fixture.outbound,fixture.store)
-      res.writeHead(response.status,{...Object.fromEntries(response.headers),...(response.headers.has('set-cookie')?{'set-cookie':response.headers.getSetCookie()}:{})});res.end(await response.text());return
+      const response=await handleReviewRequest(request,fixture.env,fixture.outbound)
+      res.writeHead(response.status,Object.fromEntries(response.headers));res.end(await response.text());return
     }
     const file=resolve(root,'.'+decodeURIComponent(url.pathname)+(url.pathname.endsWith('/')?'index.html':''))
     if(!file.startsWith(root+sep)){res.writeHead(403);res.end();return}
@@ -34,7 +34,7 @@ try {
     try {
       for(const width of [390,1280]) {
         fixture=reviewFixture()
-        const context=await browser.newContext({reducedMotion:'reduce',viewport:{width,height:width<600?844:900},...(width<600?{isMobile:true,hasTouch:true}:{})})
+        const context=await browser.newContext({viewport:{width,height:width<600?844:900},...(width<600?{isMobile:true,hasTouch:true}:{})})
         const page=await context.newPage(),errors:string[]=[],outside:string[]=[]
         page.on('pageerror',e=>errors.push(e.message));page.on('request',r=>{if(!r.url().startsWith(origin))outside.push(r.url())})
         await page.clock.install()
@@ -44,14 +44,13 @@ try {
         await page.getByRole('alert').filter({hasText:'Use your @go.pasadena.edu'}).waitFor()
         assert.equal(fixture.state.otpRequests,0)
         await page.getByLabel('School email',{exact:true}).fill(TEST_EMAIL)
-        await page.getByRole('button',{name:'Send a code →'}).click()
+        await page.getByRole('button',{name:'Send a code'}).click()
         await page.getByLabel('Email code',{exact:true}).fill('000000')
         await page.getByRole('button',{name:'Verify code'}).click()
         await page.getByRole('alert').filter({hasText:'incorrect or has expired'}).waitFor()
         await page.getByLabel('Email code',{exact:true}).fill('123456')
         await page.getByRole('button',{name:'Verify code'}).click()
-        await page.getByText('School email verified',{exact:true}).waitFor()
-        assert.ok(!(await page.locator('body').innerText()).includes(TEST_EMAIL))
+        await page.getByText('Verified as '+TEST_EMAIL,{exact:true}).waitFor()
         assert.equal(await page.evaluate(()=>document.cookie.includes('bye-review')),false,'Auth cookie is HttpOnly')
         assert.deepEqual(await page.evaluate(()=>Object.keys(localStorage)),[])
         await page.getByRole('combobox',{name:'Course',exact:true}).fill('TEST')
@@ -72,7 +71,6 @@ try {
         await page.getByRole('button',{name:'Check your review'}).click()
         await page.getByRole('heading',{name:'Check your review.'}).waitFor()
         assert.ok((await page.locator('dl').innerText()).includes('Skipped'))
-        await page.clock.runFor(500)
         await page.screenshot({path:`test-results/reviews-${name}-${width}-confirm.png`,fullPage:true})
         // Expiration must retain the open draft and selected professor/course.
         fixture.state.authExpired=true
@@ -81,8 +79,7 @@ try {
         assert.equal(fixture.state.saves.length,0)
         fixture.state.authExpired=false
         await page.clock.fastForward(61000)
-        await page.getByLabel('School email',{exact:true}).fill(TEST_EMAIL)
-        await page.getByRole('button',{name:'Send a code →'}).click()
+        await page.getByRole('button',{name:'Send a code'}).click()
         await page.getByLabel('Email code',{exact:true}).fill('123456')
         await page.getByRole('button',{name:'Verify code'}).click()
         await page.getByRole('heading',{name:'Check your review.'}).waitFor()
@@ -96,7 +93,6 @@ try {
         assert.deepEqual(fixture.state.saves[0].p_answers,{grading:1,clarity:0})
         assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false)
         assert.deepEqual(await page.locator('button:visible,a:visible,input:visible,select:visible').evaluateAll(elements=>elements.filter(el=>el.getBoundingClientRect().height<43.9).map(el=>el.textContent)),[])
-        await page.clock.runFor(500)
         await page.screenshot({path:`test-results/reviews-${name}-${width}-receipt.png`,fullPage:true})
         await page.getByRole('button',{name:'Sign out',exact:true}).click()
         await page.getByRole('heading',{name:'Verify your school email.'}).waitFor()
@@ -109,7 +105,6 @@ try {
       fixture=reviewFixture();fixture.state.catalogFails=true;fixture.state.saveFails=true
       const context=await browser.newContext({viewport:{width:390,height:844}})
       const page=await context.newPage();await page.clock.install()
-      await context.request.post(origin+'/api/reviews/auth/send',{headers:{Origin:origin},data:{email:TEST_EMAIL}})
       const verified=await context.request.post(origin+'/api/reviews/auth/verify',{headers:{Origin:origin},data:{email:TEST_EMAIL,code:'123456'}})
       assert.equal(verified.status(),200)
       await page.goto(origin+'/reviews/')
@@ -128,12 +123,11 @@ try {
       await page.getByRole('button',{name:'Submit test review'}).click()
       await page.getByRole('alert').filter({hasText:'Do not submit again'}).waitFor()
       assert.equal(await page.getByRole('button',{name:'Check back before retrying',exact:true}).isEnabled(),false)
-      assert.equal(fixture.state.storeCalls.filter(x=>x.operation==='submit').length,1)
+      assert.equal(fixture.state.calls.filter(x=>x.url.includes('/rpc/')).length,1)
       await context.close()
       // Name-based links (Mac app) fill only exact catalog matches and leave the rest open.
       fixture=reviewFixture()
       const named=await browser.newContext({viewport:{width:390,height:844}})
-      await named.request.post(origin+'/api/reviews/auth/send',{headers:{Origin:origin},data:{email:TEST_EMAIL}})
       assert.equal((await named.request.post(origin+'/api/reviews/auth/verify',{headers:{Origin:origin},data:{email:TEST_EMAIL,code:'123456'}})).status(),200)
       const exact=await named.newPage();await exact.goto(origin+'/reviews/?'+new URLSearchParams({professor:'Alex Fixture',course:'TEST 001'}))
       await exact.getByRole('button',{name:'Change professor'}).waitFor();await exact.getByRole('button',{name:'Change course'}).waitFor()

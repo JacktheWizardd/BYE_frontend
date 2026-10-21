@@ -1,7 +1,5 @@
 # Website review submission
 
-> October 20, 2026: the locally implemented replacement uses private mailbox verification, opaque sessions and direct Brevo delivery. It has not been migrated/deployed. See [current private-email runbook](PRIVATE_EMAIL_VERIFICATION.md) for required configuration and staged rollout. The older Supabase Auth/SMTP instructions below describe the deployed legacy flow and must not be used to configure the replacement.
-
 The owner-only review page lives at `/reviews/`. It uses the existing Supabase
 review database and works independently of the gated PCC/RMP search app.
 Students verify their school inbox with a code; there are no passwords or profile

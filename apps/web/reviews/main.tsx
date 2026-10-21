@@ -147,7 +147,7 @@ function Reviews() {
     const abort = new AbortController()
     api<{enabled:boolean;ownerTest?:boolean;turnstileSiteKey?:string}>('status',undefined,abort.signal).then(async status => {
       setEnabled(status.enabled); setTest(status.ownerTest !== false); setSiteKey(status.turnstileSiteKey ?? '')
-      if (status.enabled) { const user = await api<ReviewSession>('session',undefined,abort.signal); setSession(user) }
+      if (status.enabled) { const user = await api<ReviewSession>('session',undefined,abort.signal); setSession(user); if (user.email) setEmail(user.email) }
     }).catch(e => { if (!abort.signal.aborted) { authError(e); setError(e.message) } })
     return () => abort.abort()
   },[])
@@ -254,7 +254,7 @@ function Reviews() {
                 <h2 className="text-2xl">{codeSent ? 'Check your school inbox.' : 'Verify your school email.'}</h2>
                 <p className="mt-2 text-ink-2">{codeSent ? `Enter the code sent to ${email}. Check spam if you do not see it.` : test ? 'Use your @go.pasadena.edu address. This private test is available only to the configured tester.' : 'Use your @go.pasadena.edu address. We will email you a one-time code.'}</p>
               </div>
-              <form className="space-y-4" onSubmit={e=>{e.preventDefault(); if(codeSent) void run(async()=>{const user=await api<ReviewSession>('auth/verify',{email,code});setSession(user);setEmail('');setCode('');setCodeSent(false)});else void sendCode()}}>
+              <form className="space-y-4" onSubmit={e=>{e.preventDefault(); if(codeSent) void run(async()=>{const user=await api<ReviewSession>('auth/verify',{email,code});setSession(user);setCode('');setCodeSent(false)});else void sendCode()}}>
                 {codeSent
                   ? <div className="flex flex-col gap-2"><label htmlFor="review-code" className="font-semibold">Email code</label><input id="review-code" className={`${field} code tracking-[0.3em]`} value={code} autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" minLength={6} maxLength={10} required onChange={e=>setCode(e.target.value.replace(/\D/g,''))} /></div>
                   : <div className="flex flex-col gap-2"><label htmlFor="review-email" className="font-semibold">School email</label><input id="review-email" className={field} type="email" autoComplete="email" autoCapitalize="none" spellCheck={false} value={email} placeholder="you@go.pasadena.edu" maxLength={254} required onChange={e=>setEmail(e.target.value)} /></div>}
@@ -288,7 +288,7 @@ function Reviews() {
             </section>}
 
             {session.signedIn && !receipt && <>
-              <p className="mb-4 text-[13px] text-ink-3 [overflow-wrap:anywhere]">School email verified</p>
+              <p className="mb-4 text-[13px] text-ink-3 [overflow-wrap:anywhere]">Verified as {session.email}</p>
               {dimensionError && <div className="mb-4"><Notice action={<button type="button" className={`${textLink} ml-2`} onClick={()=>setLoadKey(x=>x+1)}>Retry questions</button>}>{dimensionError}</Notice></div>}
 
               {confirm ? <section className="space-y-5">
@@ -299,7 +299,7 @@ function Reviews() {
                   {dimensions.map(d=><div key={d.name} className="flex justify-between gap-5 py-2.5"><dt className="font-semibold">{questionLabel(d.name)}</dt><dd className="m-0 text-right text-ink-2">{cap(answerText(d))}</dd></div>)}
                 </dl>
                 <div><b className="font-semibold">Comment</b><p className="mt-1 whitespace-pre-wrap text-ink-2 [overflow-wrap:anywhere]">{(test ? TEST_REVIEW_PREFIX : '') + draft.body.trim() || 'No written comment.'}</p></div>
-                <p className="text-[13px] text-ink-3">BYE uses your email to send a code and keeps a private identifier to prevent duplicates and enforce bans. Our email provider processes delivery records.</p>
+                <p className="text-[13px] text-ink-3">Your school email is not shown in public review queries. Database administrators can link reviews to accounts.</p>
                 <div className="flex flex-col gap-3">
                   <button type="button" className="btn btn-primary w-full" disabled={busy || uncertain} onClick={save}>{busy ? 'Saving…' : uncertain ? 'Check back before retrying' : test ? <>Submit test review →</> : <>Submit review →</>}</button>
                   <button type="button" className="btn w-full" disabled={busy} onClick={()=>setConfirm(false)}>Back to edit</button>

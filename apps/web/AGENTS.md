@@ -31,6 +31,3 @@ are enabled for the owner; PCC/RMP remain disabled. Hosted routing and phone/des
 browser checks passed. Production settings and files were verified unchanged.
 Hosted real owner login/source activation remain pending; see docs/web-app/LIVE_APP_PREVIEW.md
 from the website root.
-
-
-October 20, 2026 (local only): `/reviews/` now clears the address after verification and shows “School email verified.” Session JSON no longer includes email. See `docs/reviews/PRIVATE_EMAIL_VERIFICATION.md` for the staged backend migration/deployment; the new server fails closed without its new secrets and ready database. No public rollout occurred.

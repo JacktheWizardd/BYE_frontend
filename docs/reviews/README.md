@@ -19,6 +19,3 @@ Website owns browser routes and APIs. Desktop owns Windows read integration and 
 Operational moderation, retention and live acceptance must follow current evidence and authorization. Native login/submission/reporting are outside the Windows read-integration phase.
 
 [All documents](../README.md)
-
-- [Private mailbox verification and bans](PRIVATE_EMAIL_VERIFICATION.md) — locally implemented replacement for email Auth; staged migration, permissions, moderation and separate rollout approvals.
-- [Private verification commit handoff](PRIVATE_EMAIL_HANDOFF.md) — exact files and separate GitHub Desktop messages for both repositories.

@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { handleReviewRequest } from '../server/reviews'
-import { reviewFixture, REVIEW_ID, sessionToken } from './review-fixtures'
+import { reviewFixture, REVIEW_ID, jwt } from './review-fixtures'
 function fixture(){
   const f=reviewFixture(), calls:{url:URL;method:string;body:any;authorization:string}[]=[]
   let professors=[{id:1,first_name:'Alex',last_name:'Fixture'}],courses=[{id:2,code:'TEST 001',title:'TEST CLASS'}]
@@ -27,8 +27,8 @@ function fixture(){
     }
     return f.outbound(input,init)
   }
-  const request=(path:string,body?:unknown,cookie?:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/'+path,{method:body?'POST':'GET',headers:{...(body?{Origin:'https://bye.test','Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},...(body?{body:JSON.stringify(body)}:{})}),f.env,outbound,f.store)
-  return {request,calls,f,setProfessors:(v:typeof professors)=>professors=v,setCourses:(v:typeof courses)=>courses=v,setReviews:(v:typeof reviews)=>reviews=v,setCode:(v:string)=>{reportCode=v;f.state.reportCode=v},setMissing:()=>{missing=true;f.state.missing=true}}
+  const request=(path:string,body?:unknown,cookie?:string)=>handleReviewRequest(new Request('https://bye.test/api/reviews/'+path,{method:body?'POST':'GET',headers:{...(body?{Origin:'https://bye.test','Content-Type':'application/json'}:{}),...(cookie?{Cookie:cookie}:{})},...(body?{body:JSON.stringify(body)}:{})}),f.env,outbound)
+  return {request,calls,f,setProfessors:(v:typeof professors)=>professors=v,setCourses:(v:typeof courses)=>courses=v,setReviews:(v:typeof reviews)=>reviews=v,setCode:(v:string)=>reportCode=v,setMissing:()=>missing=true}
 }
 test('public resolution accepts only unique normalized names and course equivalence',async()=>{
  const f=fixture(),path='resolve?instructor=Alex%20Fixture&course=TEST1'
@@ -59,19 +59,19 @@ test('BYE pages are bounded with deterministic source sorting and explicit cours
  p=(await(await f.request('list?professorId=1&offset=20')).json() as any).data;assert.equal(p.reviews.length,5);assert.equal(p.nextOffset,null)
 })
 test('report writes use the verified caller and never accept reporter IDs or read reports',async()=>{
- const f=fixture(),cookie='__Secure-bye-review='+sessionToken(),body={reviewId:REVIEW_ID,reason:'Test report'}
+ const f=fixture(),cookie='__Secure-bye-review='+jwt(),body={reviewId:REVIEW_ID,reason:'Test report'}
  assert.equal((await f.request('report',body)).status,401)
  assert.equal((await f.request('report',{...body,reporter_id:'spoof'},cookie)).status,400)
  assert.equal((await f.request('report',{...body,reason:'x'.repeat(501)},cookie)).status,400)
  assert.equal((await f.request('report',body,cookie)).status,200)
- const write=f.f.state.storeCalls.find(c=>c.operation==='report')!;assert.equal(write.args.reviewId,REVIEW_ID);assert.equal(write.args.reason,'Test report');assert.equal(write.args.reporter_id,undefined)
+ const write=f.calls.find(c=>c.url.pathname.endsWith('/reports'))!;assert.deepEqual(write.body,{review_id:REVIEW_ID,reason:'Test report'});assert.equal(write.method,'POST');assert.match(write.authorization,/^Bearer /)
  assert.equal((await f.request('report',body,cookie)).status,409)
  f.setMissing();assert.equal((await f.request('report',body,cookie)).status,404)
  assert.equal(f.calls.filter(c=>c.url.pathname.endsWith('/reports')&&c.method==='GET').length,0)
 })
 test('report errors are sanitized, and prefill requires auth and verified catalog IDs',async()=>{
- const f=fixture(),cookie='__Secure-bye-review='+sessionToken()
- for(const code of ['42501','XX000']){f.setCode(code);const r=await f.request('report',{reviewId:REVIEW_ID,reason:'Test'},cookie);assert.equal(r.status,code==='42501'?404:503);assert.ok(!(await r.text()).includes('private upstream'))}
+ const f=fixture(),cookie='__Secure-bye-review='+jwt()
+ for(const code of ['42501','XX000']){f.setCode(code);const r=await f.request('report',{reviewId:REVIEW_ID,reason:'Test'},cookie);assert.equal(r.status,code==='42501'?409:503);assert.ok(!(await r.text()).includes('private upstream'))}
  assert.equal((await f.request('selection?professorId=1&courseId=2')).status,401)
  const r=await f.request('selection?professorId=1&courseId=2',undefined,cookie);assert.equal(r.status,200);assert.equal((await r.json() as any).data.professor.first_name,'Alex')
 })

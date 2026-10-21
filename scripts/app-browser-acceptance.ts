@@ -32,14 +32,14 @@ const server=createServer(async(req,res)=>{
   const url=new URL(req.url!,'http://'+req.headers.host)
   if(url.pathname.startsWith('/api/reviews/')){
     const chunks=[];for await(const part of req)chunks.push(Buffer.from(part))
-    const r=await handleReviewRequest(new Request(url,{method:req.method,headers:req.headers as Record<string,string>,...(['POST'].includes(req.method??'')?{body:Buffer.concat(chunks)}:{})}),auth.env,outbound,auth.store)
-    res.writeHead(r.status,{...Object.fromEntries(r.headers),...(r.headers.has('set-cookie')?{'set-cookie':r.headers.getSetCookie()}:{})});res.end(await r.text());return
+    const r=await handleReviewRequest(new Request(url,{method:req.method,headers:req.headers as Record<string,string>,...(['POST'].includes(req.method??'')?{body:Buffer.concat(chunks)}:{})}),auth.env,outbound)
+    res.writeHead(r.status,Object.fromEntries(r.headers));res.end(await r.text());return
   }
   if(url.pathname.startsWith('/api/v1/')){
     const kind=url.pathname.split('/').at(-1)!
     if(kind==='status'){res.setHeader('Content-Type','application/json');res.end(JSON.stringify({enabled:true,rmpConfigured:rmpEnabled}));return}
     let r:Response;try{r=Response.json(await source.service.operation(kind as keyof ApiResults,url.searchParams,'combined-browser'))}catch(e){r=errorResponse(e)}
-    res.writeHead(r.status,{...Object.fromEntries(r.headers),...(r.headers.has('set-cookie')?{'set-cookie':r.headers.getSetCookie()}:{})});res.end(await r.text());return
+    res.writeHead(r.status,Object.fromEntries(r.headers));res.end(await r.text());return
   }
   const file=resolve(root,'.'+decodeURIComponent(url.pathname)+(url.pathname.endsWith('/')?'index.html':''))
   if(!file.startsWith(root+sep))throw new Error()
@@ -77,7 +77,7 @@ try{
    assert.equal(await page.getByRole('combobox',{name:'Professor',exact:true}).count(),0,'Verified IDs are prefilled')
    rmpEnabled=true;await search()
    await page.getByRole('heading',{name:'Rate My Professors reviews',exact:true}).waitFor()
-   await bye.getByRole('button',{name:'Report review',exact:true}).first().click();await bye.getByLabel('Reason for reporting').fill('Fictional reporting test');await bye.getByRole('button',{name:'Send report',exact:true}).click();await bye.getByText('Report received.',{exact:true}).waitFor();assert.equal(auth.state.reportCount,1)
+   await bye.getByRole('button',{name:'Report review',exact:true}).first().click();await bye.getByLabel('Reason for reporting').fill('Fictional reporting test');await bye.getByRole('button',{name:'Send report',exact:true}).click();await bye.getByText('Report received.',{exact:true}).waitFor();assert.equal(reportWrites,1)
    byeFails=true;await bye.getByRole('button',{name:'Refresh BYE reviews'}).click();await bye.getByText('BYE reviews could not be loaded. Try again shortly.',{exact:true}).first().waitFor()
    assert.ok(await page.locator('.report .review-card').count()>0,'RMP evidence survives BYE failure')
    byeFails=false;await bye.getByRole('button',{name:'Retry BYE reviews'}).click();await bye.locator('.review-card').first().waitFor()
