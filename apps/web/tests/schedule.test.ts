@@ -30,6 +30,7 @@ test('format labels and title case', () => {
   assert.equal(formatLabel(section(['HY'], [])), 'Hybrid')
   assert.equal(formatLabel(section(['OL'], [])), 'Online · live')
   assert.equal(formatLabel(section(['L'], [])), 'In person')
+  assert.equal(formatLabel(section([], [])), 'Format not announced')
   assert.equal(titleCase('SINGLE VARIABLE CALCULUS I'), 'Single variable calculus I')
 })
 
