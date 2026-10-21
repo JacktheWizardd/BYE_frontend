@@ -190,6 +190,21 @@ function App() {
   }, [])
   useEffect(() => { if (state.operationId !== lastOperation.current) { lastOperation.current = state.operationId; opened.current = ''; setSelected(''); setShowOther(false) } }, [state.operationId])
 
+  // Discover new terms while retaining the student's selected semester.
+  useEffect(() => {
+    if (isDemo) return
+    let checked=Date.now(),running=false,stopped=false
+    const refresh=async()=>{
+      if(stopped || running || document.hidden || !navigator.onLine || Date.now()-checked<3_600_000) return
+      running=true
+      try {const result=await bridge.command({kind:'terms'}) as Term[];if(!stopped){setTerms(result);checked=Date.now()}}
+      catch {checked=Date.now()-3_300_000}
+      finally {running=false}
+    }
+    const timer=setInterval(()=>{void refresh()},60_000)
+    window.addEventListener('focus',refresh);window.addEventListener('online',refresh)
+    return ()=>{stopped=true;clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh)}
+  }, [])
   const course = state.course
   const title = titleCase(state.professors[0]?.sections[0]?.title ?? '')
   useEffect(() => {

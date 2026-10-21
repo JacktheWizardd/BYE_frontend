@@ -4,6 +4,9 @@ The website repository now owns the landing page, browser application, portable 
 
 ## Current release state
 
+**Local preparation, October 20:** the source Worker now uses the shared schedule API adapter with server-side `BYE_SCHEDULE_API_URL` and `BYE_SCHEDULE_API_KEY`. Browser routes remain same-origin. Polling and local expiry preserve profile selections; semester discovery does not switch the chosen term. Unit, runtime, build and phone/desktop browser fixtures pass. Production flags and launch state were not changed; native Mac and real PostgreSQL concurrency verification remain separate.
+
+
 **Live web app paused October 17, 2026 (see [Data access](../operations/DATA_ACCESS.md)).** The landing page links the fictional `/demo/` and the `/reviews/` form; `/app/` is disabled and unlinked. The real-data build at `/app/` starts only when the Pages API and source Worker enable it; RMP is independently gated. No live screen falls back to fictional evidence. Search and reading require no login. Writing/reporting use the separate school-email session; hosted AI and analytics are absent. BYE reviews now appear independently in professor pages; AI summaries and statistical comparisons remain disabled. A separate owner-only `/reviews/` form and `/api/reviews/*` API are prepared; they do not enable the live search app. See [Review submission](../reviews/REVIEW_SUBMISSION.md) and [review verification](../reviews/REVIEW_VERIFICATION.md) for the independent setup and evidence.
 
 The gates in [release-readiness.json](../release-readiness.json) are evidence records, not permission grants. Editing a boolean does not establish access rights or complete staging acceptance. Run `pnpm verify:release` before preparing production activation.

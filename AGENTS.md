@@ -137,6 +137,9 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-20 local schedule integration (not deployed):** the source Worker reads official schedules through the shared BYE schedule API with server-side `BYE_SCHEDULE_API_URL` / `BYE_SCHEDULE_API_KEY`. LiveBridge polls version-backed sections, expires availability after fifteen minutes and preserves valid profile choices. New terms appear without changing the selected semester. Demo stays network-free; rollout/RMP flags remain unchanged. Fixture unit/runtime/build and Chromium/WebKit phone/desktop checks passed.
+
+
 - **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
 
 
