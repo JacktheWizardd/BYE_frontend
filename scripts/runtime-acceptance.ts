@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdir } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import assert from 'node:assert/strict'
+import {scheduleFixture} from '../tests/schedule-fixture'
 import { demoData, demoSeats, FALL } from '../apps/web/src/demo-data'
 const out = resolve('.wrangler/test-build'); await mkdir(out, { recursive: true })
 const env = { ...process.env, WRANGLER_SEND_METRICS: 'false', WRANGLER_LOG_PATH: '/private/tmp/bye-runtime-wrangler.log' }
@@ -11,15 +12,13 @@ execFileSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'deploy
 execFileSync(process.execPath, ['node_modules/wrangler/bin/wrangler.js', 'pages', 'functions', 'build', 'functions', '--outdir', out + '/pages'], { env, stdio: 'pipe' })
 let schedules = 0, rmpRequests = 0
 const rows = demoData.schedules[FALL.termCode].map(row => { const seats = demoSeats[String(row.crn)]; return { ...row, ...(seats ? { seatsAvail: seats.open, maxEnrl: seats.capacity, waitCount: seats.waitlist, waitCapacity: seats.waitCapacity } : {}) } })
+const fixtureSchedule=scheduleFixture(demoData.terms,rows)
 const mf = new Miniflare({
   workers: [
-    { name: 'sources', modules: true, scriptPath: out + '/sources/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true', RMP_AUTHORIZED: 'true', RMP_PERMISSION_REF: 'fictional-local-runtime-only', RMP_CACHE_SECONDS: '60' },
+    { name: 'sources', modules: true, scriptPath: out + '/sources/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', useSQLite: true } }, bindings: { BYE_SCHEDULE_API_URL:'https://schedule.fixture', BYE_SCHEDULE_API_KEY:'fictional-runtime-key', LIVE_APP_ENABLED: 'true', RMP_AUTHORIZED: 'true', RMP_PERMISSION_REF: 'fictional-local-runtime-only', RMP_CACHE_SECONDS: '60' },
       outboundService: async request => {
         const url = new URL(request.url)
-        if (url.hostname === 'prod-apiweb.pasadena.edu') {
-          if (url.pathname.endsWith('getClassScheduleTerms')) return Response.json(demoData.terms)
-          schedules++; return Response.json(rows)
-        }
+        if(url.hostname==='schedule.fixture') {if(url.pathname.endsWith('/sections'))schedules++;return fixtureSchedule(request as unknown as Request)}
         if (url.hostname !== 'www.ratemyprofessors.com') throw new Error('Unexpected outbound source')
         rmpRequests++
         const body = await request.json() as { query: string; variables: { id?: string; count: number; cursor?: string; courseFilter?: string; query?: { text: string } } }
@@ -30,10 +29,10 @@ const mf = new Miniflare({
         return Response.json({ data: { node: { ...node(p), ratings: { edges: records.map(r => ({ node: { id: r.id, comment: r.text, class: r.course, date: r.date, helpfulRating: r.rating, difficultyRating: r.difficulty, isForOnlineClass: r.online } })), pageInfo: { hasNextPage: offset + records.length < list.length, endCursor: String(offset + records.length) } } } } })
       }
     },
-    { name: 'sources-pcc', modules: true, scriptPath: out + '/sources/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true', RMP_AUTHORIZED: 'false', RMP_CACHE_SECONDS: '0' }, outboundService: request => {
+    { name: 'sources-pcc', modules: true, scriptPath: out + '/sources/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', useSQLite: true } }, bindings: { BYE_SCHEDULE_API_URL:'https://schedule.fixture', BYE_SCHEDULE_API_KEY:'fictional-runtime-key', LIVE_APP_ENABLED: 'true', RMP_AUTHORIZED: 'false', RMP_CACHE_SECONDS: '0' }, outboundService: request => {
       const url=new URL(request.url)
-      if(url.hostname!=='prod-apiweb.pasadena.edu')throw new Error('PCC-only worker must not contact RMP')
-      return Response.json(url.pathname.endsWith('getClassScheduleTerms')?demoData.terms:rows)
+      if(url.hostname!=='schedule.fixture')throw new Error('Schedule-only worker must not contact PCC or RMP')
+      return fixtureSchedule(request as unknown as Request)
     } },
     { name: 'pages-pcc', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources-pcc', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'true' } },
     { name: 'disabled', modules: true, scriptPath: out + '/pages/index.js', compatibilityDate: '2025-10-11', durableObjects: { SOURCES: { className: 'Sources', scriptName: 'sources', useSQLite: true } }, bindings: { LIVE_APP_ENABLED: 'false' } },

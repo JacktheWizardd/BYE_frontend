@@ -11,7 +11,7 @@ const value = (r: Row, k: string) => typeof r[k] === 'string' || typeof r[k] ===
 export function catalog(rows: Row[]): Suggestion[] {
   const result = new Map<string, Suggestion>()
   for (const row of rows) {
-    if (['R', 'X'].includes(value(row, 'fwSectOpenInd')) || !value(row, 'crn')) continue
+    if (!value(row, 'crn')) continue
     try {
       const c = course(value(row, 'subjCode') + value(row, 'courseNumbDisplay')), title = value(row, 'courseTitle').trim()
       const old = result.get(c.key)
@@ -59,7 +59,7 @@ export function sectionDetails(row: Row): SectionDetails {
 export function professors(rows: Row[], c: Course): Professor[] {
   const groups = new Map<string, Map<string, Row[]>>()
   for (const row of rows) {
-    if (!sameCourse(c, value(row, 'subjCode') + value(row, 'courseNumbDisplay')) || ['R', 'X'].includes(value(row, 'fwSectOpenInd')) || !value(row, 'crn')) continue
+    if (!sameCourse(c, value(row, 'subjCode') + value(row, 'courseNumbDisplay')) || !value(row, 'crn')) continue
     const name = value(row, 'pfaName').trim() || 'Instructor to be announced', crn = value(row, 'crn')
     const group = groups.get(name) ?? new Map<string, Row[]>(); group.set(crn, [...(group.get(crn) ?? []), row]); groups.set(name, group)
   }

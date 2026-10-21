@@ -47,6 +47,8 @@ try {
         await page.locator('.prof-card').filter({ hasText: 'Lena Whitcombe' }).waitFor()
         if (width >= 760) await page.getByRole('heading', { name: 'Pick a professor.' }).waitFor()
         assert.equal(await page.locator('.report-name').count(), 0, 'No report selected automatically')
+        await page.getByRole('button', { name: 'Refresh', exact: true }).click()
+        assert.equal(await page.locator('.report-name').count(), 0, 'Refresh must not pick a professor')
         await page.locator('.prof-card').filter({ hasText: 'Lena Whitcombe' }).click()
         await page.getByRole('heading', { name: 'Lena Whitcombe', exact: true }).waitFor()
         await page.locator('.review-card').first().waitFor()
@@ -58,7 +60,7 @@ try {
         assert.deepEqual(small, [], 'Visible buttons meet the 44px target')
         await page.screenshot({ path: `test-results/${name}-${width}-report.png`, fullPage: true })
         await page.clock.fastForward(300_001)
-        await page.getByText('Older schedule · seat counts hidden', { exact: false }).first().waitFor()
+        await page.getByText('Older schedule · seat counts hidden', { exact: false }).filter({ visible: true }).first().waitFor()
         assert.equal(await page.locator('.seats:visible').count(), 0, 'Expired seat counts disappear while the report remains open')
         if (width < 760) { await page.goBack(); await page.locator('.list-pane:visible').waitFor(); await page.goBack() }
         else await page.getByRole('button', { name: 'Change search' }).click()

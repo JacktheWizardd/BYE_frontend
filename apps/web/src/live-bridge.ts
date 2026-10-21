@@ -1,6 +1,7 @@
 import type { Bridge, Command, Course, Profile, Professor, Snapshot, Term } from '@shared/types'
 import type { ApiErrorBody, ApiResults, Envelope, Status } from '@shared/api'
 import { identity, normalizedName, orderReviews, sameCourse } from '@shared/domain'
+import {availabilityDeadline} from '@shared/freshness'
 
 export class LiveError extends Error {
   constructor(readonly code: string, message: string, readonly retryAfter?: number) { super(message) }
@@ -22,6 +23,13 @@ export class LiveBridge implements Bridge {
   private blockedUntil = 0
   private rmpConfigured = true
   private serial = 0
+  private pollTimer?: ReturnType<typeof setTimeout>
+  private expiryTimer?: ReturnType<typeof setTimeout>
+  private scheduleController?: AbortController
+  private scheduleStopped = false
+  private polling = false
+  private scheduleFailures = 0
+  private lifecycleInstalled = false
   private epochs = new Map<string, number>()
   constructor(private request: typeof fetch = (...args) => fetch(...args), private storage: ChoiceStore | undefined = store(), private openSource: (url: string) => void = url => { window.open(url, '_blank', 'noopener,noreferrer') }) {}
   subscribe(listener: (state: Snapshot) => void) { this.listeners.add(listener); listener(structuredClone(this.state)); return () => { this.listeners.delete(listener) } }
@@ -74,7 +82,7 @@ export class LiveBridge implements Bridge {
         return (await this.api('terms', {}, AbortSignal.timeout(65_000))).data
       }
       case 'suggest': return (await this.api('courses', { term: command.term, query: command.query }, AbortSignal.timeout(65_000))).data
-      case 'search': this.search(command.query, command.term); return
+      case 'search': if(command.refresh && this.state.course?.display===command.query && this.state.term?.termCode===command.term.termCode) {await this.refreshSchedule(true)} else {this.search(command.query,command.term)}; return
       case 'stop': this.stop(); return
       case 'retry': { const p = this.professor(command.professorId); if (p.state === 'loading') return; const signal = this.context(p, true); p.detailLoading = false; return this.track(`retry:${this.state.operationId}:${p.id}:${this.epochs.get(p.id) ?? 0}`, () => this.lookup(p, signal)) }
       case 'discover': { const p = this.professor(command.professorId), signal = this.context(p); p.choosing = true; p.issue = undefined; this.emit(); return this.track(`discover:${this.state.operationId}:${p.id}:${this.epochs.get(p.id) ?? 0}`, async () => { try { const result = await this.queue('preview', signal, () => this.api('candidates', this.params(p), signal)); this.current(p, signal); p.candidates = result.data; this.emit() } catch (e) { if (!signal.aborted) { p.issue = errorMessage(e); this.emit() } } }) }
@@ -92,23 +100,77 @@ export class LiveBridge implements Bridge {
     }
   }
   stop() {
+    if(this.pollTimer) clearTimeout(this.pollTimer); this.pollTimer=undefined
+    this.scheduleStopped=true; this.scheduleController?.abort()
     this.run.abort(); this.versions.forEach(c => c.abort()); this.versions.clear(); this.run = new AbortController(); this.state.loading = false
     for (const p of this.state.professors) { if (p.state === 'loading' || p.state === 'pending') { p.state = p.profile ? 'ready' : 'unavailable'; p.issue = 'Stopped. Try again to retrieve this profile.' }; if (p.detailLoading) p.reviewIssue = 'Stopped. Retrieved reviews are still available.'; p.detailLoading = false }
     this.emit()
   }
   private search(query: string, term: Term) {
-    this.stop(); const signal = this.run.signal
+    this.stop(); this.scheduleFailures=0; const signal = this.run.signal
     this.state = { operationId: crypto.randomUUID(), term, professors: [], loading: true, previewPending: 0 }; this.emit()
     void this.track('search:' + this.state.operationId, async () => {
       try {
         const result = await this.api('sections', { term: term.termCode, query }, signal); signal.throwIfAborted()
         this.state.course = result.data.course; this.state.professors = result.data.professors; this.state.source = result.meta; this.state.issue = result.warning
         if (!this.state.professors.length) this.state.issue = 'No matching sections were published for this course and semester.'
-        this.emit()
+        this.emit(); this.startSchedulePolling()
         await Promise.all(this.state.professors.map(p => this.lookup(p, this.context(p))))
       } catch (e) { if (!signal.aborted) this.state.issue = errorMessage(e) }
       finally { if (!signal.aborted) { this.state.loading = false; this.emit() } }
     })
+  }
+  private pauseSchedule() {
+    if(this.pollTimer) clearTimeout(this.pollTimer); this.pollTimer=undefined
+    this.scheduleController?.abort()
+  }
+  private startSchedulePolling() {
+    if(typeof document==='undefined') return
+    this.scheduleStopped=false
+    if(!this.lifecycleInstalled) {
+      this.lifecycleInstalled=true
+      document.addEventListener('visibilitychange',()=>{if(document.hidden)this.pauseSchedule();else if(!this.scheduleStopped)void this.refreshSchedule()})
+      window.addEventListener('online',()=>{if(!this.scheduleStopped)void this.refreshSchedule()})
+      window.addEventListener('offline',()=>this.pauseSchedule())
+    }
+    this.armScheduleExpiry(); this.scheduleNext()
+  }
+  private scheduleNext() {
+    if(this.pollTimer)clearTimeout(this.pollTimer); this.pollTimer=undefined
+    if(!this.scheduleStopped && typeof document!=='undefined' && !document.hidden && navigator.onLine && this.state.course) this.pollTimer=setTimeout(()=>{void this.refreshSchedule()},Math.min(900_000,60_000*2**this.scheduleFailures)*(0.9+Math.random()*0.2))
+  }
+  private armScheduleExpiry() {
+    if(this.expiryTimer)clearTimeout(this.expiryTimer); this.expiryTimer=undefined
+    const source=this.state.source
+    if(!source || typeof document==='undefined')return
+    const remaining=availabilityDeadline(source)-Date.now()
+    if(source.stale || remaining<=0){this.expireSchedule();return}
+    this.expiryTimer=setTimeout(()=>this.expireSchedule(),Math.min(remaining,2_147_483_647))
+  }
+  private expireSchedule() {
+    const source=this.state.source;if(!source) return
+    if(source.stale || Date.now()>=availabilityDeadline(source)) {
+      let changed=!source.stale
+      for(const p of this.state.professors) for(const s of p.sections) {
+        if(s.source)s.source={...s.source,stale:true}
+        if(s.details && [s.details.seatsOpen,s.details.capacity,s.details.waitlistCount,s.details.waitlistCapacity].some(x=>x!==undefined)) {s.details={...s.details,seatsOpen:undefined,capacity:undefined,waitlistCount:undefined,waitlistCapacity:undefined};changed=true}
+      }
+      if(changed) {this.state.source={...source,stale:true};this.emit()}
+    } else this.armScheduleExpiry()
+  }
+  private async refreshSchedule(manual=false) {
+    if(this.polling || !this.state.course || !this.state.term || this.state.loading || (!manual && (this.scheduleStopped || typeof document==='undefined' || document.hidden || !navigator.onLine))) return
+    this.polling=true;const controller=new AbortController();this.scheduleController=controller
+    const signal=AbortSignal.any([this.run.signal,controller.signal]),operation=this.state.operationId
+    try {
+      const result=await this.api('sections',{term:this.state.term.termCode,query:this.state.course.display},signal);signal.throwIfAborted()
+      if(operation!==this.state.operationId) return
+      const previous=new Map(this.state.professors.map(p=>[p.id,p]))
+      this.state.professors=result.data.professors.map(p=>{const old=previous.get(p.id);if(old && old.name===p.name){old.sections=p.sections;return old}p.state='unavailable';p.issue='PCC updated the instructor assignment. Retrieve a verified profile when ready.';return p})
+      const retained=new Set(this.state.professors.map(p=>p.id));for(const [id,c] of this.versions) if(!retained.has(id)){c.abort();this.versions.delete(id)}
+      this.state.source=result.meta;this.scheduleFailures=0;this.emit();this.startSchedulePolling()
+    }catch{if(!signal.aborted && operation===this.state.operationId){this.scheduleFailures=Math.min(this.scheduleFailures+1,4);this.expireSchedule()}}
+    finally{this.polling=false;if(this.scheduleController===controller)this.scheduleController=undefined;this.scheduleNext()}
   }
   private async preview(p: Professor, id: string, signal: AbortSignal) {
     const result = await this.api('profile', { ...this.params(p), id }, signal); this.current(p, signal); this.verify(p, result.data.profile, id)
