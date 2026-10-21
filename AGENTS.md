@@ -137,6 +137,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-20 private mailbox verification (local only):** Review Auth now uses server-keyed mailbox identifiers, direct Brevo API delivery and a restricted Postgres gateway, with opaque challenge/session cookies and administrator-only mailbox bans. It needs new secrets, staged SQL prepare/backfill/cutover, cron setup and separately authorized deployment/Auth cleanup. Without complete new configuration it fails closed. Follow `docs/reviews/PRIVATE_EMAIL_VERIFICATION.md`; do not deploy this backend as an ordinary push without planning the migration window. Public source/update/download gates are unchanged.
+
 - **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
 
 

@@ -19,7 +19,7 @@ await mkdir(stage,{recursive:true});await cp('public',stage+'/public',{recursive
 const previewHeaders="\n# Owner preview: no injected analytics snippet.\n/*\n  Cache-Control: public, no-transform\n"
 await writeFile(stage+'/public/_headers',(await readFile('public/_headers','utf8'))+previewHeaders)
 const env={...process.env,WRANGLER_SEND_METRICS:'false',WRANGLER_LOG_PATH:'/private/tmp/bye-app-preview-build.log'}
-execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','pages','functions','build','functions','--outdir',stage+'/functions-build'],{env,stdio:'pipe'})
+execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','pages','functions','build','functions','--compatibility-date','2025-10-11','--compatibility-flags','nodejs_compat','--outdir',stage+'/functions-build'],{env,stdio:'pipe'})
 await copyFile(stage+'/functions-build/index.js',stage+'/public/_worker.js')
 execFileSync(process.execPath,['node_modules/wrangler/bin/wrangler.js','deploy','--config','workers/source/wrangler.jsonc','--env','preview','--dry-run','--outdir',stage+'/sources'],{env,stdio:'pipe'})
 await writeFile(stage+'/wrangler.jsonc',JSON.stringify(config,null,2)+'\n')

@@ -6,7 +6,7 @@ export interface ReviewInput {
   professorId: string; courseId: string; quality: number; difficulty: number;
   body: string; answers: Record<string, -1 | 0 | 1>;
 }
-export interface ReviewSession { signedIn: boolean; email?: string }
+export interface ReviewSession { signedIn: boolean }
 export const TEST_REVIEW_PREFIX = 'BYE website test, please ignore.\n'
 export const REVIEW_COMMENT_LIMIT = 2000 - TEST_REVIEW_PREFIX.length
 export const questionLabel = (name: string) => ({

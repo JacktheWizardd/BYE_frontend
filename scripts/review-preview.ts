@@ -18,8 +18,8 @@ createServer(async (req, res) => {
     if (url.pathname.startsWith('/api/reviews/')) {
       const chunks: Buffer[] = []; for await (const chunk of req) chunks.push(Buffer.from(chunk))
       const request = new Request(url, { method: req.method, headers: Object.fromEntries(Object.entries(req.headers).filter(([, v]) => typeof v === 'string')) as Record<string, string>, ...(['POST', 'PUT', 'PATCH'].includes(req.method ?? '') ? { body: Buffer.concat(chunks) } : {}) })
-      const response = await handleReviewRequest(request, fixture.env, fixture.outbound)
-      res.writeHead(response.status, Object.fromEntries(response.headers)); res.end(await response.text()); return
+      const response = await handleReviewRequest(request, fixture.env, fixture.outbound, fixture.store)
+      res.writeHead(response.status, {...Object.fromEntries(response.headers),...(response.headers.has('set-cookie')?{'set-cookie':response.headers.getSetCookie()}:{})}); res.end(await response.text()); return
     }
     const file = resolve(root, '.' + decodeURIComponent(url.pathname) + (url.pathname.endsWith('/') ? 'index.html' : ''))
     if (!file.startsWith(root + sep)) { res.writeHead(403); res.end(); return }

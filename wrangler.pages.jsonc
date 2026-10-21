@@ -2,6 +2,7 @@
   "name": "bye-before-you-enroll",
   "pages_build_output_dir": "./public",
   "compatibility_date": "2025-10-11",
+  "compatibility_flags": ["nodejs_compat"],
   "vars": {
     "LIVE_APP_ENABLED": "false",
     "REVIEWS_ENABLED": "true",
