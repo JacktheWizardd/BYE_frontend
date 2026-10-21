@@ -1,6 +1,6 @@
 # GitHub Desktop commit handoff
 
-This is the historical website-source migration handoff. Its inclusion list and checks describe that work, not the October 20 documentation reorganization. For the current documentation map, start at [Documents](../README.md).
+This is the historical website-source migration handoff. Its inclusion list and checks describe that work, not the October 20 documentation reorganization. For the current documentation map, start at [Documents](../../README.md).
 
 Commit the website repository first, then the app repository's migration. Do not include unrelated changes. These are prepared local changes; committing does not satisfy the live release gates.
 

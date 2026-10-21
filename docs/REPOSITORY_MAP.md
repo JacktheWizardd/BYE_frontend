@@ -35,6 +35,10 @@ The sibling [desktop and schedule backend repo](https://github.com/JacktheWizard
 
 ## Safe cleanup approach
 
+Phase 2 moves two historical operations records into `docs/history/operations/`.
+See [the move manifest and verification](maintenance/phase-2-cleanup.md) and
+[history home](history/README.md). Current rollout guides stay in place.
+
 1. Keep canonical application and UI paths unchanged while desktop framework selection is pending.
 2. Index existing archive and historical documentation, and check links before moving any historical files.
 3. Resolve pending cross-platform documentation work before overlapping README/index rewrites.
