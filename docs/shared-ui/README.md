@@ -1,5 +1,7 @@
 # Shared UI
 
+> **Proposed direction (October 20, 2026):** See [cross-platform migration and repository decisions](CROSS_PLATFORM_MIGRATION.md). The shared React/Tauri/Capacitor architecture is under evaluation, not implemented. Current website, Windows-vendored snapshot and native Mac behavior remain unchanged.
+
 ## What we built and why
 
 Canonical React screens, domain helpers and design tokens live in this repository so browser and Windows behavior can evolve together. Windows vendors an explicit snapshot rather than importing browser code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
