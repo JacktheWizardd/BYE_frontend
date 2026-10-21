@@ -11,6 +11,14 @@ This repository contains the public-facing website, browser application source, 
 
 The native macOS application, Windows application, and standalone PCC schedule API are maintained in the separate `BYE_Before_You_Enroll` repository.
 
+## Cross-platform client direction (proposal)
+
+BYE is evaluating a shared React + TypeScript application for desktop, with **Tauri 2** a candidate for Windows and macOS, **Electron with the same shared UI** as a lower-risk alternative, and **Capacitor** an optional future iOS/Android wrapper. These are **not implemented or released**. The current Windows desktop runtime is Electron; the current macOS runtime is SwiftUI.
+
+This repository already owns canonical React UI, core helpers and design tokens, which Windows consumes as an intentional vendored snapshot. The developer is reviewing whether to keep two GitHub repositories with versioned handoffs or consolidate client apps into one frontend workspace. No repo merge, change to production Cloudflare deployment, or desktop replacement is authorized by this documentation.
+
+See [cross-platform frontend proposal and repository choices](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md). The deployed schedule API and student review service remain separate; desktop adoption of the schedule API is still pending.
+
 ## Current status
 
 *Updated October 20, 2026.*
@@ -145,6 +153,7 @@ The [documentation home](docs/README.md) organizes the website's development rec
 - [Web application and design](docs/web-app/README.md)
 - [Student reviews](docs/reviews/README.md)
 - [Shared UI components](docs/shared-ui/README.md)
+- [Cross-platform frontend proposal](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md)
 - [Operations and security](docs/operations/README.md)
 - [Web beta and release requirements](docs/web-app/WEB_BETA.md)
 - [Contributor and AI-agent instructions](AGENTS.md)
