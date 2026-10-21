@@ -1,0 +1,21 @@
+{
+  "name": "@bye/desktop",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --config vite.config.ts",
+    "build": "vite build --config vite.config.ts",
+    "tauri": "tauri",
+    "build:native": "tauri build --no-bundle"
+  },
+  "dependencies": {
+    "@bye/app": "workspace:*",
+    "@bye/api-client": "workspace:*",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.3"
+  }
+}

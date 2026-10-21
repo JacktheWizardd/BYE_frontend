@@ -137,6 +137,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **Shared frontend trial:** `apps/preview` and `apps/desktop` mount `packages/app` with browser/Tauri adapters, canonical UI/core/tokens and a pinned backend contract snapshot. React + TypeScript is agreed; Tauri 2 is the desktop candidate, Capacitor later; Electron is legacy only. Production entry points remain unchanged. See [trial source, commands, verification and remaining Mac gate](docs/shared-ui/SHARED_APP_TRIAL.md). Backend relocation, replacement and releases await their explicit gates.
+
 - **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
 
 

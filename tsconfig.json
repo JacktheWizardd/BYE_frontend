@@ -38,6 +38,10 @@
     "apps/web/reviews",
     "apps/web/vite.reviews.config.ts",
     "apps/landing/src",
-    "apps/landing/vite.config.ts"
+    "apps/landing/vite.config.ts",
+    "apps/preview/src",
+    "apps/preview/vite.config.ts",
+    "apps/desktop/src",
+    "apps/desktop/vite.config.ts"
   ]
 }

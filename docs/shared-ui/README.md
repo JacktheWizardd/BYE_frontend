@@ -18,6 +18,9 @@ Edit canonical packages here, then use the desktop repo's existing `scripts/sync
 
 ## What remains
 
-The requested BYE/RMP source toggle is a separate UI change. Mac remains native SwiftUI; shared React components do not automatically update it. Test actual consumers after future component changes; this task only reorganizes documentation.
+The requested BYE/RMP source toggle is a separate UI change. The existing Mac
+source remains SwiftUI. The [shared application trial](SHARED_APP_TRIAL.md) adds
+isolated browser/Tauri hosts using canonical workspace packages, with source
+provenance, verification and the remaining real-Mac acceptance gate.
 
 [All documents](../README.md)
