@@ -11,6 +11,14 @@ This repository contains the public-facing website, browser application source, 
 
 The native macOS application, Windows application, and standalone PCC schedule API are maintained in the separate `BYE_Before_You_Enroll` repository.
 
+## Agreed shared application architecture
+
+React + TypeScript is the shared frontend; Tauri 2 is the desktop candidate and Capacitor follows desktop validation. Electron is legacy only, with no role or fallback in the target architecture.
+
+BYE_website owns the shared frontend workspace and wrappers. BYE_Before_You_Enroll owns backend contracts and ultimately services. Repository names stay unchanged. Existing apps, server deployments and release tooling remain available through validation.
+
+See the [migration sequence and acceptance gates](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md). Backend relocation follows actual Windows and Mac preview acceptance. No merge, production deployment, release or legacy removal is authorized.
+
 ## Current status
 
 *Updated October 20, 2026.*
@@ -145,6 +153,7 @@ The [documentation home](docs/README.md) organizes the website's development rec
 - [Web application and design](docs/web-app/README.md)
 - [Student reviews](docs/reviews/README.md)
 - [Shared UI components](docs/shared-ui/README.md)
+- [Cross-platform frontend proposal](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md)
 - [Operations and security](docs/operations/README.md)
 - [Web beta and release requirements](docs/web-app/WEB_BETA.md)
 - [Contributor and AI-agent instructions](AGENTS.md)

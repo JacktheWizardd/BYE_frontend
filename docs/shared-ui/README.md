@@ -1,5 +1,7 @@
 # Shared UI
 
+> **Agreed direction:** [Shared application migration](CROSS_PLATFORM_MIGRATION.md): React/TypeScript, Tauri desktop candidate, later Capacitor, with frontend and backend ownership in the existing two repositories. Electron is legacy only; replacement remains subject to validation.
+
 ## What we built and why
 
 Canonical React screens, domain helpers and design tokens live in this repository so browser and Windows behavior can evolve together. Windows vendors an explicit snapshot rather than importing browser code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
@@ -10,7 +12,7 @@ Canonical React screens, domain helpers and design tokens live in this repositor
 - [Shared domain types and helpers](../../packages/core/README.md)
 - [Design tokens](../../packages/tokens/tokens.json)
 - [Windows integration handoff](WINDOWS_API_HANDOFF.md)
-- [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/windows/UI_PARITY.md)
+- [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/UI_PARITY.md)
 
 Edit canonical packages here, then use the desktop repo's existing `scripts/sync-bye-shared.mjs` workflow. Keep sample disclosures and web freshness behavior distinct from Windows API freshness.
 

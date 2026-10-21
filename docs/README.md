@@ -7,6 +7,7 @@ Choose an area to understand **what we built, why we chose it, how it works, and
 | [Web app and design](web-app/README.md) | Browser modes, redesign and owner-preview history |
 | [Student reviews](reviews/README.md) | Submission, public API, verification and privacy |
 | [Shared UI](shared-ui/README.md) | React packages, design tokens and Windows handoff |
+| [Shared application migration](shared-ui/CROSS_PLATFORM_MIGRATION.md) | Agreed React/TypeScript workspace, Tauri desktop candidate, later Capacitor and frontend/backend ownership |
 | [Operations](operations/README.md) | Data access, security, verification and contributor handoff |
 
 The [sibling desktop documentation](../../BYE_Before_You_Enroll/docs/README.md) covers native Mac, Windows, the schedule backend, AI experiments, releases and the product roadmap. Application and package READMEs remain beside their source. The machine-consumed `release-readiness.json` remains in this folder.
