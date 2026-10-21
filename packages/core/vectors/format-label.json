@@ -1,5 +1,5 @@
 {
-  "about": "Short format label for a section's PCC schedule codes. Swift: Section.formatLabel. TypeScript: formatLabel(section).",
+  "about": "Short format label for a section's PCC schedule codes. No codes means PCC didn't publish a format: 'Format not announced'. Swift: Section.formatLabel. TypeScript: formatLabel(section).",
   "cases": [
     { "formats": ["OD"], "expected": "Online · async" },
     { "formats": ["HY", "OD"], "expected": "Hybrid" },
@@ -9,6 +9,6 @@
     { "formats": ["OS"], "expected": "Online · live" },
     { "formats": ["LEC"], "expected": "In person" },
     { "formats": ["LEC", "OL"], "expected": "In person" },
-    { "formats": [], "expected": "In person" }
+    { "formats": [], "expected": "Format not announced" }
   ]
 }
