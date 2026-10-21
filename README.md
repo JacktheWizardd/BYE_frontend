@@ -1,15 +1,17 @@
 
 # BYE — Website
 
-**The public website and browser experience for Before You Enroll.**
+**The website and shared frontend workspace for Before You Enroll.**
 
 [Visit BYE](https://bye-before-you-enroll.pages.dev)
 
 BYE is an independent student-built project intended to help Pasadena City College students make more informed decisions when selecting classes and professors.
 
-This repository contains the public-facing website, browser application source, shared React components, and student review web experience.
+This repository owns the landing page, browser/review interfaces, shared React/TypeScript application, isolated Tauri host, canonical UI/core/tokens/fonts and client adapters.
 
-The native macOS application, Windows application, and standalone PCC schedule API are maintained in the separate `BYE_Before_You_Enroll` repository.
+`BYE_Before_You_Enroll` owns backend contracts, the schedule service and owner dashboard, and database migration records. Its SwiftUI/Electron clients and release tooling remain intact as retained legacy implementations.
+
+Website API and source Worker implementations remain here during the transition. Their planned backend destinations are `services/web-api/` and `services/source-worker/`, after desktop acceptance. See the [current ownership map and relocation inventory](docs/REPOSITORY_MAP.md).
 
 ## Agreed shared application architecture
 
@@ -69,6 +71,7 @@ The review experience is independent of the fictional demo and the centralized c
 | Landing page | React, TypeScript, Tailwind CSS |
 | Motion | GSAP, Lenis, Three.js |
 | Browser application | React and shared BYE UI packages |
+| Shared application trial | React/TypeScript in `packages/app`, browser preview and Tauri 2 host |
 | Hosting | Cloudflare Pages |
 | Review backend | Supabase and Pages server routes |
 | Shared design | Tokens, React components, and domain helpers |
@@ -80,21 +83,26 @@ The review experience is independent of the fictional demo and the centralized c
 |---|---|
 | `apps/landing/` | Landing page source |
 | `apps/web/` | Browser application and review experience |
+| `apps/preview/` | Isolated browser host for the shared app, fictional by default |
+| `apps/desktop/` | Isolated Tauri host for the same shared app |
+| `packages/app/` | Shared React application, state and runtime injection |
+| `packages/api-client/` | Bridge adapters and client operations |
+| `packages/api-contracts/` | Versioned backend-owned snapshot with source hashes |
 | `packages/core/` | Shared domain helpers |
 | `packages/ui/` | Shared React screens and components |
 | `packages/tokens/` | Shared design tokens |
-| `server/` | Server-side application logic |
-| `functions/` | Cloudflare Pages routes |
-| `workers/` | Supporting Worker services |
+| `server/` | Transitional website backend implementation; future backend ownership |
+| `functions/` | Current Pages handlers; same-origin forwarding is a later gated change |
+| `workers/source/` | Transitional source Worker; service identities and bindings stay unchanged |
 | `docs/` | Development guides and project records |
 | `tests/` | Automated tests |
 | `public/` | Generated site output and release assets |
 
-The Windows application vendors an approved snapshot of shared React code. The native Mac application remains SwiftUI-based.
+The shared browser/Tauri trial consumes workspace packages directly. The retained Windows app still vendors a snapshot; the retained Mac app is SwiftUI. Neither is replaced by this structure preparation.
 
 ## Local development
 
-Requires Node.js 24 and pnpm 11.25.0.
+Requires Node.js 22.16+ and pnpm 11.25.0. Tauri additionally uses pinned Rust 1.90.0 and the platform's native prerequisites.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -111,6 +119,22 @@ pnpm test:browser
 ```
 
 Additional runtime and integration checks are documented in the [web beta guide](docs/web-app/WEB_BETA.md).
+
+For the isolated shared application:
+
+```sh
+pnpm dev:preview
+pnpm test:shared-app
+pnpm dev:desktop
+```
+
+The preview defaults to labelled fictional fixtures. See the [shared trial guide](docs/shared-ui/SHARED_APP_TRIAL.md) for native prerequisites and acceptance gates. These hosts do not publish into `public/`.
+
+`packages/api-contracts` is an independent snapshot of backend-owned
+`@bye/contracts` version `1.0.0-preview.1`; do not hand-edit it. From the backend
+root, run `pnpm contracts:check <this-checkout>/packages/api-contracts` to verify
+it read-only. Contract export is an intentional backend operation, not a runtime
+dependency on another checkout.
 
 Edit application source rather than generated files under `public/`.
 
@@ -153,7 +177,8 @@ The [documentation home](docs/README.md) organizes the website's development rec
 - [Web application and design](docs/web-app/README.md)
 - [Student reviews](docs/reviews/README.md)
 - [Shared UI components](docs/shared-ui/README.md)
-- [Cross-platform frontend proposal](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md)
+- [Agreed shared application migration](docs/shared-ui/CROSS_PLATFORM_MIGRATION.md)
+- [Current repository ownership and relocation inventory](docs/REPOSITORY_MAP.md)
 - [Operations and security](docs/operations/README.md)
 - [Web beta and release requirements](docs/web-app/WEB_BETA.md)
 - [Contributor and AI-agent instructions](AGENTS.md)

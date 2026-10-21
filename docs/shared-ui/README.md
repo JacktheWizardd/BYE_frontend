@@ -4,7 +4,7 @@
 
 ## What we built and why
 
-Canonical React screens, domain helpers and design tokens live in this repository so browser and Windows behavior can evolve together. Windows vendors an explicit snapshot rather than importing browser code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
+Canonical React screens, domain helpers and design tokens live in this repository. `packages/app` is mounted by `apps/preview` and the isolated Tauri host in `apps/desktop`, using workspace packages directly. The retained Windows app vendors an explicit snapshot rather than importing code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
 
 ## How it works
 
@@ -14,7 +14,12 @@ Canonical React screens, domain helpers and design tokens live in this repositor
 - [Windows integration handoff](WINDOWS_API_HANDOFF.md)
 - [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/UI_PARITY.md)
 
-Edit canonical packages here, then use the desktop repo's existing `scripts/sync-bye-shared.mjs` workflow. Keep sample disclosures and web freshness behavior distinct from Windows API freshness.
+Edit canonical packages here. The retained Windows client's `scripts/sync-bye-shared.mjs` workflow is only for that legacy snapshot, not the shared browser/Tauri workspace. Keep sample disclosures and web freshness behavior distinct from Windows API freshness.
+
+Backend contracts are owned by `BYE_Before_You_Enroll`; `packages/api-contracts`
+here is a pinned, independently usable snapshot. From the backend root, run
+`pnpm contracts:check <frontend-checkout>/packages/api-contracts` to verify it.
+See [current ownership and backend relocation inventory](../REPOSITORY_MAP.md).
 
 ## What remains
 

@@ -8,8 +8,9 @@ Choose an area to understand **what we built, why we chose it, how it works, and
 | [Student reviews](reviews/README.md) | Submission, public API, verification and privacy |
 | [Shared UI](shared-ui/README.md) | React packages, design tokens and Windows handoff |
 | [Shared application migration](shared-ui/CROSS_PLATFORM_MIGRATION.md) | Agreed React/TypeScript workspace, Tauri desktop candidate, later Capacitor and frontend/backend ownership |
+| [Repository ownership and relocation inventory](REPOSITORY_MAP.md) | Current frontend packages, transitional backend source, dependencies and future service destinations |
 | [Operations](operations/README.md) | Data access, security, verification and contributor handoff |
 
-The [sibling desktop documentation](../../BYE_Before_You_Enroll/docs/README.md) covers native Mac, Windows, the schedule backend, AI experiments, releases and the product roadmap. Application and package READMEs remain beside their source. The machine-consumed `release-readiness.json` remains in this folder.
+The [sibling backend documentation](../../BYE_Before_You_Enroll/docs/README.md) covers backend contracts, the schedule service, owner administration and migrations, plus retained Mac/Windows clients and release records. Application and package READMEs remain beside their source. The machine-consumed `release-readiness.json` remains in this folder.
 
 For current code ownership, read [AGENTS.md](../AGENTS.md). Consult [data access](operations/DATA_ACCESS.md) and [web beta](web-app/WEB_BETA.md) before any live-source rollout. Historical tests and readiness booleans do not authorize deployment.

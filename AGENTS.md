@@ -12,7 +12,8 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
   2. **Mac app:** a download for Apple Silicon Macs. **Paused since 2026-10-19** (`DOWNLOADS_OPEN = false`) while the app API is finished and the app is redesigned; the Mac card shows "Available soon" and a slim Kit email signup (`#updates`) sits under the install cards.
   3. **Windows app:** shown as "Coming soon" until the owner decides where to host the ZIP (it is too large for Cloudflare Pages).
-- The app's source code lives in a separate repository, `BYE_Before_You_Enroll`, usually checked out beside this one (`../BYE_Before_You_Enroll`).
+- This repository owns the shared React/TypeScript frontend, browser/Tauri hosts and client packages. `BYE_Before_You_Enroll` owns backend contracts, the schedule service and owner dashboard, and database migration records. Retained SwiftUI/Electron sources and release tooling stay there during validation.
+- `server/`, `functions/` and `workers/source/` remain implemented here during the transition. Future backend destinations are `services/web-api/` and `services/source-worker/`; do not relocate implementations or add forwarding services before desktop acceptance. See [current ownership and relocation inventory](docs/REPOSITORY_MAP.md).
 
 ## Files
 
@@ -22,7 +23,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 | `packages/tokens/tokens.json` | **Single source of the BYE design tokens** (colors, type, radii, shadows, tilts, motion) for the website, web app, Windows and Mac apps. Run `pnpm build:tokens` after editing; `pnpm build` and `tests/tokens.test.ts` fail if `generated/` is stale | Yes (then rebuild) |
 | `packages/tokens/generated/` | **Generated** `tokens.css`, Tailwind `theme.css` (imported by `apps/landing`) and `BYETokens.swift` (copied into the Mac app) | **No** |
 | `packages/core/` | Shared domain logic and types; `vectors/` holds JSON test cases every app must pass | Yes |
-| `packages/ui/` | Shared React screens (professor card, report, sections, chooser, motion) used by `apps/web` and vendored by the Windows app | Yes |
+| `packages/app/`, `packages/api-client/` | Shared React application and injected browser/Tauri client adapters | Yes |
+| `apps/preview/`, `apps/desktop/` | Isolated fictional browser preview and Tauri host mounting `packages/app` | Yes |
+| `packages/api-contracts/` | Pinned backend-owned contract snapshot with `SOURCE.json` hashes | Export intentionally from the backend; do not hand-edit |
+| `packages/ui/` | Canonical shared React screens used by browser/shared app; retained Windows client vendors a snapshot | Yes |
 | `public/index.html`, `public/site/` | **Generated** prerendered home page and its hashed assets. Rebuild with `pnpm build:landing` | **No** |
 | `public/404.html` | Not-found page; standalone with its own inline CSS | Yes |
 | `archive/landing-ivory/` | Backup of the previous hand-written landing page (2026-10-17). Not deployed | Only to restore it |
@@ -136,6 +140,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-21 repository structure preparation:** Ownership maps now distinguish the implemented shared frontend, retained legacy clients and backend code temporarily hosted here. Backend root pnpm tooling verifies contracts independently; no runtime code, contract hashes, deployment configuration or release files moved. The dependency/test/tooling inventory in `docs/REPOSITORY_MAP.md` records the later relocation boundary. Full desktop acceptance and staging/rollback gates remain in force.
 
 - **Shared frontend trial:** `apps/preview` and `apps/desktop` mount `packages/app` with browser/Tauri adapters, canonical UI/core/tokens and a pinned backend contract snapshot. React + TypeScript is agreed; Tauri 2 is the desktop candidate, Capacitor later; Electron is legacy only. Production entry points remain unchanged. See [trial source, commands, verification and remaining Mac gate](docs/shared-ui/SHARED_APP_TRIAL.md). Backend relocation, replacement and releases await their explicit gates.
 
