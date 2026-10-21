@@ -11,7 +11,7 @@ import { ByeReviews } from './bye-reviews'
 const SORTS = [['rating', 'Rating'], ['difficulty', 'Difficulty'], ['reviews', 'Reviews']] as const
 
 // Results: course header, filters and the professor list on the left, the professor page (or the neutral overview) on the right.
-// The row, page and overview are the shared screens with the Mac app's extras turned on (see vendor/bye-shared/ui/report.tsx).
+// The row, report and overview use the canonical @bye/ui workspace screens.
 export function Results(props: {
   state: Snapshot; title: string; summary: string; filtered: Professor[]; displayed: Professor[]; showAll: boolean; setShowAll: (v: boolean) => void
   days: Weekday[]; setDays: (d: Weekday[]) => void; onlineOnly: boolean; setOnlineOnly: (v: boolean) => void; sort: string; setSort: (s: string) => void

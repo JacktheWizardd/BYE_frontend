@@ -2,8 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { Course, Professor } from '@bye/core/types'
 import type { Run } from './types'
 
-// The Windows-only parts of the professor screens. The row, the professor page and the course overview are the shared
-// screens in vendor/bye-shared/ui (ProfessorRow, Report, EmptyDetail) with the Mac app’s extras turned on in results.tsx.
+// Optional report extensions; the core row/report/overview come from @bye/ui.
 export const DISCLAIMER = 'Ratings reflect student feedback across reviewed courses. They don’t guarantee a grade.'
 
 // Retained for builds with the AI policy enabled; the current Windows policy keeps it off.

@@ -1,9 +1,5 @@
 # Shared UI
 
-The [shared application trial](SHARED_APP_TRIAL.md) adds an isolated browser/Tauri
-preview using canonical workspace packages. It records extraction provenance,
-verification and the remaining real-Mac acceptance gate.
-
 ## What we built and why
 
 Canonical React screens, domain helpers and design tokens live in this repository so browser and Windows behavior can evolve together. Windows vendors an explicit snapshot rather than importing browser code across checkouts. BYE reviews appear before RMP with independent labels and states; their ratings and text are never merged.
@@ -20,6 +16,9 @@ Edit canonical packages here, then use the desktop repo's existing `scripts/sync
 
 ## What remains
 
-The requested BYE/RMP source toggle is a separate UI change. Mac remains native SwiftUI; shared React components do not automatically update it. Test actual consumers after future component changes; this task only reorganizes documentation.
+The requested BYE/RMP source toggle is a separate UI change. The existing Mac
+source remains SwiftUI. The [shared application trial](SHARED_APP_TRIAL.md) adds
+isolated browser/Tauri hosts using canonical workspace packages, with source
+provenance, verification and the remaining real-Mac acceptance gate.
 
 [All documents](../README.md)

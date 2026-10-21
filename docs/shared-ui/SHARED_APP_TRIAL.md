@@ -46,7 +46,7 @@ Exact input files/hashes are recorded in [MIGRATION_SOURCE.json](MIGRATION_SOURC
 | Website public contract types + backend checked-in OpenAPI | Backend `packages/api-contracts`; pinned frontend snapshot |
 | Existing desktop branding icon | `apps/desktop/src-tauri/icons` (resized using Tauri icon tooling) |
 
-Baseline main: website `6f9ebb3b5fb0c81c4c8fc8ef406114e02156020e`, desktop
+Extraction baseline main: website `6f9ebb3b5fb0c81c4c8fc8ef406114e02156020e`, desktop
 `c137d3922d4a3105691d2461ebf47a02a7486245`. All eight instruction hashes matched
 the local manifest before implementation. Original working checkouts remain
 untouched, including newer schedule integrations. Desktop PR #8 remains a separate
@@ -54,6 +54,13 @@ runtime/documentation workstream; its Electron/native changes are not overwritte
 or implicitly merged. PRs #9/#13 carry the updated architecture decision.
 Coordination script `scripts/agents.py` cannot run in this Windows environment
 because its Unix `fcntl` import fails; no board state was fabricated.
+
+Before publication, branches were rebased onto website main
+`2fed520ef76292e0d89fb303c5af5f6a56bce00c` and desktop main
+`c4cbcd023a7e16ce429ad99920a218117cff6257`. Those later owner changes retire
+the legacy apps and disable their network features. The isolated fixture preview
+does not undo those switches, reopen production, or alter the final 0.4.1 release
+assets. Live-mode source remains opt-in engineering work, not an authorized rollout.
 
 ## Run locally
 
@@ -98,7 +105,8 @@ Recorded on Windows with repository fixtures; no public deployment performed:
   response tests passed. Includes all-selected-days, asynchronous/unknown-day and
   stale-seat rules, abort/race/profile identity, independent source errors,
   failed saves, HTTP 429 and malformed review responses.
-- Existing website production build passed with generated public blobs unchanged.
+- Existing website production build passed; generated output is excluded from this
+  migration change, preserving current main's production files and release assets.
   Existing Chromium/WebKit browser suite passed at 375/390/1280; local Pages
   runtime acceptance passed. These are fixture checks, not live-data rollout evidence.
 - Shared preview Chromium/WebKit passed at 390 and 1280, including no automatic

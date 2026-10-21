@@ -15,8 +15,8 @@ import { isMac, shortcut, type Run } from './app/types'
 import '@bye/ui/styles.css'
 import './app/app.css'
 
-// The Windows app follows the approved v3 design (docs/APP_REDESIGN_PLAN.md in the website repository) and the Mac app's
-// behavior (Sources/Classwise/Views). Shared screens and tokens come from vendor/bye-shared (synced from the website).
+// Shared v3 shell extracted from the legacy Windows renderer. UI/core/tokens are
+// canonical workspace dependencies; native responsibilities are injected.
 const empty: Snapshot = { operationId: '', professors: [], loading: false, previewPending: 0 }
 const RECENT_LIMIT = 5
 // Each opened class keeps its own screen for this session, like a browser tab: the last finished results and every choice on them.
@@ -198,7 +198,7 @@ function Sidebar({ name, recent, active, onHome, onClass, onMenu, onRemove, onSe
     </nav>
     <span className="spacer" />
     <button className="sidebar-me" onClick={onSettings} aria-label="Your name and settings">
-      <span className="avatar ink">{name ? [...name][0].toUpperCase() : '?'}</span><span className="truncate">{name || 'Guest'}</span><span className="muted" aria-hidden="true">⚙</span>
+      <span className="avatar ink">{name ? [...name][0].toUpperCase() : '?'}</span><span className="truncate">{name || 'Guest'}</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3" fill="var(--bye-paper)"/><circle cx="15" cy="17" r="3" fill="var(--bye-paper)"/></svg>
     </button>
   </aside>
 }

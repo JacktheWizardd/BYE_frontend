@@ -45,6 +45,8 @@ try {
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `Horizontal overflow at ${width}`)
         await page.screenshot({ path: `test-results/shared-app/${name}-${width}-report.png`, fullPage: true })
         if (width === 390) {
+          const back = await page.getByRole('button', { name: 'Professors', exact: true }).boundingBox()
+          assert(back && back.height >= 44 && back.width >= 44, 'Phone back target must be at least 44px')
           await page.goBack()
           await page.locator('.sidebar-list').waitFor({ state: 'visible' })
           assert.equal(await page.locator('.detail').isVisible(), false)
