@@ -1,6 +1,6 @@
 # Shared UI
 
-> **Proposed direction (October 20, 2026):** See [cross-platform migration and repository decisions](CROSS_PLATFORM_MIGRATION.md). The shared React/Tauri/Capacitor architecture is under evaluation, not implemented. Current website, Windows-vendored snapshot and native Mac behavior remain unchanged.
+> **Agreed direction:** [Shared application migration](CROSS_PLATFORM_MIGRATION.md): React/TypeScript, Tauri desktop candidate, later Capacitor, with frontend and backend ownership in the existing two repositories. Electron is legacy only; replacement remains subject to validation.
 
 ## What we built and why
 
