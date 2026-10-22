@@ -1,10 +1,10 @@
 export interface Course { subject: string; number: string; key: string; display: string; matchingKey: string }
-export interface Term { termCode: string; termName: string; termDisplayControl: string }
+export interface Term { termCode: string; termName: string; termDisplayControl: string; semesterStatus?: 'unknown' | 'upcoming' | 'current' | 'archived'; officialStartDate?: string | null; officialEndDate?: string | null; archivedAt?: string | null }
 export type Row = Record<string, string | number | null>
 export interface Suggestion { course: Course; title: string }
 export interface SectionDetails { seatsOpen?: number; capacity?: number; waitlistCount?: number; waitlistCapacity?: number; termPart: string; campus: string; units: string }
 export type Weekday = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
-export interface SourceMeta { schedule?: import('./schedule-api').ScheduleMeta; cacheStatus?: 'hit' | 'miss' | 'stale'; retrievedAt: number; stale: boolean; source: 'pcc' | 'rmp'; expiresAt?: number }
+export interface SourceMeta { semesterStatus?: Term['semesterStatus']; archivedAt?: string | null; schedule?: import('./schedule-api').ScheduleMeta; cacheStatus?: 'hit' | 'miss' | 'stale'; retrievedAt: number; stale: boolean; source: 'pcc' | 'rmp'; expiresAt?: number }
 export interface ByeReviewState {
   loading: boolean; issue?: string; ratingIssue?: string
   resolution?: import('./reviews').ByeResolution; profile?: import('./reviews').ByeRatingProfile

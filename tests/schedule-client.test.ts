@@ -46,3 +46,25 @@ test('redirects, rate limits and revoked keys fail closed without leaking upstre
     await assert.rejects(client.terms(AbortSignal.timeout(5000)),error=>error instanceof Error&&!error.message.includes('private'))
   }
 })
+
+
+test('availability expires at two minutes, honors shorter server deadlines, and rejects invalid deadlines',()=>{
+  const now=Date.parse('2026-10-22T12:00:00Z');
+  const value={term:'202670',catalogVersion:'v',availabilityVersion:'v',stale:false,sourceCheckedAt:new Date(now-119999).toISOString()};
+  assert.equal(expired(value,now),false);
+  assert.equal(expired(value,now+1),true);
+  assert.equal(expired({...value,availabilityExpiresAt:new Date(now-1).toISOString()},now),true);
+  assert.equal(expired({...value,availabilityExpiresAt:'invalid'},now),true);
+  assert.equal(expired({...value,availabilityExpiresAt:new Date(now+1000000).toISOString()},now+1),true);
+  assert.equal(expired({...value,availabilityExpiresAt:null},now),true);
+});
+test('successful unchanged source checks restore expired availability without replacing course sections',async()=>{
+  const f=fixture(),signal=AbortSignal.timeout(5000);
+  f.setMeta({...f.getMeta(),sourceCheckedAt:new Date(Date.now()-121000).toISOString(),stale:true});
+  const old=await f.pcc.courseSections('202670','math5ah',signal);assert.equal(old.rows[0].seatsAvail,null);
+  f.setMeta({...f.getMeta(),sourceCheckedAt:new Date().toISOString(),stale:false});
+  f.sections[0].availability!.seatsAvailable=0;f.sections[0].availability!.waitlistCount=null;
+  const next=await f.pcc.courseSections('202670','math5ah',signal);
+  assert.equal(next.rows[0].seatsAvail,0);assert.equal(next.rows[0].waitCount,null);
+  assert.equal(f.requests.filter(p=>p.endsWith('/sections')).length,1);
+});

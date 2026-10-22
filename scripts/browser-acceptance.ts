@@ -59,7 +59,7 @@ try {
         const small = await page.locator('button:visible').evaluateAll(elements => elements.filter(el => el.isConnected && el.getBoundingClientRect().height < 43.9).map(el => ({ text: el.textContent, height: el.getBoundingClientRect().height })))
         assert.deepEqual(small, [], 'Visible buttons meet the 44px target')
         await page.screenshot({ path: `test-results/${name}-${width}-report.png`, fullPage: true })
-        await page.clock.fastForward(300_001)
+        await page.clock.fastForward(120_001)
         await page.getByText('Older schedule · seat counts hidden', { exact: false }).filter({ visible: true }).first().waitFor()
         assert.equal(await page.locator('.seats:visible').count(), 0, 'Expired seat counts disappear while the report remains open')
         if (width < 760) { await page.goBack(); await page.locator('.list-pane:visible').waitFor(); await page.goBack() }

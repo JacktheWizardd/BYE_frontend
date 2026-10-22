@@ -14,7 +14,7 @@ export function scheduleFixture(terms:Term[],rows:Row[]) {
   });
   return (request:Request):Response=>{
     const url=new URL(request.url),parts=url.pathname.split('/').filter(Boolean),term=parts[2];
-    const meta={term,catalogVersion:'fixture-catalog',availabilityVersion:'fixture-seats',sourceCheckedAt:checkedAt,stale:false};
+    const meta={term,catalogVersion:'fixture-catalog',availabilityVersion:'fixture-seats',sourceCheckedAt:checkedAt,availabilityExpiresAt:new Date(Date.parse(checkedAt)+120_000).toISOString(),stale:false};
     let data:unknown;
     if(url.pathname==='/v1/terms') data=terms.map(t=>({termCode:t.termCode,name:t.termName}));
     else if(parts[3]==='manifest')data=meta;

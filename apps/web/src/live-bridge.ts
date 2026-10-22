@@ -126,6 +126,7 @@ export class LiveBridge implements Bridge {
   }
   private startSchedulePolling() {
     if(typeof document==='undefined') return
+    if(this.state.source?.semesterStatus === 'archived') {this.scheduleStopped=true;this.pauseSchedule();return}
     this.scheduleStopped=false
     if(!this.lifecycleInstalled) {
       this.lifecycleInstalled=true
@@ -137,7 +138,7 @@ export class LiveBridge implements Bridge {
   }
   private scheduleNext() {
     if(this.pollTimer)clearTimeout(this.pollTimer); this.pollTimer=undefined
-    if(!this.scheduleStopped && typeof document!=='undefined' && !document.hidden && navigator.onLine && this.state.course) this.pollTimer=setTimeout(()=>{void this.refreshSchedule()},Math.min(900_000,60_000*2**this.scheduleFailures)*(0.9+Math.random()*0.2))
+    if(!this.scheduleStopped && typeof document!=='undefined' && !document.hidden && navigator.onLine && this.state.course) this.pollTimer=setTimeout(()=>{void this.refreshSchedule()},Math.min(900_000,15_000*2**this.scheduleFailures)*(0.9+Math.random()*0.2))
   }
   private armScheduleExpiry() {
     if(this.expiryTimer)clearTimeout(this.expiryTimer); this.expiryTimer=undefined
@@ -159,7 +160,7 @@ export class LiveBridge implements Bridge {
     } else this.armScheduleExpiry()
   }
   private async refreshSchedule(manual=false) {
-    if(this.polling || !this.state.course || !this.state.term || this.state.loading || (!manual && (this.scheduleStopped || typeof document==='undefined' || document.hidden || !navigator.onLine))) return
+    if(this.state.source?.semesterStatus === 'archived' || this.polling || !this.state.course || !this.state.term || this.state.loading || (!manual && (this.scheduleStopped || typeof document==='undefined' || document.hidden || !navigator.onLine))) return
     this.polling=true;const controller=new AbortController();this.scheduleController=controller
     const signal=AbortSignal.any([this.run.signal,controller.signal]),operation=this.state.operationId
     try {

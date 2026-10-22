@@ -143,7 +143,8 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
           <label htmlFor="term">Semester</label>
           <select id="term" value={termCode} disabled={!terms.length} onChange={e => setTermCode(e.target.value)}>
             {!terms.length && <option value="">Loading semesters…</option>}
-            {terms.map(t => <option key={t.termCode} value={t.termCode}>{t.termName}</option>)}
+            {terms.filter(t=>t.semesterStatus !== 'archived').map(t => <option key={t.termCode} value={t.termCode}>{t.termName}</option>)}
+            {terms.some(t=>t.semesterStatus === 'archived') && <optgroup label="Archived semesters">{terms.filter(t=>t.semesterStatus === 'archived').map(t=><option key={t.termCode} value={t.termCode}>{t.termName}</option>)}</optgroup>}
           </select>
         </div>
         <div className="field">
@@ -170,7 +171,7 @@ function App() {
   const [showOther, setShowOther] = useState(false), [recent, setRecent] = useState<Recent[]>(loadRecent)
   const lastOperation = useRef(''), opened = useRef(''), listScroll = useRef(0)
   const [sourceClock,setSourceClock]=useState(Date.now)
-  useEffect(()=>{if(isDemo)return;const timer=setInterval(()=>{if(!document.hidden)setSourceClock(Date.now())},60_000);return()=>clearInterval(timer)},[])
+  useEffect(()=>{if(isDemo)return;const timer=setInterval(()=>{if(!document.hidden)setSourceClock(Date.now())},15_000);return()=>clearInterval(timer)},[])
   const command = (c: Command) => { bridge.command(c).catch(e => setError(e instanceof Error ? e.message : 'This action failed. Try again.')) }
 
   // Each screen is a history entry, so the phone's back gesture returns to the previous screen instead of leaving.
@@ -261,9 +262,9 @@ function App() {
             <div className="results-title">
               <span className="title-line">{course ? <span className="chip">{course.display}</span> : <span className="muted">Finding sections…</span>}{title && <span className="course-title">{title}</span>}<SampleTag>Sample data</SampleTag></span>
               <span className="muted small">{state.term?.termName}</span>
-              {!isDemo && state.source && <span className="muted small" role="status">{state.source.stale || Math.max(sourceClock,Date.now())>=availabilityDeadline(state.source) ? 'Older schedule · seat counts hidden' : 'Checked '+Math.max(0,Math.floor((Math.max(sourceClock,Date.now())-state.source.retrievedAt)/60_000))+' min ago'}</span>}
+              {!isDemo && state.source && <span className="muted small" role="status">{state.source.semesterStatus === 'archived' ? 'Archived semester · For reference' : state.source.stale || Math.max(sourceClock,Date.now())>=availabilityDeadline(state.source) ? 'Older schedule · seat counts hidden' : 'Checked '+Math.max(0,Math.floor((Math.max(sourceClock,Date.now())-state.source.retrievedAt)/60_000))+' min ago'}</span>}
             </div>
-            {!isDemo && course && <button className="text-link" disabled={state.loading} onClick={()=>state.term && command({kind:'search',query:course.display,term:state.term,refresh:true})}>Refresh</button>}
+            {!isDemo && course && state.source?.semesterStatus !== 'archived' && <button className="text-link" disabled={state.loading} onClick={()=>state.term && command({kind:'search',query:course.display,term:state.term,refresh:true})}>Refresh</button>}
             {state.loading ? <button className="text-link" onClick={() => command({ kind: 'stop' })}>Stop</button> : <button className="text-link" onClick={back}>Edit</button>}
           </div>
           {state.professors.length > 0 && state.loading && <div className="progress" role="status">

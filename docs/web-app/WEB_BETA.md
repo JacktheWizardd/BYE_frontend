@@ -96,3 +96,15 @@ Builds from `main` failed from `e79f6c5` on: Pages had no build command, so depe
 ### October 21, 2026 — local Windows/web completion
 
 The live results header now exposes Refresh and the source-check age. Refresh retains valid instructor/profile choices and does not select replacements. Hidden/offline transitions cancel active polling; Stop does not prevent seat/waitlist expiry. The legacy source retains its five-minute policy and shared schedule responses retain their explicit fifteen-minute deadline. Overview totals deduplicate co-instructor CRNs and never present a partial count as complete. Type checking, 96 tests, source builds, local workerd acceptance, Chromium/WebKit schedule checks at 375/390/1280 and review-flow checks at 390/1280 passed. Changes are local/uncommitted; source flags and deployment state are unchanged.
+
+
+## Current state — all-semester freshness follow-up
+
+The shared schedule backend has the multi-term schema and two-minute availability policy deployed. This repository's local client polls every fifteen seconds while visible/online, honors the shared deadline with a two-minute ceiling, and preserves valid profile choices. All published years are eligible for import. Faster source collection remains disabled pending capacity/source evidence; a sixty-second target is not a verified freshness guarantee. Ninety-eight local tests, typecheck/build, Pages/Worker acceptance, Chromium/WebKit at 375/390/1280px, and full-app recovery at 390/1280px passed. Public website/source flags and launch state are unchanged. Hosted import status is recorded in the sibling backend's docs/all-semesters.md.
+
+## Current state — archived semester support, October 21, 2026
+The local live-app source carries archive lifecycle metadata, groups archived terms, labels historical results and stops archive availability polling. API v8/sync v9 and official dates are deployed in the shared backend. This source is built and verified locally; the public website was not activated or deployed. Existing launch gates stay false. Chromium/WebKit archive acceptance passes at 390px and 1280px, in addition to the existing unit/build/runtime/browser suites.
+
+GitHub Desktop Summary: Support searchable archived semesters in the live app
+
+Description: Preserve archive metadata through the shared schedule adapter and same-origin API, group historical semester choices, show reference labels and stop archive availability polling. Add fictional archive browser acceptance covering phone/desktop layouts and no background polling. Verified 98 unit tests, typecheck/build, Pages/workerd runtime, existing browser suites and archive checks at 390px/1280px. Changes remain uncommitted; public deployment and source-access launch gates are unchanged.

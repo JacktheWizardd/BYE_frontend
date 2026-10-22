@@ -6,7 +6,7 @@ export class SchedulePCC {
   private catalogs=new Map<string,{data:ScheduleCourse[];version:string}>()
   private entries=new Map<string,{term:string;key:string;course:ScheduleCourse;sections:ScheduleSection[];meta:ScheduleMeta}>()
   constructor(readonly client:ScheduleClient) {}
-  async terms():Promise<Term[]> {return (await this.client.terms(AbortSignal.timeout(20_000))).data.map(t=>({termCode:t.termCode,termName:t.name,termDisplayControl:'Y'}))}
+  async terms():Promise<Term[]> {return (await this.client.terms(AbortSignal.timeout(20_000))).data.map(t=>({termCode:t.termCode,termName:t.name,termDisplayControl:'Y',semesterStatus:t.semesterStatus,officialStartDate:t.officialStartDate,officialEndDate:t.officialEndDate,archivedAt:t.archivedAt}))}
   async schedule(term:string):Promise<Row[]> {
     const catalog=await this.client.catalog(term,AbortSignal.timeout(20_000));
     return catalog.data.map(c=>({termCode:term,subjCode:c.subject,courseNumbDisplay:c.number,courseTitle:c.title,crn:'00000'}));
@@ -29,7 +29,7 @@ export class SchedulePCC {
       current={term,key:c.key,course:c,sections:sections.data,meta:sections.meta};
     } else {
       const mustRefresh=previous.meta.availabilityVersion!==manifest.meta.availabilityVersion || expired(previous.meta)!==expired(manifest.meta);
-      if(mustRefresh && previous.sections.length) {
+      if(manifest.meta.semesterStatus !== 'archived' && mustRefresh && previous.sections.length) {
         const crns=[...new Set(previous.sections.map(s=>s.crn))];
         const values=new Map<string,ScheduleSection['availability']>();
         for(let i=0;i<crns.length;i+=100) for(const item of (await this.client.availability(term,crns.slice(i,i+100),signal)).data) values.set(item.crn,item.availability);

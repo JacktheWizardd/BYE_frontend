@@ -1,6 +1,6 @@
 // Portable v1 schedule consumer. Source facts are never inferred from counts.
 export interface ScheduleCourse { key: string; subject: string; number: string; title: string }
-export interface ScheduleTerm { termCode: string; name: string; published?: boolean }
+export interface ScheduleTerm { termCode: string; name: string; published?: boolean; semesterStatus?: 'unknown' | 'upcoming' | 'current' | 'archived'; officialStartDate?: string | null; officialEndDate?: string | null; archivedAt?: string | null }
 export interface ScheduleAvailability { statusCode: string | null; enrolled: number | null; capacity: number | null; seatsAvailable: number | null; waitlistCount: number | null; waitlistCapacity: number | null; waitlistAvailable: number | null }
 export interface ScheduleSection {
   crn: string; courseKey: string; units: string | null; information: Record<string, unknown>;
@@ -8,12 +8,17 @@ export interface ScheduleSection {
   instructors: { assignmentId: string; role: 'primary' | 'secondary'; name: string | null }[];
   availability: ScheduleAvailability | null;
 }
-export interface ScheduleMeta { term: string; catalogVersion: string; availabilityVersion: string; sourceCheckedAt: string | null; stale: boolean; refreshPolicy?: { targetSeconds: number; aggregateMinimumSeconds: number; nextEligibleAt: string; published: boolean } }
+export interface ScheduleMeta { semesterStatus?: ScheduleTerm['semesterStatus']; officialStartDate?: string | null; officialEndDate?: string | null; archivedAt?: string | null; term: string; catalogVersion: string; availabilityVersion: string; sourceCheckedAt: string | null; stale: boolean; availabilityExpiresAt?: string | null; refreshPolicy?: { fastEnabled?: boolean; targetSeconds: number; aggregateMinimumSeconds: number; nextEligibleAt: string; published: boolean } }
 export interface ScheduleEnvelope<T> { data: T; meta: ScheduleMeta }
 export class ScheduleError extends Error {
   constructor(readonly code: string, readonly retryAfter = 0) { super(code === 'UNCONFIGURED' ? 'The BYE schedule service is not configured.' : 'The BYE schedule service is unavailable. Try again shortly.') }
 }
-export const expired = (meta: Pick<ScheduleMeta,'sourceCheckedAt'|'stale'>, now = Date.now()) => meta.stale || !meta.sourceCheckedAt || !Number.isFinite(Date.parse(meta.sourceCheckedAt)) || now - Date.parse(meta.sourceCheckedAt) >= 900_000 || Date.parse(meta.sourceCheckedAt) > now + 60_000;
+export const availabilityDeadline = (meta: Pick<ScheduleMeta,'sourceCheckedAt'|'availabilityExpiresAt'>) => {
+  const checked = meta.sourceCheckedAt ? Date.parse(meta.sourceCheckedAt) : NaN;
+  const deadline = meta.availabilityExpiresAt === undefined ? checked + 120_000 : meta.availabilityExpiresAt === null ? NaN : Date.parse(meta.availabilityExpiresAt);
+  return Number.isFinite(checked) && Number.isFinite(deadline) ? Math.min(checked + 120_000, deadline) : 0;
+};
+export const expired = (meta: Pick<ScheduleMeta,'sourceCheckedAt'|'stale'|'availabilityExpiresAt'>, now = Date.now()) => meta.stale || !meta.sourceCheckedAt || !Number.isFinite(Date.parse(meta.sourceCheckedAt)) || now >= availabilityDeadline(meta) || Date.parse(meta.sourceCheckedAt) > now + 60_000;
 
 export class ScheduleClient {
   private cache = new Map<string,{etag:string; body:ScheduleEnvelope<unknown>}>();

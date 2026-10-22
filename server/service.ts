@@ -1,3 +1,4 @@
+import {availabilityDeadline as scheduleDeadline, expired as scheduleExpired} from '../packages/core/schedule-api'
 import { course, eligible, identity, normalizedName, professors, resolve, suggestions } from '../packages/core/domain'
 import type { Profile, Row, Term } from '../packages/core/types'
 import type { CourseSchedule } from './schedule-pcc'
@@ -66,7 +67,7 @@ export class SourceService {
     const term = input(params.get('term'), 6, 'semester')
     if(kind==='courses' && this.pcc.suggest) return {data:await this.pcc.suggest(term,input(params.get('query'),120,'course search')),meta:{source:'pcc',retrievedAt:this.now(),stale:false}} as Envelope<ApiResults[K]>
     const shared=this.pcc.courseSections ? await this.pcc.courseSections(term,input(params.get('course')??params.get('query'),100,'course'),AbortSignal.timeout(20_000)) : undefined
-    const schedule:Envelope<Row[]> = shared ? {data:shared.rows,meta:{source:'pcc',retrievedAt:shared.meta.sourceCheckedAt ? Date.parse(shared.meta.sourceCheckedAt) : 0,stale:shared.meta.stale,expiresAt:shared.meta.sourceCheckedAt ? Date.parse(shared.meta.sourceCheckedAt)+900_000 : 0,schedule:shared.meta}} : await this.schedule(term)
+    const schedule:Envelope<Row[]> = shared ? {data:shared.rows,meta:{source:'pcc',semesterStatus:shared.meta.semesterStatus,archivedAt:shared.meta.archivedAt,retrievedAt:shared.meta.sourceCheckedAt ? Date.parse(shared.meta.sourceCheckedAt) : 0,stale:scheduleExpired(shared.meta,this.now()),expiresAt:scheduleDeadline(shared.meta),schedule:shared.meta}} : await this.schedule(term)
     if (kind === 'courses') {
       const query = input(params.get('query'), 120, 'course search')
       return { ...schedule, data: suggestions(query, schedule.data) } as Envelope<ApiResults[K]>
