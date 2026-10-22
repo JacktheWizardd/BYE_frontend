@@ -6,4 +6,4 @@
 /download /downloads/BYE-0.5.0-AppleSilicon.dmg 302
 # Windows: the installer lives on the public BYE-releases GitHub repository (too large for Pages).
 # To ship a new Windows version, upload it to a new release there and change this line.
-/download/windows https://github.com/JacktheWizardd/BYE-releases/releases/download/v0.5.0-beta.1/BYE-Setup-0.4.0-beta.1-windows-x64.exe 302
+/download/windows https://github.com/JacktheWizardd/BYE-releases/releases/download/v0.5.0/BYE-Setup-0.5.0-windows-x64.exe 302
