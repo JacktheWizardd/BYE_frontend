@@ -3,8 +3,11 @@ import { readFile, readdir } from 'node:fs/promises'
 for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.html', 'public/app/index.html', 'public/reviews/index.html']) {
   assert.match(await readFile(path, 'utf8'), /name="robots" content="noindex/)
 }
-// Downloads are paused: /download must still exist and go to the install cards until DOWNLOADS_OPEN is true again.
-assert.match(await readFile('public/_redirects', 'utf8'), /^\/download \/#download 302/m)
+// Downloads are open: /download goes to the newest Mac DMG, and that DMG must exist.
+const dmg = (await readFile('public/_redirects', 'utf8')).match(/^\/download \/downloads\/(BYE-[\w.-]+-AppleSilicon\.dmg) 302$/m)?.[1]
+assert.ok(dmg, '/download must redirect to a DMG in /downloads/'); await readFile('public/downloads/' + dmg)
+// Windows: /download/windows goes to an installer on the public BYE-releases repository.
+assert.match(await readFile('public/_redirects', 'utf8'), /^\/download\/windows https:\/\/github\.com\/JacktheWizardd\/BYE-releases\/releases\/download\/[\w.-]+\/BYE-Setup-[\w.-]+-windows-x64\.exe 302$/m)
 // Site-wide CSP: same-origin scripts and connections only (a script here could read a student's email
 // from /api/reviews/session), and no framing. /reviews/ may add only the Turnstile host.
 // Git may check _headers out with CRLF on Windows; compare rules, not line endings.
@@ -19,7 +22,7 @@ const landing = await readFile('public/index.html', 'utf8')
 // Web use stays on the labeled sample-data demo; the live /app/ is paused. Reviews are linked.
 assert.match(landing, /href="\/demo\/"/); assert.match(landing, /Sample data for now/); assert.match(landing, /href="\/reviews\/"/); assert.doesNotMatch(landing, /href="\/app\/"/)
 // The prerendered home page loads only its own hashed assets from /site/.
-assert.doesNotMatch(landing, /href="\/download"/); assert.match(landing, /id="updates"/); assert.match(landing, /href="mailto:byebeforeyouenroll@gmail\.com/); assert.doesNotMatch(landing, /REPLACE WITH/)
+assert.match(landing, /href="\/download"/); assert.match(landing, /id="updates"/); assert.match(landing, /href="mailto:byebeforeyouenroll@gmail\.com/); assert.doesNotMatch(landing, /REPLACE WITH/)
 // The update signup posts straight to Kit (no Kit script), and the CSP must allow that form target.
 assert.match(landing, /<form[^>]* action="https:\/\/app\.kit\.com\/forms\/\d+\/subscriptions" method="post"/); assert.match(landing, /name="email_address"/)
 assert.ok(csp('/*').includes("form-action 'self' https://app.kit.com"), 'Site CSP must allow the Kit signup form')

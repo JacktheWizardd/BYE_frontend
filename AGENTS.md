@@ -10,8 +10,8 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get three ways to use BYE:
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
-  2. **Mac app:** a download for Apple Silicon Macs. **Paused since 2026-10-19** (`DOWNLOADS_OPEN = false`) while the app API is finished and the app is redesigned; the Mac card shows "Available soon" and a slim Kit email signup (`#updates`) sits under the install cards.
-  3. **Windows app:** shown as "Coming soon" until the owner decides where to host the ZIP (it is too large for Cloudflare Pages).
+  2. **Mac app:** a download for Apple Silicon Macs. **Reopened 2026-10-22 with 0.5.0** (`DOWNLOADS_OPEN = true`; it was paused from 2026-10-19). Setting it false shows "Available soon" on the Mac card; a slim Kit email signup (`#updates`) sits under the install cards.
+  3. **Windows app:** `/download/windows` redirects to the installer on the public `JacktheWizardd/BYE-releases` GitHub repository (too large for Cloudflare Pages; chosen 2026-10-22). `WINDOWS_OPEN` in `content/site.ts` switches the card back to "Available soon".
 - This repository owns the shared React/TypeScript frontend, browser/Tauri hosts and client packages. `BYE_Before_You_Enroll` owns backend contracts, the schedule service and owner dashboard, and database migration records. Retained SwiftUI/Electron sources and release tooling stay there during validation.
 - `server/`, `functions/` and `workers/source/` remain implemented here during the transition. Future backend destinations are `services/web-api/` and `services/source-worker/`; do not relocate implementations or add forwarding services before desktop acceptance. See [current ownership and relocation inventory](docs/REPOSITORY_MAP.md).
 

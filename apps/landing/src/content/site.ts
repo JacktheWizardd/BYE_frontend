@@ -4,10 +4,14 @@
 export const DEMO_URL = '/demo/'
 // DOWNLOAD LINK: /download redirects to the newest Mac DMG (see public/_redirects). Never change this path.
 export const DOWNLOAD_URL = '/download'
-// Downloads are paused while the app API is finished and the app is redesigned. While false, the Mac
-// card shows "Available soon" and /download redirects to /#download (the install cards).
-// To reopen: set true, restore the DMG line in public/_redirects and update scripts/verify-static.mjs.
-export const DOWNLOADS_OPEN = false
+// Mac downloads reopened with 0.5.0 (2026-10-22). While false, the Mac card shows "Available soon" and
+// /download redirects to /#download (the install cards). To pause: set false, swap the two lines in
+// public/_redirects and update scripts/verify-static.mjs.
+export const DOWNLOADS_OPEN = true
+// WINDOWS LINK: /download/windows redirects to the installer on the public BYE-releases GitHub repository
+// (public/_redirects). The installer is too large for Cloudflare Pages. Never change this path.
+export const WINDOWS_DOWNLOAD_URL = '/download/windows'
+export const WINDOWS_OPEN = true
 // NEWSLETTER LINK: the Kit form that collects update emails. Find the ID in Kit → Grow → Landing pages
 // & forms → "BYE website signup" → Embed → HTML (the number in the form action). Empty shows "Signup opens soon".
 export const KIT_FORM_ID = '10068136'
@@ -20,7 +24,6 @@ export const FEEDBACK_URL = '#feedback'
 
 export const DEMO_LABEL = 'Sample data for now'
 export const MAC_REQUIREMENTS = 'Apple Silicon · macOS 14 or newer'
-export const WINDOWS_STATUS = 'Windows · available soon'
 
 export const nav = [
   { href: '#how', label: 'How it works' },

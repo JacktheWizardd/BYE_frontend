@@ -26,7 +26,7 @@ export function Hero() {
           <p className="mt-6 max-w-[30rem] text-lg leading-relaxed text-ink-2 lg:text-xl">
             Every section of a PCC class next to professor ratings, difficulty and student reviews. You choose; BYE never picks for you.
           </p>
-          {/* Phones and tablets lead with the web demo; desktop leads with Install (Mac now, Windows coming soon). */}
+          {/* Phones and tablets lead with the web demo; desktop leads with Install (Mac and Windows). */}
           <div className="mt-8 flex flex-col gap-3 md:flex-row md:flex-wrap">
             <a href={DEMO_URL} className="btn btn-primary lg:hidden">Try the web demo <ArrowRight className="size-5" /></a>
             <a href="#download" className="btn lg:hidden">{DOWNLOADS_OPEN ? 'Install on Mac or Windows' : 'Mac and Windows · available soon'}</a>
@@ -34,7 +34,7 @@ export function Hero() {
             <a href={DEMO_URL} className="btn hidden lg:inline-flex">Try the web demo</a>
           </div>
           <p className="mt-4 text-[13px] text-ink-3">
-            Free · made by a PCC student<span className="hidden lg:inline"> · {DOWNLOADS_OPEN ? 'Mac now, Windows coming soon' : 'Mac and Windows apps available soon'} · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
+            Free · made by a PCC student<span className="hidden lg:inline"> · {DOWNLOADS_OPEN ? 'for Mac and Windows' : 'Mac and Windows apps available soon'} · web demo: {DEMO_LABEL.toLowerCase()}</span><span className="lg:hidden"> · the web demo uses sample data</span>
           </p>
         </div>
 
