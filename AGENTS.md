@@ -10,7 +10,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get three ways to use BYE:
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
-  2. **Mac app:** a download for Apple Silicon Macs. **Reopened 2026-10-22 with 0.5.0** (`DOWNLOADS_OPEN = true`; it was paused from 2026-10-19). Setting it false shows "Available soon" on the Mac card; a slim Kit email signup (`#updates`) sits under the install cards.
+  2. **Mac app:** a download for Apple Silicon Macs. **Reopened 2026-10-22 with 0.5.0** (`DOWNLOADS_OPEN = true`; it was paused from 2026-10-19). Setting it false shows "Available soon" on the Mac card. The Kit email signup (`#updates`) was removed on 2026-10-22; the site CSP `form-action` is back to `'self'`.
   3. **Windows app:** `/download/windows` redirects to the installer on the public `JacktheWizardd/BYE-releases` GitHub repository (too large for Cloudflare Pages; chosen 2026-10-22). `WINDOWS_OPEN` in `content/site.ts` switches the card back to "Available soon".
 - This repository owns the shared React/TypeScript frontend, browser/Tauri hosts and client packages. `BYE_Before_You_Enroll` owns backend contracts, the schedule service and owner dashboard, and database migration records. Retained SwiftUI/Electron sources and release tooling stay there during validation.
 - `server/`, `functions/` and `workers/source/` remain implemented here during the transition. Future backend destinations are `services/web-api/` and `services/source-worker/`; do not relocate implementations or add forwarding services before desktop acceptance. See [current ownership and relocation inventory](docs/REPOSITORY_MAP.md).
@@ -61,7 +61,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - **No Rate My Professors branding in the design.** Its name appears only in the plain-text source and license credit in the footer.
 - **Testimonials** stay off (`apps/landing/src/content/testimonials.ts`, `enabled: false`) until there are real quotes from testers who agreed to be quoted. Never invent quotes or names.
 - **Neutrality.** BYE never ranks or recommends professors. Don't add "Top pick", "Best" or similar labels anywhere.
-- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`, `NEWSLETTER LINK`. Every page link comes from these constants; tools and people search for the markers.
+- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`. Every page link comes from these constants; tools and people search for the markers.
 - **Credits in the footer** (MIT client attribution, font licenses). Keep them when editing the footer.
 
 ## Safe to change or add

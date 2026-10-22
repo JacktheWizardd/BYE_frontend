@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { DEMO_LABEL, DEMO_URL, DOWNLOAD_URL, DOWNLOADS_OPEN, MAC_REQUIREMENTS, WINDOWS_DOWNLOAD_URL, WINDOWS_OPEN } from '../content/site'
-import { Newsletter } from './Newsletter'
 import { ArrowRight } from '../ui/icons'
 
 // While downloads are closed a card is only its title, requirements and an "Available soon" button, so both
@@ -66,8 +65,6 @@ export function FinalCta() {
               ] : undefined}
               note={WINDOWS_OPEN ? <><b className="font-semibold text-ink">“Windows protected your PC”?</b> BYE isn’t signed by Microsoft yet. If you trust it, choose More info → Run anyway.</> : undefined} />
           </div>
-          {!DOWNLOADS_OPEN && <p className="mt-4 text-[14px] text-ink-2">Want to know when they are ready? <a href="#updates" className="font-semibold text-ink">Get an email ↓</a></p>}
-          <Newsletter />
         </div>
       </div>
     </section>

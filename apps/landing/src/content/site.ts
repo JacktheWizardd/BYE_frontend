@@ -12,10 +12,6 @@ export const DOWNLOADS_OPEN = true
 // (public/_redirects). The installer is too large for Cloudflare Pages. Never change this path.
 export const WINDOWS_DOWNLOAD_URL = '/download/windows'
 export const WINDOWS_OPEN = true
-// NEWSLETTER LINK: the Kit form that collects update emails. Find the ID in Kit → Grow → Landing pages
-// & forms → "BYE website signup" → Embed → HTML (the number in the form action). Empty shows "Signup opens soon".
-export const KIT_FORM_ID = '10068136'
-export const KIT_FORM_URL = `https://app.kit.com/forms/${KIT_FORM_ID}/subscriptions`
 // REVIEW LINK: the review form for @go.pasadena.edu students.
 export const REVIEWS_URL = '/reviews/'
 // FEEDBACK LINK: feedback goes by email (see sections/Feedback.tsx); FEEDBACK_URL points at that section.

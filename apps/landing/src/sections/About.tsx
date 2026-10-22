@@ -3,7 +3,7 @@ import { FEEDBACK_URL } from '../content/site'
 // Personal note: a draft for the owner to rewrite in their own words. Privacy lines state only verified facts.
 const keeps = [
   'If you write a review: your school email, to send your sign-in code and keep one review per class.',
-  'If you get a BYE number in the app: your school email, to verify you and keep your number the same on any Mac.',
+  'If you get a BYE number in the app: your school email, to verify you and keep your number the same on any computer.',
   'Your review and the ratings you give.',
   'BYE’s admin can see which account wrote a review, so reports can be handled.',
 ]
