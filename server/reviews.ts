@@ -148,7 +148,7 @@ function eligible(user: User | null, access: Access) {
 }
 // Per-isolate abuse brake in front of Supabase's own limits; keyed by client address, never stored.
 const buckets = new Map<string, { count: number; until: number }>()
-const LIMITS: Record<string, { max: number; windowMs: number }> = { 'auth/send': { max: 5, windowMs: 10 * 60_000 }, 'auth/verify': { max: 20, windowMs: 10 * 60_000 }, submit: { max: 10, windowMs: 60 * 60_000 }, report: { max: 20, windowMs: 60 * 60_000 },
+const LIMITS: Record<string, { max: number; windowMs: number }> = { 'auth/send': { max: 5, windowMs: 10 * 60_000 }, 'auth/verify': { max: 20, windowMs: 10 * 60_000 }, submit: { max: 10, windowMs: 60 * 60_000 }, number: { max: 10, windowMs: 60 * 60_000 }, numbers: { max: 60, windowMs: 60 * 60_000 }, report: { max: 20, windowMs: 60 * 60_000 },
   // Per address, so rotating IPs can't flood one inbox or keep guessing one student's code.
   'auth/send@email': { max: 4, windowMs: 30 * 60_000 }, 'auth/verify@email': { max: 10, windowMs: 15 * 60_000 } }
 export function rateLimit(route: string, client: string, now = Date.now()) {
@@ -184,7 +184,7 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
   let saveAttempted = false
   try {
     const url = new URL(request.url), route = url.pathname.slice('/api/reviews/'.length)
-    const methods: Record<string,string> = { status:'GET', session:'GET', dimensions:'GET', courses:'GET', professors:'GET', 'auth/send':'POST', 'auth/verify':'POST', 'auth/signout':'POST', submit:'POST', resolve:'GET', profile:'GET', list:'GET', selection:'GET', report:'POST' }
+    const methods: Record<string,string> = { status:'GET', session:'GET', dimensions:'GET', courses:'GET', professors:'GET', 'auth/send':'POST', 'auth/verify':'POST', 'auth/signout':'POST', submit:'POST', resolve:'GET', profile:'GET', list:'GET', selection:'GET', report:'POST', number:'POST', numbers:'GET' }
     if (!methods[route]) throw new ReviewError(404, 'NOT_FOUND', 'This review endpoint does not exist.')
     if (request.method !== methods[route]) return Response.json({ error: { code:'METHOD_NOT_ALLOWED', message:'Method not allowed.', retryable:false } }, { status:405, headers:{ ...commonHeaders, Allow:methods[route] } })
     if (request.method === 'POST' && request.headers.get('Origin') !== url.origin) throw new ReviewError(403, 'ORIGIN_DENIED', 'Open the review form on this website before continuing.')
@@ -214,6 +214,12 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
       if (!Number.isFinite(ttl) || ttl <= 0) throw sessionError()
       return reply({ signedIn:true, email }, cookie(request, env, session.access_token, ttl))
     }
+    if (route === 'numbers') {
+      // Public: how many BYE numbers exist ("Student 12 of 40"). A count only, never who.
+      const { data, error } = await client(config, outbound).rpc('bye_number_count')
+      if (error || !Number.isSafeInteger(data) || data < 0) throw new ReviewError(503, 'NUMBERS_UNAVAILABLE', 'The BYE student count could not be loaded. Try again shortly.')
+      return reply({ total:data })
+    }
     if (['resolve','profile','list'].includes(route)) {
       const db=client(config,outbound)
       return reply(await (route==='resolve'?resolveCatalog(db,url.searchParams):route==='profile'?byeProfile(db,url.searchParams):byePage(db,url.searchParams)))
@@ -230,6 +236,16 @@ export async function handleReviewRequest(request: Request, env: ReviewEnv, outb
     if (!eligible(identity.user, config)) throw sessionError()
     if (route === 'session') return reply({ signedIn:true, email:normalizeEmail(identity.user!.email) })
     if (route === 'selection') return reply(await selection(supabase,url.searchParams))
+    if (route === 'number') {
+      // The caller's BYE number, given the first time and the same ever after (supabase/007_bye_numbers.sql).
+      const body = await jsonBody(request)
+      if (Object.keys(body).length) throw invalid('Send an empty form to get your BYE number.')
+      const { data, error } = await supabase.rpc('claim_bye_number')
+      if (error?.code === '42501' || error?.code === 'PGRST301' || error?.code === 'PGRST303') throw sessionError()
+      const row = Array.isArray(data) && data.length === 1 ? data[0] : null
+      if (error || !row || !Number.isSafeInteger(row.number) || row.number < 1 || !Number.isSafeInteger(row.total) || row.total < 1) throw new ReviewError(503, 'NUMBER_UNAVAILABLE', 'Your BYE number could not be confirmed. Try again shortly.')
+      return reply({ number:row.number, total:row.total })
+    }
     if (route === 'report') {
       const body=await jsonBody(request)
       if(Object.keys(body).some(k=>!['reviewId','reason'].includes(k)) || typeof body.reviewId!=='string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.reviewId) || typeof body.reason!=='string' || !body.reason.trim() || Array.from(body.reason.trim()).length>500)throw invalid('Choose a review and give a reason of 1 to 500 characters.')

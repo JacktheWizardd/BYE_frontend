@@ -50,6 +50,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 
 ## Change with care
 
+- **The Mac app signs in through `/api/reviews/auth/send`, `auth/verify` and `number`** to give students their BYE number (`supabase/007_bye_numbers.sql` in the app repository). It sends `Origin` set to this site and keeps the session cookie in memory only.
+  - Keep those routes, their JSON shapes and the cookie names (`__Secure-bye-review`, `bye-review-local`) working for it.
+  - Turning on Turnstile (`TURNSTILE_*`) blocks the app's code requests, because a native app can't solve the check. Add an app path first.
+  - `GET /api/reviews/numbers` is the public student count.
 - **`noindex` meta tags and `robots.txt`.** These keep the site out of search engines while BYE is in testing. Remove them only when the owner says BYE is launching publicly. Every page, including `/demo/`, should keep them until then.
 - **Hero buttons adapt by device.** Below 900px (phones, tablets) "Try the web demo" leads and the second button goes to `#download`; at 900px and up "Download for Mac" leads, with "Windows · coming soon" beside it and the demo as a link. Keep the `#mac` and `#download` anchors.
 - **Honesty labels.** Any link to `/demo/` must say it is sample data ("Sample data for now"). Product mockups keep "Illustration, not real data" or "… not real professors". Sample professors in `apps/landing/src/content/sample.ts` are fictional; never use real PCC faculty.
@@ -140,6 +144,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 5. Commit and push only when the owner asks. The owner usually commits in GitHub Desktop and wants a ready-to-paste **Summary** and **Description**.
 
 ## Current state (update this when you change the site)
+
+- **2026-10-21 BYE student numbers (not deployed):** `server/reviews.ts` adds `POST /api/reviews/number`, which needs a verified school session and returns `{ number, total }`, and the public `GET /api/reviews/numbers`, which returns `{ total }`. Both call RPCs from the app repository's `supabase/007_bye_numbers.sql`, which the owner runs by hand. Number 1 is reserved for the owner. The About privacy list says what a number keeps. Tests: `tests/bye-numbers.test.ts`. Live use needs the SQL run first, then a deploy. Backend hardening requires an empty JSON object (existing 16 KiB parser), rejects malformed RPC results, and preserves Mac paths/cookies. Local verification: typecheck, 100/100 tests, full build/static checks passed. Production preflight, owner reservation and deploy remain separately gated; Turnstile must stay off for native sign-in.
 
 - **2026-10-21 repository structure preparation:** Ownership maps now distinguish the implemented shared frontend, retained legacy clients and backend code temporarily hosted here. Backend root pnpm tooling verifies contracts independently; no runtime code, contract hashes, deployment configuration or release files moved. The dependency/test/tooling inventory in `docs/REPOSITORY_MAP.md` records the later relocation boundary. Full desktop acceptance and staging/rollback gates remain in force.
 
