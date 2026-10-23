@@ -145,6 +145,22 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-22 footer wording (not deployed):** The footer now says BYE is a free, independent student project "and still an experiment, so things may change or break." Landing rebuilt; typecheck passed.
+
+- **2026-10-21 local schedule completion (uncommitted, not deployed):** Refresh and source-check age are exposed in live results. Stop retains local availability expiry; hidden/offline pages cancel in-flight refreshes. Profile evidence survives unchanged assignments and replacements receive no inherited profile. Seat totals deduplicate CRNs and remain unknown when incomplete. Type checking, 96 tests, build, local workerd and Chromium/WebKit checks at phone/desktop widths passed; rollout flags remain unchanged.
+
+- **2026-10-20 local schedule integration (not deployed):** the source Worker reads official schedules through the shared BYE schedule API with server-side `BYE_SCHEDULE_API_URL` / `BYE_SCHEDULE_API_KEY`. LiveBridge polls version-backed sections, expires availability after fifteen minutes and preserves valid profile choices. New terms appear without changing the selected semester. Demo stays network-free; rollout/RMP flags remain unchanged. Fixture unit/runtime/build and Chromium/WebKit phone/desktop checks passed.
+
+
+- **2026-10-20 one Reviews section for BYE + RMP (branch `claude/merged-reviews`, not deployed):** The shared professor page (`packages/ui/report.tsx`) now takes `bye` (host state + `load`/`write`/`actions`) instead of a `byeReviews` block.
+  - Scores: a BYE row (tag "BYE") above the RMP row (tag "RMP"); never blended.
+  - One "Reviews" section: a Both · BYE · RMP toggle (starts on Both), one course filter and one sort for both sources. In Both, all BYE reviews come first, then RMP. Every card carries a source tag. "View more reviews" loads BYE pages first. Courses only BYE has appear in the filter. `byeFilter` in `packages/core/domain.ts` maps the filter to a BYE course by code.
+  - "Find more for this class" is gone. `findMore` became `preloaded` (the Windows app loads reviews on open; filters use saved reviews).
+  - Web: `apps/web/src/bye-reviews.tsx` is now the `useByeReviews` hook (same `/api/reviews/*` calls and report flow). `/demo/` is unchanged.
+  - Seat bar: fills by seats taken (`seatLevel`): ink, yellow at 15% or fewer open ("Almost full"), red when full.
+  - Source marks sit at the bottom right of each card's score line. RMP is a plain outline tag. BYE is a collectible postage stamp (`ByeStamp`): common ink 55%, uncommon framed 25%, rare yellow 12%, epic postmarked 6%, legendary yellow in ink 2%. `stampTier` picks the tier from the review ID only, never its scores, so no review looks "featured"; `packages/core/vectors/stamp-tier.json` keeps every app in step.
+  - Windows wiring is on the app repo's `redesign/windows-app-v3`, synced from this commit.
+
 - **2026-10-21 BYE student numbers (not deployed):** `server/reviews.ts` adds `POST /api/reviews/number`, which needs a verified school session and returns `{ number, total }`, and the public `GET /api/reviews/numbers`, which returns `{ total }`. Both call RPCs from the app repository's `supabase/007_bye_numbers.sql`, which the owner runs by hand. Number 1 is reserved for the owner. The About privacy list says what a number keeps. Tests: `tests/bye-numbers.test.ts`. Live use needs the SQL run first, then a deploy. Backend hardening requires an empty JSON object (existing 16 KiB parser), rejects malformed RPC results, and preserves Mac paths/cookies. Local verification: typecheck, 100/100 tests, full build/static checks passed. Production preflight, owner reservation and deploy remain separately gated; Turnstile must stay off for native sign-in.
 
 - **2026-10-21 repository structure preparation:** Ownership maps now distinguish the implemented shared frontend, retained legacy clients and backend code temporarily hosted here. Backend root pnpm tooling verifies contracts independently; no runtime code, contract hashes, deployment configuration or release files moved. The dependency/test/tooling inventory in `docs/REPOSITORY_MAP.md` records the later relocation boundary. Full desktop acceptance and staging/rollback gates remain in force.

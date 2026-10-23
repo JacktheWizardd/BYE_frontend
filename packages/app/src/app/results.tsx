@@ -6,7 +6,7 @@ import { AI_SUMMARIES_ENABLED, AI_SUMMARIES_UNAVAILABLE_NOTE } from '../features
 import { Chooser, DISCLAIMER, Summary } from './report'
 import type { Run } from './types'
 import { useRuntime } from '../runtime'
-import { ByeReviews } from './bye-reviews'
+import { useByeReviews } from './bye-reviews'
 
 const SORTS = [['rating', 'Rating'], ['difficulty', 'Difficulty'], ['reviews', 'Reviews']] as const
 
@@ -21,6 +21,7 @@ export function Results(props: {
   const runtime = useRuntime()
   const { state, filtered, displayed, days, onlineOnly, run } = props, course = state.course
   const p = filtered.find(x => x.id === props.selected), chooser = state.professors.find(x => x.choosing)
+  const bye = useByeReviews(p?.name, course?.display)
   const checked = state.professors.filter(x => x.state !== 'pending' && x.state !== 'loading').length
   const sections = filtered.flatMap(x => x.sections), sectionCount = new Set(sections.map(s => s.crn)).size
   // Open seats across the listed sections, when PCC published them.
@@ -51,8 +52,8 @@ export function Results(props: {
         <p className="muted small">{DISCLAIMER}</p>
       </aside>
       <div className="detail">
-        {p && course ? <Report p={p} course={course} matches={s => fits(s, days)} command={run} reviewFilter="select" findMore writeReview={!runtime.demo} reviewPage={[3, 5]}
-            back={() => props.select('')} byeReviews={runtime.demo ? undefined : <ByeReviews key={p.id + '|' + course.key} name={p.name} course={course.display} />}
+        {p && course ? <Report p={p} course={course} matches={s => fits(s, days)} command={run} reviewFilter="select" writeReview={!runtime.demo} reviewPage={[3, 5]}
+            back={() => props.select('')} bye={bye}
             checking={state.loading || state.previewPending > 0} initial={props.reportState(p.id)} onChange={value => props.saveReport(p.id, value)}
             summary={AI_SUMMARIES_ENABLED ? <Summary p={p} course={course} run={run} /> : <p className="panel small muted" role="status">{AI_SUMMARIES_UNAVAILABLE_NOTE}</p>} />
           : !filtered.length ? !state.loading && <div className="empty-detail">

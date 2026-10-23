@@ -31,3 +31,7 @@ are enabled for the owner; PCC/RMP remain disabled. Hosted routing and phone/des
 browser checks passed. Production settings and files were verified unchanged.
 Hosted real owner login/source activation remain pending; see docs/web-app/LIVE_APP_PREVIEW.md
 from the website root.
+
+## Current state — October 20, 2026 local preparation
+
+The live schedule path now goes through the shared semester-aware BYE API via the server Worker. Browser requests remain same-origin, use jittered visible/online polling, preserve valid professor choices and expire availability locally. The source Worker requires configured platform key/base URL. All source/launch gates, fictional demo rules, reviews and RMP authorization remain unchanged. Local unit, runtime, build and phone/desktop browser fixtures passed; this is not a deployment record.

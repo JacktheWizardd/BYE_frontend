@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { displayTitle, fits, formatLabel, orderReviews } from '../packages/core/domain'
+import { displayTitle, fits, formatLabel, orderReviews, stampTier } from '../packages/core/domain'
 import type { Review, Section, Weekday } from '../packages/core/types'
 
 // Shared test vectors: the Mac app (ClasswiseCore) and the Windows app run these same JSON files.
@@ -26,4 +26,11 @@ test('review-order vectors', async () => {
 
 test('display-title vectors', async () => {
   for (const c of (await vectors('display-title')).cases) assert.equal(displayTitle(c.raw), c.expected, c.raw)
+})
+
+test('stamp-tier vectors and odds', async () => {
+  for (const c of (await vectors('stamp-tier')).cases) assert.equal(stampTier(c.id), c.expected, c.id)
+  const counts: Record<string, number> = {}, n = 10000
+  for (let i = 0; i < n; i++) { const t = stampTier(`review-${i}`); counts[t] = (counts[t] ?? 0) + 1 }
+  for (const [tier, odds] of Object.entries({ legendary: 2, epic: 6, rare: 12, uncommon: 25, common: 55 })) assert.ok(Math.abs(counts[tier] / n * 100 - odds) < 1.5, `${tier}: ${counts[tier]}`)
 })

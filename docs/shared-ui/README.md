@@ -13,6 +13,7 @@ Canonical React screens, domain helpers and design tokens live in this repositor
 - [Design tokens](../../packages/tokens/tokens.json)
 - [Windows integration handoff](WINDOWS_API_HANDOFF.md)
 - [UI parity in the sibling desktop repo](../../../BYE_Before_You_Enroll/docs/UI_PARITY.md)
+- Design reference for v3 and the shared app (private claude.ai pages; ask the owner for access): the [BYE design system](https://claude.ai/artifact/5g1xu2G1a1mRvpnRDnMA5h) (tokens, components, the stamp spec, rules for `packages/app`) and the [BYE v3 case study](https://claude.ai/artifact/8dY4NxLoa6cgj1pGutcX5Y) (why each v3 decision was made). The packages above stay the source of truth.
 
 Edit canonical packages here. The retained Windows client's `scripts/sync-bye-shared.mjs` workflow is only for that legacy snapshot, not the shared browser/Tauri workspace. Keep sample disclosures and web freshness behavior distinct from Windows API freshness.
 

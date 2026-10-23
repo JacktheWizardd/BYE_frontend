@@ -1,8 +1,10 @@
-import { PCC, RMP } from '../../server/network'
+import { SchedulePCC } from '../../server/schedule-pcc'
+import { ScheduleClient } from '../../packages/core/schedule-api'
+import { RMP } from '../../server/network'
 import { SourceService, errorResponse, type Cache, type CacheEntry, type SourceConfig } from '../../server/service'
 import type { ApiResults } from '../../packages/core/api'
 
-interface Env { SOURCES: DurableObjectNamespace; LIVE_APP_ENABLED?: string; RMP_AUTHORIZED?: string; RMP_PERMISSION_REF?: string; RMP_CACHE_SECONDS?: string; CACHE_EPOCH?: string }
+interface Env { SOURCES: DurableObjectNamespace; LIVE_APP_ENABLED?: string; BYE_SCHEDULE_API_URL?: string; BYE_SCHEDULE_API_KEY?: string; RMP_AUTHORIZED?: string; RMP_PERMISSION_REF?: string; RMP_CACHE_SECONDS?: string; CACHE_EPOCH?: string }
 /** Chunk serialized entries so a complete semester never occupies one storage value. */
 export class DurableCache implements Cache {
   constructor(private storage: DurableObjectStorage) {}
@@ -52,7 +54,7 @@ export class Sources {
     const seconds = Number(env.RMP_CACHE_SECONDS ?? 0)
     const config: SourceConfig = { enabled: env.LIVE_APP_ENABLED === 'true', rmpAuthorized: env.RMP_AUTHORIZED === 'true', rmpPermissionRef: env.RMP_PERMISSION_REF ?? '', rmpCacheSeconds: Number.isFinite(seconds) && seconds >= 0 ? seconds : 0 }
     this.cache = new DurableCache(state.storage)
-    this.service = new SourceService(new PCC(), new RMP(), this.cache, config)
+    this.service = new SourceService(new SchedulePCC(new ScheduleClient(env.BYE_SCHEDULE_API_URL ?? '',env.BYE_SCHEDULE_API_KEY ?? '')), new RMP(), this.cache, config)
     state.blockConcurrencyWhile(async () => { const epoch = env.CACHE_EPOCH ?? 'v1'; if (await state.storage.get('cache-epoch') !== epoch) { await state.storage.deleteAll(); await state.storage.put('cache-epoch', epoch) }; if (await state.storage.getAlarm() === null) await state.storage.setAlarm(Date.now() + 3_600_000) })
   }
   async alarm() { await this.cache.purgeExpired(); await this.state.storage.setAlarm(Date.now() + 3_600_000) }

@@ -4,6 +4,9 @@ The website repository now owns the landing page, browser application, portable 
 
 ## Current release state
 
+**Local preparation, October 20:** the source Worker now uses the shared schedule API adapter with server-side `BYE_SCHEDULE_API_URL` and `BYE_SCHEDULE_API_KEY`. Browser routes remain same-origin. Polling and local expiry preserve profile selections; semester discovery does not switch the chosen term. Unit, runtime, build and phone/desktop browser fixtures pass. Production flags and launch state were not changed; native Mac and real PostgreSQL concurrency verification remain separate.
+
+
 **Live web app paused October 17, 2026 (see [Data access](../operations/DATA_ACCESS.md)).** The landing page links the fictional `/demo/` and the `/reviews/` form; `/app/` is disabled and unlinked. The real-data build at `/app/` starts only when the Pages API and source Worker enable it; RMP is independently gated. No live screen falls back to fictional evidence. Search and reading require no login. Writing/reporting use the separate school-email session; hosted AI and analytics are absent. BYE reviews now appear independently in professor pages; AI summaries and statistical comparisons remain disabled. A separate owner-only `/reviews/` form and `/api/reviews/*` API are prepared; they do not enable the live search app. See [Review submission](../reviews/REVIEW_SUBMISSION.md) and [review verification](../reviews/REVIEW_VERIFICATION.md) for the independent setup and evidence.
 
 The gates in [release-readiness.json](../release-readiness.json) are evidence records, not permission grants. Editing a boolean does not establish access rights or complete staging acceptance. Run `pnpm verify:release` before preparing production activation.
@@ -89,3 +92,19 @@ This does not satisfy or remove production release gates.
 ## Production Pages settings — October 17, 2026
 
 Builds from `main` failed from `e79f6c5` on: Pages had no build command, so dependencies were never installed and `functions/` could not resolve `@supabase/supabase-js`. The project now uses build command `pnpm install --frozen-lockfile` (output `public`), `NODE_VERSION=22.23.3` and `PNPM_VERSION=11.25.0`, plus production variables `REVIEWS_ENABLED=true`, `REVIEW_ACCESS=students`, `SUPABASE_URL` and the secret `SUPABASE_PUBLISHABLE_KEY`. `LIVE_APP_ENABLED` is unset (off) and no `SOURCES` binding exists in production. Note: Pages reads only a root `wrangler.json(c)`/`wrangler.toml`; the root `wrangler.jsonc` is the backup Worker config, so `wrangler.pages.jsonc` values are documentation, not applied settings. Production deploy `5591a31b` (commit `29663bb`) succeeded; `/reviews/` and `/api/reviews/status` (enabled, students) respond, and `/download`, `/updates/appcast.xml` and `/demo/` are unchanged.
+
+### October 21, 2026 — local Windows/web completion
+
+The live results header now exposes Refresh and the source-check age. Refresh retains valid instructor/profile choices and does not select replacements. Hidden/offline transitions cancel active polling; Stop does not prevent seat/waitlist expiry. The legacy source retains its five-minute policy and shared schedule responses retain their explicit fifteen-minute deadline. Overview totals deduplicate co-instructor CRNs and never present a partial count as complete. Type checking, 96 tests, source builds, local workerd acceptance, Chromium/WebKit schedule checks at 375/390/1280 and review-flow checks at 390/1280 passed. Changes are local/uncommitted; source flags and deployment state are unchanged.
+
+
+## Current state — all-semester freshness follow-up
+
+The shared schedule backend has the multi-term schema and two-minute availability policy deployed. This repository's local client polls every fifteen seconds while visible/online, honors the shared deadline with a two-minute ceiling, and preserves valid profile choices. All published years are eligible for import. Faster source collection remains disabled pending capacity/source evidence; a sixty-second target is not a verified freshness guarantee. Ninety-eight local tests, typecheck/build, Pages/Worker acceptance, Chromium/WebKit at 375/390/1280px, and full-app recovery at 390/1280px passed. Public website/source flags and launch state are unchanged. Hosted import status is recorded in the sibling backend's docs/all-semesters.md.
+
+## Current state — archived semester support, October 21, 2026
+The local live-app source carries archive lifecycle metadata, groups archived terms, labels historical results and stops archive availability polling. API v8/sync v9 and official dates are deployed in the shared backend. This source is built and verified locally; the public website was not activated or deployed. Existing launch gates stay false. Chromium/WebKit archive acceptance passes at 390px and 1280px, in addition to the existing unit/build/runtime/browser suites.
+
+GitHub Desktop Summary: Support searchable archived semesters in the live app
+
+Description: Preserve archive metadata through the shared schedule adapter and same-origin API, group historical semester choices, show reference labels and stop archive availability polling. Add fictional archive browser acceptance covering phone/desktop layouts and no background polling. Verified 98 unit tests, typecheck/build, Pages/workerd runtime, existing browser suites and archive checks at 390px/1280px. Changes remain uncommitted; public deployment and source-access launch gates are unchanged.

@@ -1,7 +1,7 @@
 import type { Section, SourceMeta } from './types'
 
-// Web sources retain their five-minute policy. The schedule service supplies its own deadline.
-export const availabilityDeadline = (source: SourceMeta) => source.expiresAt ?? source.retrievedAt + 300_000
+// Availability defaults to a two-minute policy. The schedule service supplies its own deadline.
+export const availabilityDeadline = (source: SourceMeta) => Number.isFinite(source.expiresAt ?? source.retrievedAt + 120_000) ? Math.min(source.expiresAt ?? source.retrievedAt + 120_000, source.retrievedAt + 120_000) : 0
 export function staleSource(source: SourceMeta | undefined, now = Date.now()) {
   return !!source && (source.stale || !Number.isFinite(source.retrievedAt) || now < source.retrievedAt || now >= availabilityDeadline(source))
 }

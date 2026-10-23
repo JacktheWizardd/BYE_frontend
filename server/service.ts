@@ -1,5 +1,8 @@
+import {availabilityDeadline as scheduleDeadline, expired as scheduleExpired} from '../packages/core/schedule-api'
 import { course, eligible, identity, normalizedName, professors, resolve, suggestions } from '../packages/core/domain'
 import type { Profile, Row, Term } from '../packages/core/types'
+import type { CourseSchedule } from './schedule-pcc'
+import type { ScheduleMeta } from '../packages/core/schedule-api'
 import type { ApiResults, Envelope } from '../packages/core/api'
 import { UpstreamLimitError, IdentityError, type PCC, type RMP } from './network'
 
@@ -18,7 +21,7 @@ const input = (value: string | null, max: number, label: string) => { if (!value
 export class SourceService {
   private flights = new Map<string, Promise<Envelope<unknown>>>()
   private requests = new Map<string, { count: number; until: number }>()
-  constructor(private pcc: Pick<PCC, 'terms' | 'schedule'>, private rmp: Pick<RMP, 'candidates' | 'page'>, private cache: Cache, readonly config: SourceConfig, private now = Date.now) {}
+  constructor(private pcc: Pick<PCC, 'terms' | 'schedule'> & {courseSections?:(term:string,query:string,signal:AbortSignal)=>Promise<CourseSchedule>;suggest?:(term:string,query:string)=>Promise<ApiResults['courses']>}, private rmp: Pick<RMP, 'candidates' | 'page'>, private cache: Cache, readonly config: SourceConfig, private now = Date.now) {}
   private limit(client: string) {
     const now = this.now()
     for (const [key, value] of this.requests) if (value.until <= now) this.requests.delete(key)
@@ -47,7 +50,7 @@ export class SourceService {
     this.flights.set(key, flight as Promise<Envelope<unknown>>)
     return flight
   }
-  private terms() { return this.cached('terms', 'pcc', 6 * 60 * 60_000, () => this.pcc.terms(), true) }
+  private terms() { return this.cached(this.pcc.courseSections ? 'shared-api:terms:v1' : 'terms', 'pcc', this.pcc.courseSections ? 60_000 : 6 * 60 * 60_000, () => this.pcc.terms(), true) }
   private async schedule(term: string) {
     if (!/^\d{6}$/.test(term)) throw new ApiError(400, 'INVALID_TERM', 'Choose a published PCC semester.')
     const published = await this.terms()
@@ -61,7 +64,10 @@ export class SourceService {
     if (!this.config.enabled) throw unavailable()
     this.limit(client)
     if (kind === 'terms') return this.terms() as Promise<Envelope<ApiResults[K]>>
-    const term = input(params.get('term'), 6, 'semester'), schedule = await this.schedule(term)
+    const term = input(params.get('term'), 6, 'semester')
+    if(kind==='courses' && this.pcc.suggest) return {data:await this.pcc.suggest(term,input(params.get('query'),120,'course search')),meta:{source:'pcc',retrievedAt:this.now(),stale:false}} as Envelope<ApiResults[K]>
+    const shared=this.pcc.courseSections ? await this.pcc.courseSections(term,input(params.get('course')??params.get('query'),100,'course'),AbortSignal.timeout(20_000)) : undefined
+    const schedule:Envelope<Row[]> = shared ? {data:shared.rows,meta:{source:'pcc',semesterStatus:shared.meta.semesterStatus,archivedAt:shared.meta.archivedAt,retrievedAt:shared.meta.sourceCheckedAt ? Date.parse(shared.meta.sourceCheckedAt) : 0,stale:scheduleExpired(shared.meta,this.now()),expiresAt:scheduleDeadline(shared.meta),schedule:shared.meta}} : await this.schedule(term)
     if (kind === 'courses') {
       const query = input(params.get('query'), 120, 'course search')
       return { ...schedule, data: suggestions(query, schedule.data) } as Envelope<ApiResults[K]>
