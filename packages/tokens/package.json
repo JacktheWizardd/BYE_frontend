@@ -1,0 +1,12 @@
+{
+  "name": "@bye/tokens",
+  "version": "0.1.0-preview.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./tokens.json",
+    "./tokens.json": "./tokens.json",
+    "./*": "./*"
+  },
+  "dependencies": {}
+}

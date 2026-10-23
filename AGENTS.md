@@ -10,9 +10,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - About 80% of visitors are on phones, so the site is **mobile first**: base CSS is for phones, and `min-width` media queries (600px, 900px) add the tablet and desktop layouts.
 - Visitors get three ways to use BYE:
   1. **On the web:** the web demo at `/demo/`, running on bundled, fictional **sample data**. Students can also write reviews at `/reviews/`.
-  2. **Mac app:** a download for Apple Silicon Macs. **Paused since 2026-10-19** (`DOWNLOADS_OPEN = false`) while the app API is finished and the app is redesigned; the Mac card shows "Available soon" and a slim Kit email signup (`#updates`) sits under the install cards.
-  3. **Windows app:** shown as "Coming soon" until the owner decides where to host the ZIP (it is too large for Cloudflare Pages).
-- The app's source code lives in a separate repository, `BYE_Before_You_Enroll`, usually checked out beside this one (`../BYE_Before_You_Enroll`).
+  2. **Mac app:** a download for Apple Silicon Macs. **Reopened 2026-10-22 with 0.5.0** (`DOWNLOADS_OPEN = true`; it was paused from 2026-10-19). Setting it false shows "Available soon" on the Mac card. The Kit email signup (`#updates`) was removed on 2026-10-22; the site CSP `form-action` is back to `'self'`.
+  3. **Windows app:** `/download/windows` redirects to the installer on the public `JacktheWizardd/BYE-releases` GitHub repository (too large for Cloudflare Pages; chosen 2026-10-22). `WINDOWS_OPEN` in `content/site.ts` switches the card back to "Available soon".
+- This repository owns the shared React/TypeScript frontend, browser/Tauri hosts and client packages. `BYE_Before_You_Enroll` owns backend contracts, the schedule service and owner dashboard, and database migration records. Retained SwiftUI/Electron sources and release tooling stay there during validation.
+- `server/`, `functions/` and `workers/source/` remain implemented here during the transition. Future backend destinations are `services/web-api/` and `services/source-worker/`; do not relocate implementations or add forwarding services before desktop acceptance. See [current ownership and relocation inventory](docs/REPOSITORY_MAP.md).
 
 ## Files
 
@@ -22,7 +23,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 | `packages/tokens/tokens.json` | **Single source of the BYE design tokens** (colors, type, radii, shadows, tilts, motion) for the website, web app, Windows and Mac apps. Run `pnpm build:tokens` after editing; `pnpm build` and `tests/tokens.test.ts` fail if `generated/` is stale | Yes (then rebuild) |
 | `packages/tokens/generated/` | **Generated** `tokens.css`, Tailwind `theme.css` (imported by `apps/landing`) and `BYETokens.swift` (copied into the Mac app) | **No** |
 | `packages/core/` | Shared domain logic and types; `vectors/` holds JSON test cases every app must pass | Yes |
-| `packages/ui/` | Shared React screens (professor card, report, sections, chooser, motion) used by `apps/web` and vendored by the Windows app | Yes |
+| `packages/app/`, `packages/api-client/` | Shared React application and injected browser/Tauri client adapters | Yes |
+| `apps/preview/`, `apps/desktop/` | Isolated fictional browser preview and Tauri host mounting `packages/app` | Yes |
+| `packages/api-contracts/` | Pinned backend-owned contract snapshot with `SOURCE.json` hashes | Export intentionally from the backend; do not hand-edit |
+| `packages/ui/` | Canonical shared React screens used by browser/shared app; retained Windows client vendors a snapshot | Yes |
 | `public/index.html`, `public/site/` | **Generated** prerendered home page and its hashed assets. Rebuild with `pnpm build:landing` | **No** |
 | `public/404.html` | Not-found page; standalone with its own inline CSS | Yes |
 | `archive/landing-ivory/` | Backup of the previous hand-written landing page (2026-10-17). Not deployed | Only to restore it |
@@ -46,6 +50,10 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 
 ## Change with care
 
+- **The Mac app signs in through `/api/reviews/auth/send`, `auth/verify` and `number`** to give students their BYE number (`supabase/007_bye_numbers.sql` in the app repository). It sends `Origin` set to this site and keeps the session cookie in memory only.
+  - Keep those routes, their JSON shapes and the cookie names (`__Secure-bye-review`, `bye-review-local`) working for it.
+  - Turning on Turnstile (`TURNSTILE_*`) blocks the app's code requests, because a native app can't solve the check. Add an app path first.
+  - `GET /api/reviews/numbers` is the public student count.
 - **`noindex` meta tags and `robots.txt`.** These keep the site out of search engines while BYE is in testing. Remove them only when the owner says BYE is launching publicly. Every page, including `/demo/`, should keep them until then.
 - **Hero buttons adapt by device.** Below 900px (phones, tablets) "Try the web demo" leads and the second button goes to `#download`; at 900px and up "Download for Mac" leads, with "Windows · coming soon" beside it and the demo as a link. Keep the `#mac` and `#download` anchors.
 - **Honesty labels.** Any link to `/demo/` must say it is sample data ("Sample data for now"). Product mockups keep "Illustration, not real data" or "… not real professors". Sample professors in `apps/landing/src/content/sample.ts` are fictional; never use real PCC faculty.
@@ -53,7 +61,7 @@ The public website for **BYE (Before You Enroll)**, a free tool that helps Pasad
 - **No Rate My Professors branding in the design.** Its name appears only in the plain-text source and license credit in the footer.
 - **Testimonials** stay off (`apps/landing/src/content/testimonials.ts`, `enabled: false`) until there are real quotes from testers who agreed to be quoted. Never invent quotes or names.
 - **Neutrality.** BYE never ranks or recommends professors. Don't add "Top pick", "Best" or similar labels anywhere.
-- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`, `NEWSLETTER LINK`. Every page link comes from these constants; tools and people search for the markers.
+- **Marked comments in `apps/landing/src/content/site.ts`:** `APP LINK`, `DOWNLOAD LINK`, `REVIEW LINK`, `FEEDBACK LINK`. Every page link comes from these constants; tools and people search for the markers.
 - **Credits in the footer** (MIT client attribution, font licenses). Keep them when editing the footer.
 
 ## Safe to change or add
@@ -152,6 +160,12 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
   - Seat bar: fills by seats taken (`seatLevel`): ink, yellow at 15% or fewer open ("Almost full"), red when full.
   - Source marks sit at the bottom right of each card's score line. RMP is a plain outline tag. BYE is a collectible postage stamp (`ByeStamp`): common ink 55%, uncommon framed 25%, rare yellow 12%, epic postmarked 6%, legendary yellow in ink 2%. `stampTier` picks the tier from the review ID only, never its scores, so no review looks "featured"; `packages/core/vectors/stamp-tier.json` keeps every app in step.
   - Windows wiring is on the app repo's `redesign/windows-app-v3`, synced from this commit.
+
+- **2026-10-21 BYE student numbers (not deployed):** `server/reviews.ts` adds `POST /api/reviews/number`, which needs a verified school session and returns `{ number, total }`, and the public `GET /api/reviews/numbers`, which returns `{ total }`. Both call RPCs from the app repository's `supabase/007_bye_numbers.sql`, which the owner runs by hand. Number 1 is reserved for the owner. The About privacy list says what a number keeps. Tests: `tests/bye-numbers.test.ts`. Live use needs the SQL run first, then a deploy. Backend hardening requires an empty JSON object (existing 16 KiB parser), rejects malformed RPC results, and preserves Mac paths/cookies. Local verification: typecheck, 100/100 tests, full build/static checks passed. Production preflight, owner reservation and deploy remain separately gated; Turnstile must stay off for native sign-in.
+
+- **2026-10-21 repository structure preparation:** Ownership maps now distinguish the implemented shared frontend, retained legacy clients and backend code temporarily hosted here. Backend root pnpm tooling verifies contracts independently; no runtime code, contract hashes, deployment configuration or release files moved. The dependency/test/tooling inventory in `docs/REPOSITORY_MAP.md` records the later relocation boundary. Full desktop acceptance and staging/rollback gates remain in force.
+
+- **Shared frontend trial:** `apps/preview` and `apps/desktop` mount `packages/app` with browser/Tauri adapters, canonical UI/core/tokens and a pinned backend contract snapshot. React + TypeScript is agreed; Tauri 2 is the desktop candidate, Capacitor later; Electron is legacy only. Production entry points remain unchanged. See [trial source, commands, verification and remaining Mac gate](docs/shared-ui/SHARED_APP_TRIAL.md). Backend relocation, replacement and releases await their explicit gates.
 
 - **2026-10-20 documentation organization:** Start at `docs/README.md`. General guides now live under `docs/web-app/`, `docs/reviews/`, `docs/shared-ui/` and `docs/operations/`; machine-consumed `docs/release-readiness.json` remains in place. No site behavior, deployment or release changes are included.
 

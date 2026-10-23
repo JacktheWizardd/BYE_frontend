@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
-import { DEMO_LABEL, DEMO_URL, DOWNLOAD_URL, DOWNLOADS_OPEN, MAC_REQUIREMENTS } from '../content/site'
-import { Newsletter } from './Newsletter'
+import { DEMO_LABEL, DEMO_URL, DOWNLOAD_URL, DOWNLOADS_OPEN, MAC_REQUIREMENTS, WINDOWS_DOWNLOAD_URL, WINDOWS_OPEN } from '../content/site'
 import { ArrowRight } from '../ui/icons'
 
 // While downloads are closed a card is only its title, requirements and an "Available soon" button, so both
@@ -33,7 +32,7 @@ export function FinalCta() {
         <div className="mx-auto max-w-5xl">
           <div className="max-w-3xl">
             <h2 className="text-[38px] leading-[1.06] md:text-[56px] lg:text-[68px]">Plan your next semester <span className="swipe">with your eyes open.</span></h2>
-            <p className="mt-6 max-w-xl text-lg text-ink-2">{DOWNLOADS_OPEN ? 'Install BYE on your Mac today, with Windows coming soon.' : 'The Mac and Windows apps are available soon.'} On a phone? Try the web demo, or send yourself the link for later.</p>
+            <p className="mt-6 max-w-xl text-lg text-ink-2">{DOWNLOADS_OPEN ? (WINDOWS_OPEN ? 'Install BYE on your Mac or Windows PC today.' : 'Install BYE on your Mac today, with Windows coming soon.') : 'The Mac and Windows apps are available soon.'} On a phone? Try the web demo, or send yourself the link for later.</p>
             <div className="mt-8 flex flex-col items-stretch gap-3 md:flex-row md:items-center">
               <a href={DEMO_URL} className="btn btn-primary">Try the web demo <ArrowRight className="size-5" /></a>
               <button type="button" data-copy-link className="btn lg:hidden">Copy link for your computer</button>
@@ -54,10 +53,18 @@ export function FinalCta() {
                 <>Eject the DMG and open BYE Beta from Applications.</>,
               ] : undefined}
               note={DOWNLOADS_OPEN ? <><b className="font-semibold text-ink">Security warning?</b> BYE is signed but not yet notarized by Apple. If you trust it, go to System Settings → Privacy &amp; Security → Open Anyway. Updates install themselves.</> : undefined} />
-            <Install id="windows" title="Windows" meta="Windows 11 · 64-bit" action={soon} />
+            {/* WINDOWS LINK: /download/windows → the installer on the public BYE-releases repository. */}
+            <Install id="windows" title="Windows" meta="Windows 11 · 64-bit"
+              action={WINDOWS_OPEN
+                ? <a href={WINDOWS_DOWNLOAD_URL} className="btn btn-primary w-full md:w-auto">Download for Windows <ArrowRight className="size-5" /></a>
+                : soon}
+              steps={WINDOWS_OPEN ? [
+                <>Open the downloaded <b className="font-semibold text-ink">BYE-Setup</b> file.</>,
+                <>Follow the installer.</>,
+                <>Open BYE from the Start menu.</>,
+              ] : undefined}
+              note={WINDOWS_OPEN ? <><b className="font-semibold text-ink">“Windows protected your PC”?</b> BYE isn’t signed by Microsoft yet. If you trust it, choose More info → Run anyway.</> : undefined} />
           </div>
-          {!DOWNLOADS_OPEN && <p className="mt-4 text-[14px] text-ink-2">Want to know when they are ready? <a href="#updates" className="font-semibold text-ink">Get an email ↓</a></p>}
-          <Newsletter />
         </div>
       </div>
     </section>

@@ -3,12 +3,13 @@ import { FEEDBACK_URL } from '../content/site'
 // Personal note: a draft for the owner to rewrite in their own words. Privacy lines state only verified facts.
 const keeps = [
   'If you write a review: your school email, to send your sign-in code and keep one review per class.',
+  'If you get a BYE number in the app: your school email, to verify you and keep your number the same on any computer.',
   'Your review and the ratings you give.',
   'BYE’s admin can see which account wrote a review, so reports can be handled.',
 ]
 const doesNot = [
   'No BYE password or profile to manage.',
-  'The Mac app needs no account, and its saved data stays on your Mac.',
+  'The Mac app works without an account. Apart from an optional BYE number, its saved data stays on your Mac.',
   'This site loads no ads and no tracking scripts.',
 ]
 

@@ -1,3 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'apps/desktop'
+  - 'apps/preview'
 allowBuilds:
   esbuild: true
   workerd: true
