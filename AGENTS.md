@@ -137,6 +137,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-22 footer wording (not deployed):** The footer now says BYE is a free, independent student project "and still an experiment, so things may change or break." Landing rebuilt; typecheck passed.
+
 - **2026-10-21 local schedule completion (uncommitted, not deployed):** Refresh and source-check age are exposed in live results. Stop retains local availability expiry; hidden/offline pages cancel in-flight refreshes. Profile evidence survives unchanged assignments and replacements receive no inherited profile. Seat totals deduplicate CRNs and remain unknown when incomplete. Type checking, 96 tests, build, local workerd and Chromium/WebKit checks at phone/desktop widths passed; rollout flags remain unchanged.
 
 - **2026-10-20 local schedule integration (not deployed):** the source Worker reads official schedules through the shared BYE schedule API with server-side `BYE_SCHEDULE_API_URL` / `BYE_SCHEDULE_API_KEY`. LiveBridge polls version-backed sections, expires availability after fifteen minutes and preserves valid profile choices. New terms appear without changing the selected semester. Demo stays network-free; rollout/RMP flags remain unchanged. Fixture unit/runtime/build and Chromium/WebKit phone/desktop checks passed.
