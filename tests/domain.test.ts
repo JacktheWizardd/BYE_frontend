@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { catalog, course, delivery, eligible, filterReviews, identity, orderReviews, professors, resolve, sameCourse, suggestions } from '../packages/core/domain'
+import { byeFilter, catalog, seatLevel, course, delivery, eligible, filterReviews, identity, orderReviews, professors, resolve, sameCourse, suggestions } from '../packages/core/domain'
 import type { Profile, Review, Row } from '../packages/core/types'
 export const profile = (id = '1', overrides: Partial<Profile> = {}): Profile => ({ id, firstName: 'John', lastName: 'Harris', schoolID: 2649, school: 'Pasadena City College', department: 'History', reviews: [], courseCounts: [], coverage: {}, ...overrides })
 const review = (id: string, text: string, label = 'ETH014'): Review => ({ id, text, course: label, date: '2026-05-01' })
@@ -19,7 +19,7 @@ test('official resolution, exact precedence and ambiguous aliases', () => {
   assert.throws(() => resolve('math05a', rows), /More than one/)
   assert.equal(resolve('math05a', rows.slice(0, 1)).key, 'MATH005A')
   assert.equal(suggestions('math5a', rows)[0].course.key, 'MATH5A')
-  assert.equal(catalog([{ ...rows[0], fwSectOpenInd: 'R' }]).length, 0)
+  for(const status of ['R','X']) assert.equal(catalog([{ ...rows[0], fwSectOpenInd: status }]).length,1,'Uninterpreted source statuses must remain visible')
 })
 test('PCC fixture retains closed sections, deduplicates CRNs and groups meetings', async () => {
   const rows = JSON.parse(await readFile(new URL('../apps/web/tests/fixtures/pcc-summer-2026-eth014.json', import.meta.url), 'utf8'))
@@ -53,4 +53,21 @@ test('all six review sort modes keep unknown dates last and use stable ties',()=
  const expectations={recent:'b',oldest:'a',highest:'b',lowest:'a',difficulty:'b',highestDifficulty:'a'}
  for(const [by,id] of Object.entries(expectations))assert.equal(orderReviews(rows,by)[0].id,id)
  assert.equal(orderReviews(rows,'oldest').at(-1)?.id,'c')
+})
+
+test('the one review filter maps to BYE courses by code, never by guess', () => {
+  const courses = [{ id: '61', code: 'MATH 005A' }, { id: '62', code: 'ETH 014' }]
+  assert.equal(byeFilter('this', courses), 'this')
+  assert.equal(byeFilter('all', courses), 'all')
+  assert.equal(byeFilter('MATH5A', courses), '61', 'RMP labels drop spaces and zero padding')
+  assert.equal(byeFilter('ETH 014', courses), '62')
+  assert.equal(byeFilter('MATH5B', courses), null)
+  assert.equal(byeFilter('Calculus', courses), null)
+})
+
+test('seat bar fills as the class fills: open, almost full, full', () => {
+  assert.deepEqual(seatLevel(0, 28), { level: 'full', filled: 1 })
+  assert.deepEqual(seatLevel(4, 28), { level: 'almost', filled: 24 / 28 })
+  assert.deepEqual(seatLevel(15, 35), { level: 'open', filled: 20 / 35 })
+  assert.deepEqual(seatLevel(5, undefined), { level: 'open', filled: 0 })
 })

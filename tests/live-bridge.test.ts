@@ -5,7 +5,7 @@ import { setup } from './fixtures'
 import { FALL, demoData } from '../apps/web/src/demo-data'
 import type { Snapshot } from '../packages/core/types'
 import { errorResponse } from '../server/service'
-import type { ApiResults } from '../packages/core/api'
+import type { ApiResults, Envelope } from '../packages/core/api'
 
 class Choices implements ChoiceStore {
   values = new Map<string, string>()
@@ -153,4 +153,48 @@ test('PCC search remains available when RMP is disabled, without RMP operations 
   assert.ok(snapshot.professors.length);assert.ok(snapshot.professors.every((p:any)=>p.sections.length))
   assert.equal(calls.some(k=>['candidates','profile','reviews'].includes(k)),false)
   await assert.rejects(bridge.command({kind:'summary',professorId:snapshot.professors[0].id}),/not part/)
+})
+
+
+test('manual schedule refresh preserves evidence and never selects a replacement instructor', async () => {
+  const f=fixture(); let changed=false,replacement=false
+  const request:typeof fetch=async(url,init)=>{
+    const response=await f.request(url,init)
+    if(!String(url).includes('/sections?') || !response.ok)return response
+    const body=await response.json() as Envelope<ApiResults['sections']>
+    if(changed)for(const p of body.data.professors)for(const section of p.sections)if(section.details)section.details.seatsOpen=2
+    if(replacement){body.data.professors[0].id='replacement-assignment';body.data.professors[0].name='Taylor Example'}
+    return Response.json(body)
+  }
+  const bridge=new LiveBridge(request);let state!:Snapshot;bridge.subscribe(s=>state=s)
+  await bridge.command({kind:'search',query:'MATH5A',term:FALL});await bridge.idle()
+  const selected=state.professors.find(p=>p.profile)!,profile=structuredClone(selected.profile),operation=state.operationId
+  changed=true;await bridge.command({kind:'search',query:state.course!.display,term:FALL,refresh:true})
+  assert.equal(state.operationId,operation);assert.deepEqual(state.professors.find(p=>p.id===selected.id)?.profile,profile)
+  assert(state.professors.every(p=>p.sections.every(s=>s.details?.seatsOpen===2)))
+  replacement=true;await bridge.command({kind:'search',query:state.course!.display,term:FALL,refresh:true})
+  assert.equal(state.professors.find(p=>p.id==='replacement-assignment')?.profile,undefined);bridge.stop()
+})
+
+test('Stop retains local expiry and hiding cancels a pending schedule refresh', async () => {
+  const f=fixture(),doc=new EventTarget() as EventTarget & {hidden:boolean};doc.hidden=false
+  const win=new EventTarget(),originals=new Map<string,PropertyDescriptor|undefined>()
+  for(const [key,value] of Object.entries({document:doc,window:win,navigator:{onLine:true}})){originals.set(key,Object.getOwnPropertyDescriptor(globalThis,key));Object.defineProperty(globalThis,key,{value,configurable:true})}
+  let hold=false,cancelled=false,started!:()=>void
+  const pending=new Promise<void>(resolve=>started=resolve)
+  const request:typeof fetch=async(url,init)=>{
+    if(hold && String(url).includes('/sections?')){started();await new Promise((_,reject)=>init!.signal!.addEventListener('abort',()=>{cancelled=true;reject(init!.signal!.reason)},{once:true}))}
+    const response=await f.request(url,init)
+    if(!String(url).includes('/sections?') || !response.ok)return response
+    const body=await response.json() as Envelope<ApiResults['sections']>;body.meta.expiresAt=Date.now()+180;return Response.json(body)
+  }
+  const bridge=new LiveBridge(request);let state!:Snapshot;bridge.subscribe(s=>state=s)
+  try {
+    await bridge.command({kind:'search',query:'MATH5A',term:FALL});await bridge.idle()
+    hold=true;const refresh=bridge.command({kind:'search',query:state.course!.display,term:FALL,refresh:true});await pending
+    doc.hidden=true;doc.dispatchEvent(new Event('visibilitychange'));await refresh;assert(cancelled)
+    bridge.stop();assert(state.professors.some(p=>p.sections.some(s=>s.details?.seatsOpen!==undefined)))
+    await new Promise(r=>setTimeout(r,210));assert(state.source?.stale)
+    assert(state.professors.every(p=>p.sections.every(s=>s.details?.seatsOpen===undefined && s.details?.waitlistCount===undefined)))
+  } finally {bridge.stop();for(const [key,descriptor] of originals){if(descriptor)Object.defineProperty(globalThis,key,descriptor);else Reflect.deleteProperty(globalThis,key)}}
 })

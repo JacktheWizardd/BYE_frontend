@@ -26,5 +26,17 @@
       "supersededBy": "2026-10-17: live web app paused; website keeps demo + reviews only"
     }
   },
-  "webMode": "demo-plus-reviews"
+  "webMode": "demo-plus-reviews",
+  "sharedScheduleBackend": {
+    "verifiedAt": "2026-10-22T03:20:23Z",
+    "multiTermSchemaDeployed": true,
+    "singleSourceCheckPassed": true,
+    "fastCollectionEnabled": false,
+    "sustainedOneMinuteVerified": false,
+    "observation24HoursPending": true,
+    "note": "Backend recovery evidence only. Website launch and source-access gates remain unchanged.",
+    "archivePolicyDeployed": true,
+    "apiVersion": 8,
+    "syncVersion": 9
+  }
 }

@@ -1,4 +1,4 @@
-import { ByeReviews } from './bye-reviews'
+import { useByeReviews } from './bye-reviews'
 import React, { useEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import '@fontsource/schibsted-grotesk/400.css'
@@ -7,6 +7,7 @@ import '@fontsource/schibsted-grotesk/700.css'
 import '@fontsource/jetbrains-mono/500.css'
 import type { Command, Professor, Snapshot, Suggestion, Term } from '@shared/types'
 import { orderProfessors } from '@shared/domain'
+import {availabilityDeadline,openSeatTotal} from '@shared/freshness'
 import { bridge, isDemo } from './bridge'
 import { WEEKDAYS, fits, formatLabel, titleCase, type Weekday } from './schedule'
 import { Chooser, DayBubbles, EmptyDetail, LoadingRows, ProfessorList, Report, SampleTag, Segmented, SurfaceProvider, Wordmark, plural, useTypedHint } from '../../../packages/ui'
@@ -142,7 +143,8 @@ function SearchView(props: { terms: Term[]; termCode: string; setTermCode: (t: s
           <label htmlFor="term">Semester</label>
           <select id="term" value={termCode} disabled={!terms.length} onChange={e => setTermCode(e.target.value)}>
             {!terms.length && <option value="">Loading semesters…</option>}
-            {terms.map(t => <option key={t.termCode} value={t.termCode}>{t.termName}</option>)}
+            {terms.filter(t=>t.semesterStatus !== 'archived').map(t => <option key={t.termCode} value={t.termCode}>{t.termName}</option>)}
+            {terms.some(t=>t.semesterStatus === 'archived') && <optgroup label="Archived semesters">{terms.filter(t=>t.semesterStatus === 'archived').map(t=><option key={t.termCode} value={t.termCode}>{t.termName}</option>)}</optgroup>}
           </select>
         </div>
         <div className="field">
@@ -168,6 +170,8 @@ function App() {
   const [onlineOnly, setOnlineOnly] = useState(false)
   const [showOther, setShowOther] = useState(false), [recent, setRecent] = useState<Recent[]>(loadRecent)
   const lastOperation = useRef(''), opened = useRef(''), listScroll = useRef(0)
+  const [sourceClock,setSourceClock]=useState(Date.now)
+  useEffect(()=>{if(isDemo)return;const timer=setInterval(()=>{if(!document.hidden)setSourceClock(Date.now())},15_000);return()=>clearInterval(timer)},[])
   const command = (c: Command) => { bridge.command(c).catch(e => setError(e instanceof Error ? e.message : 'This action failed. Try again.')) }
 
   // Each screen is a history entry, so the phone's back gesture returns to the previous screen instead of leaving.
@@ -190,6 +194,21 @@ function App() {
   }, [])
   useEffect(() => { if (state.operationId !== lastOperation.current) { lastOperation.current = state.operationId; opened.current = ''; setSelected(''); setShowOther(false) } }, [state.operationId])
 
+  // Discover new terms while retaining the student's selected semester.
+  useEffect(() => {
+    if (isDemo) return
+    let checked=Date.now(),running=false,stopped=false
+    const refresh=async()=>{
+      if(stopped || running || document.hidden || !navigator.onLine || Date.now()-checked<3_600_000) return
+      running=true
+      try {const result=await bridge.command({kind:'terms'}) as Term[];if(!stopped){setTerms(result);checked=Date.now()}}
+      catch {checked=Date.now()-3_300_000}
+      finally {running=false}
+    }
+    const timer=setInterval(()=>{void refresh()},60_000)
+    window.addEventListener('focus',refresh);window.addEventListener('online',refresh)
+    return ()=>{stopped=true;clearInterval(timer);window.removeEventListener('focus',refresh);window.removeEventListener('online',refresh)}
+  }, [])
   const course = state.course
   const title = titleCase(state.professors[0]?.sections[0]?.title ?? '')
   useEffect(() => {
@@ -203,7 +222,10 @@ function App() {
   const otherDays = sorted.filter(p => !fitting.includes(p))
   const list = showOther ? [...fitting, ...otherDays] : fitting
   const p = list.find(x => x.id === selected)
+  useEffect(()=>{if(selected && !state.professors.some(x=>x.id===selected)){setSelected('');opened.current=''}},[selected,state.professors])
   const chooser = state.professors.find(x => x.choosing)
+  // BYE student reviews follow the open professor and class; the demo has none.
+  const bye = useByeReviews(isDemo ? undefined : p?.name, course?.display)
 
   // Load every review once a report is open and the quick previews have settled, like the desktop app.
   useEffect(() => {
@@ -227,8 +249,7 @@ function App() {
   const checked = state.professors.filter(x => x.state !== 'pending' && x.state !== 'loading').length
   const sections = state.professors.reduce((n, x) => n + x.sections.length, 0)
   // Open seats across the listed sections, when PCC published them and the schedule isn't stale.
-  const seatCounts = list.flatMap(x => x.sections).filter(s => fits(s, days) && !s.source?.stale).map(s => s.details?.seatsOpen).filter((n): n is number => n !== undefined)
-  const openSeats = seatCounts.length ? seatCounts.reduce((a, b) => a + b, 0) : undefined
+  const openSeats = openSeatTotal(list.flatMap(x=>x.sections.filter(s=>fits(s,days))),Math.max(sourceClock,Date.now()))
 
   return <SurfaceProvider demo={isDemo}><div className="app">
     <DemoBanner />
@@ -241,7 +262,9 @@ function App() {
             <div className="results-title">
               <span className="title-line">{course ? <span className="chip">{course.display}</span> : <span className="muted">Finding sections…</span>}{title && <span className="course-title">{title}</span>}<SampleTag>Sample data</SampleTag></span>
               <span className="muted small">{state.term?.termName}</span>
+              {!isDemo && state.source && <span className="muted small" role="status">{state.source.semesterStatus === 'archived' ? 'Archived semester · For reference' : state.source.stale || Math.max(sourceClock,Date.now())>=availabilityDeadline(state.source) ? 'Older schedule · seat counts hidden' : 'Checked '+Math.max(0,Math.floor((Math.max(sourceClock,Date.now())-state.source.retrievedAt)/60_000))+' min ago'}</span>}
             </div>
+            {!isDemo && course && state.source?.semesterStatus !== 'archived' && <button className="text-link" disabled={state.loading} onClick={()=>state.term && command({kind:'search',query:course.display,term:state.term,refresh:true})}>Refresh</button>}
             {state.loading ? <button className="text-link" onClick={() => command({ kind: 'stop' })}>Stop</button> : <button className="text-link" onClick={back}>Edit</button>}
           </div>
           {state.professors.length > 0 && state.loading && <div className="progress" role="status">
@@ -266,7 +289,7 @@ function App() {
             <ProfessorList list={list} selectedId={isPhone() ? undefined : p?.id} onOpen={open} openOnArrow={!isPhone()} />
             {!onlineOnly && otherDays.length > 0 && <p className="muted small other-note">{plural(otherDays.length, 'professor')} only {otherDays.length === 1 ? 'teaches' : 'teach'} on other days. <button className="text-link" onClick={() => setShowOther(v => !v)}>{showOther ? 'Hide' : 'Show'}</button></p>}
           </aside>
-          <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} byeReviews={<ByeReviews key={p.id + '|' + course.key} name={p.name} course={course.display} />} /> :
+          <section className="report-pane">{p && course ? <Report p={p} course={course} matches={s => fits(s, days)} back={back} command={command} bye={bye} /> :
             !state.loading && <EmptyDetail professors={list.length} openSeats={openSeats} sections={list.flatMap(x => x.sections.filter(s => fits(s, days)))} />}</section>
         </div>
       </div>}

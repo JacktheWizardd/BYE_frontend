@@ -108,3 +108,13 @@ Rollback: `RMP_AUTHORIZED=false` on the source Worker stops RMP calls; `LIVE_APP
 ## Live web app paused — October 17, 2026
 
 Jack decided to focus on the Mac app. The October 16 go-live decision above is **superseded**: the website keeps the fictional `/demo/` (labeled sample data) and the `/reviews/` form only. `LIVE_APP_ENABLED`, `RMP_AUTHORIZED` and RMP retention are off/zero in every Worker and Pages environment, so the website makes no PCC or RMP requests. The preview source Worker's `CACHE_EPOCH` was changed to purge RMP data cached during the October 16 preview check (purge runs when the object next starts). Review sign-in stays open to `@go.pasadena.edu` students (`REVIEW_ACCESS=students`).
+
+
+## Shared schedule backend follow-up
+
+Observed from the public PCC terms endpoint: nine terms currently have termDisplayControl=Y; Summer 2027 is N and is excluded. The shared Supabase backend's all-term schema and two-minute expiry policy are deployed; one-minute collection remains disabled pending measured capacity and source-access acceptance. The Supabase organization is Free. This observation does not resolve PCC permitted use, RMP permission, public activation or hosted acceptance gates. Website client changes are local only.
+
+The shared backend recovery was verified at 2026-10-22T03:20:23Z: Fall published successfully with failures zero, and scheduled collection was restored. Source check size 12,255,655 bytes, total worker time 18.3 s, normalization 582 ms. This single run does not establish sustained one-minute capacity. All-term imports and 24-hour observation are pending.
+
+## Current evidence — archived reference schedules
+Shared backend API v8/sync v9 stores officially referenced semester dates, preserves validated historical catalogs, returns null enrollment availability for archives and stops archive demand/collection. Initial imports use a bounded 90-second read, subsequent checks 40 seconds; five-minute aggregate budget and fast-mode gate remain. Historical search is not evidence of present or future offerings. See the desktop service's docs/archived-semesters.md for source references, imports and verification limits. This does not authorize public website activation or establish source-use permission.

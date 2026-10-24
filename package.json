@@ -9,7 +9,7 @@
     "dev": "vite --config apps/web/vite.config.ts --mode demo",
     "dev:live": "vite --config apps/web/vite.config.ts --mode live",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test apps/web/tests/*.test.ts tests/*.test.ts",
+    "test": "node --import tsx --test apps/web/tests/*.test.ts tests/*.test.ts tests/*.test.mjs",
     "build": "node scripts/build.mjs",
     "build:tokens": "node scripts/build-tokens.mjs",
     "verify:static": "node scripts/verify-static.mjs",

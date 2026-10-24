@@ -3,6 +3,8 @@
 
 **The website and shared frontend workspace for Before You Enroll.**
 
+**October 23, 2026:** The public website is prepared for shutdown. Pages middleware gates public pages, downloads and website APIs with HTTP 503 while preserving exact Mac update delivery. Windows retirement delivery stays disabled pending native acceptance. Installed native apps require the separate retirement update. See [availability gate and rollback](docs/operations/WEBSITE_UNAVAILABLE.md).
+
 [Visit BYE](https://bye-before-you-enroll.pages.dev)
 
 BYE is an independent student-built project intended to help Pasadena City College students make more informed decisions when selecting classes and professors.
