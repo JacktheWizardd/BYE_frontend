@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict'
+import { createServer } from 'node:http'
+import { readFile, mkdir } from 'node:fs/promises'
+import path from 'node:path'
+import { chromium, webkit } from 'playwright'
+import { availability } from '../server/availability'
+const directory=path.resolve('public'),output=path.resolve('test-results/retirement')
+await mkdir(output,{recursive:true})
+const server=createServer(async(req,res)=>{try{const request=new Request('http://127.0.0.1'+req.url,{method:req.method});const response=await availability(request,async()=>{const file=path.resolve(directory,'.'+new URL(request.url).pathname);if(!file.startsWith(directory+path.sep))return new Response(null,{status:404});try{const body=await readFile(file);const type=file.endsWith('.css')?'text/css':file.endsWith('.woff2')?'font/woff2':file.endsWith('.ttf')?'font/ttf':'application/octet-stream';return new Response(body,{headers:{'Content-Type':type}})}catch{return new Response(null,{status:404})}});res.writeHead(response.status,Object.fromEntries(response.headers));res.end(Buffer.from(await response.arrayBuffer()))}catch{res.writeHead(500);res.end()}})
+await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve))
+const address=server.address();assert.ok(address&&typeof address==='object');const origin='http://127.0.0.1:'+address.port
+try{for(const [name,engine] of [['chromium',chromium],['webkit',webkit]] as const){const browser=await engine.launch();try{for(const width of [390,1280]){const context=await browser.newContext({viewport:{width,height:844},reducedMotion:'reduce'});const page=await context.newPage();const external:string[]=[];await context.route('**/*',async route=>{if(!route.request().url().startsWith(origin+'/')){external.push(route.request().url());await route.abort()}else await route.continue()});const result=await page.goto(origin+'/');assert.equal(result?.status(),503);await page.getByRole('heading',{name:'BYE has shut down.'}).waitFor();assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.equal(external.length,0);assert.equal((await context.request.post(origin+'/api/reviews/auth/send')).status(),503);await page.screenshot({path:path.join(output,name+'-'+width+'.png'),fullPage:true});await context.close();console.log(name+' '+width+': retirement page, no overflow, no external requests and API gate passed')}}finally{await browser.close()}}}finally{await new Promise<void>(resolve=>server.close(()=>resolve()))}

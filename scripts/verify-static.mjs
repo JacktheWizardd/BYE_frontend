@@ -1,3 +1,5 @@
+import retirement from '../retirement-release.json' with { type: 'json' }
+if (retirement.retired) { await import('./verify-retirement-static.mjs'); process.exit(0) }
 import assert from 'node:assert/strict'
 import { readFile, readdir } from 'node:fs/promises'
 for (const path of ['public/index.html', 'public/404.html', 'public/demo/index.html', 'public/app/index.html', 'public/reviews/index.html']) {

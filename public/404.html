@@ -3,49 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Page not found · BYE</title>
+  <title>BYE has shut down</title>
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#faf8f3">
   <link rel="icon" href="/favicon.png" type="image/png">
-  <style>
-    /* Standalone on purpose: the home page's CSS is hashed and may change, this page must always render. */
-    @font-face { font-family: "Schibsted Grotesk"; src: url("/fonts/schibsted-grotesk-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-    @font-face { font-family: "Schibsted Grotesk"; src: url("/fonts/schibsted-grotesk-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-    @font-face { font-family: "Libre Baskerville"; src: url("/fonts/LibreBaskerville-Bold.ttf") format("truetype"); font-weight: 700; font-display: swap; }
-    :root { --paper: #faf8f3; --ink: #161618; --ink-2: #5f5a52; --line: #e2dcd0; --line-strong: #8c857a; --accent: #f2c14e; }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; background: var(--paper); color: var(--ink); }
-    body { font: 400 16px/1.55 "Schibsted Grotesk", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-    ::selection { background: var(--accent); color: var(--ink); }
-    :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 4px; }
-    .wrap { max-width: 1200px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-left)); }
-    header { border-bottom: 1px solid var(--line); }
-    header .wrap { display: flex; align-items: center; height: 64px; }
-    .brand { display: flex; align-items: baseline; gap: 10px; color: var(--ink); text-decoration: none; padding: 8px 0; }
-    .brand small { font-size: 14px; color: var(--ink-2); }
-    .display { font-family: "Libre Baskerville", Georgia, serif; font-weight: 700; letter-spacing: -0.035em; }
-    .swipe { padding: 0 0.08em; background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 88% / 100% 0.3em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-    main { padding: 72px 0 96px; }
-    h1 { margin: 0; font-size: 44px; line-height: 1.05; text-wrap: balance; max-width: 14ch; }
-    p { margin: 20px 0 32px; font-size: 18px; color: var(--ink-2); max-width: 32rem; }
-    .actions { display: flex; flex-direction: column; gap: 12px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 24px; border-radius: 999px; font: 600 16px/1.2 "Schibsted Grotesk", system-ui, sans-serif; text-decoration: none; color: var(--ink); background: #fff; border: 1.5px solid var(--line-strong); transition: background-color .15s, border-color .15s; }
-    .btn:hover { border-color: var(--ink); }
-    .btn-primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-    .btn-primary:hover { background: var(--accent); border-color: var(--accent); color: var(--ink); }
-    @media (min-width: 600px) { h1 { font-size: 64px; } .actions { flex-direction: row; } }
-    @media (min-width: 900px) { main { padding: 120px 0 140px; } h1 { font-size: 80px; } }
-  </style>
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/offline.css">
 </head>
 <body>
-  <header><div class="wrap"><a class="brand" href="/" aria-label="BYE, Before You Enroll, home"><span class="display swipe" style="font-size:25px;line-height:1">BYE</span><small>Before You Enroll</small></a></div></header>
-  <main class="wrap">
-    <h1 class="display">This page <span class="swipe">dropped the class.</span></h1>
-    <p>It doesn't exist, or it moved. Head back to the home page, or try the web demo with sample data.</p>
-    <div class="actions">
-      <a class="btn btn-primary" href="/">Back to BYE →</a>
-      <a class="btn" href="/demo/">Try the web demo</a>
-    </div>
+  <main>
+    <p class="brand" aria-label="BYE, Before You Enroll"><span>BYE</span></p>
+    <h1>BYE has shut down.</h1>
+    <p>The website and application services are no longer available.</p>
+    <p class="note">Installed BYE? A retirement update is being prepared. Update delivery remains available; older copies may still work until updated.</p>
   </main>
 </body>
 </html>

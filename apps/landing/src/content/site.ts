@@ -7,11 +7,11 @@ export const DOWNLOAD_URL = '/download'
 // Mac downloads reopened with 0.5.0 (2026-10-22). While false, the Mac card shows "Available soon" and
 // /download redirects to /#download (the install cards). To pause: set false, swap the two lines in
 // public/_redirects and update scripts/verify-static.mjs.
-export const DOWNLOADS_OPEN = true
+export const DOWNLOADS_OPEN = false
 // WINDOWS LINK: /download/windows redirects to the installer on the public BYE-releases GitHub repository
 // (public/_redirects). The installer is too large for Cloudflare Pages. Never change this path.
 export const WINDOWS_DOWNLOAD_URL = '/download/windows'
-export const WINDOWS_OPEN = true
+export const WINDOWS_OPEN = false
 // REVIEW LINK: the review form for @go.pasadena.edu students.
 export const REVIEWS_URL = '/reviews/'
 // FEEDBACK LINK: feedback goes by email (see sections/Feedback.tsx); FEEDBACK_URL points at that section.

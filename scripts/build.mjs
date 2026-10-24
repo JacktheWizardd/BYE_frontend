@@ -1,6 +1,13 @@
 import { build } from 'vite'
 import { readFile, writeFile, copyFile } from 'node:fs/promises'
 import { execFileSync } from 'node:child_process'
+import retirement from '../retirement-release.json' with { type: 'json' }
+// A routine build must never regenerate the active application over the holding pages.
+if (retirement.retired) {
+  execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit'], { stdio: 'inherit' })
+  await import('./verify-retirement-static.mjs')
+  process.exit(0)
+}
 execFileSync(process.execPath, ['node_modules/typescript/bin/tsc', '--noEmit'], { stdio: 'inherit' })
 // Generated design tokens must match packages/tokens/tokens.json (run `pnpm build:tokens` after editing it).
 execFileSync(process.execPath, ['scripts/build-tokens.mjs', '--check'], { stdio: 'inherit' })

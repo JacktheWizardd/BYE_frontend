@@ -3,7 +3,10 @@
 #   2. change the file name on the DMG line below
 # To pause downloads (DOWNLOADS_OPEN in apps/landing/src/content/site.ts), comment out the DMG line
 # and restore: /download /#download 302
-/download /downloads/BYE-0.5.0-AppleSilicon.dmg 302
+# Offline since 2026-10-23 (holding page). To reopen, restore these two lines and remove the two below.
+# /download /downloads/BYE-0.5.0-AppleSilicon.dmg 302
 # Windows: the installer lives on the public BYE-releases GitHub repository (too large for Pages).
 # To ship a new Windows version, upload it to a new release there and change this line.
-/download/windows https://github.com/JacktheWizardd/BYE-releases/releases/download/v0.5.0/BYE-Setup-0.5.0-windows-x64.exe 302
+# /download/windows https://github.com/JacktheWizardd/BYE-releases/releases/download/v0.5.0/BYE-Setup-0.5.0-windows-x64.exe 302
+/download/windows / 302
+/download / 302

@@ -1,0 +1,8 @@
+{
+  "retired": true,
+  "version": "0.5.1",
+  "macBuild": 11,
+  "windowsReady": false,
+  "windowsDownloadUrl": "https://bye-before-you-enroll.pages.dev/download/windows/retirement",
+  "windowsArtifactUrl": "https://github.com/JacktheWizardd/BYE-releases/releases/download/v0.5.1/BYE-Retirement-0.5.1-windows-x64.zip"
+}
