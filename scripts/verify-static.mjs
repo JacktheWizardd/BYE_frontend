@@ -17,7 +17,9 @@ for (const [path, script] of [['/*', "script-src 'self';"], ['/reviews/*', "scri
   for (const part of [script, "connect-src 'self';", "frame-ancestors 'none'", "object-src 'none'", "base-uri 'none'"]) assert.ok(csp(path).includes(part), `${path} CSP must include ${part}`)
 }
 const routes = JSON.parse(await readFile('public/_routes.json', 'utf8'))
-assert.deepEqual(routes.include, ['/api/v1/*', '/api/reviews/*'])
+// The availability middleware must cover pages, assets, downloads and API routes.
+assert.deepEqual(routes.include, ['/*'])
+assert.deepEqual(routes.exclude, [])
 const landing = await readFile('public/index.html', 'utf8')
 // Web use stays on the labeled sample-data demo; the live /app/ is paused. Reviews are linked.
 assert.match(landing, /href="\/demo\/"/); assert.match(landing, /Sample data for now/); assert.match(landing, /href="\/reviews\/"/); assert.doesNotMatch(landing, /href="\/app\/"/)

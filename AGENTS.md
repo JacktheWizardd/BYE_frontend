@@ -145,6 +145,8 @@ pnpm is enabled through corepack (`corepack pnpm …` works without a global ins
 
 ## Current state (update this when you change the site)
 
+- **2026-10-24 website unavailable (owner requested):** Root Pages middleware returns uncached HTTP 503 for public pages, assets, new downloads and website APIs. `/updates/*` and `/windows/latest.json` remain available for desktop update delivery. All-path `_routes.json` is intentional; original application source and release assets are retained. This does not disable installed native apps. See `docs/operations/WEBSITE_UNAVAILABLE.md` for checks and rollback.
+
 - **2026-10-22 footer wording (not deployed):** The footer now says BYE is a free, independent student project "and still an experiment, so things may change or break." Landing rebuilt; typecheck passed.
 
 - **2026-10-21 local schedule completion (uncommitted, not deployed):** Refresh and source-check age are exposed in live results. Stop retains local availability expiry; hidden/offline pages cancel in-flight refreshes. Profile evidence survives unchanged assignments and replacements receive no inherited profile. Seat totals deduplicate CRNs and remain unknown when incomplete. Type checking, 96 tests, build, local workerd and Chromium/WebKit checks at phone/desktop widths passed; rollout flags remain unchanged.
