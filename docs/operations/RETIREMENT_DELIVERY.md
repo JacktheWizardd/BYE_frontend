@@ -69,3 +69,9 @@ Publish the signed Mac 0.5.1/build 11 update and enable Windows 0.5.1 metadata w
 
 Checksums and Windows ZIP integrity passed. Website typecheck, all 121 tests, retirement-preserving build/static checks and Chromium/WebKit fixtures at 390/1280 passed for this release. Earlier real Mac upgrade rehearsals covered 0.4.0 and 0.5.0. Windows native acceptance and the reported existing uninstaller integrity error remain unresolved.
 ```
+
+### Publication verification
+
+Published GitHub BYE-releases v0.5.1 and pushed website release commit `6065d2a`; Cloudflare Pages reported deployment success. The legacy application source/publication record was pushed through `5131d7a`. Public Windows metadata returns 0.5.1 (HTTP 200), and the exact retirement path redirects to the hosted ZIP (HTTP 302). A full unauthenticated download matched SHA-256 `8116d58d617ae0cc1bb29c32c0f1ce630c5ffbc6e847d421629eaf17dc305cb2` and passed ZIP integrity. The live Mac feed matches the committed feed with build 11; the full public ZIP matches the signature-verified local archive byte for byte. GET and HEAD passed for all update paths. Public pages, ordinary Windows downloads, API reads/writes and unexpected update queries still return uncached HTTP 503.
+
+These delivery checks do not supply native Windows acceptance or prove every installed copy has updated. The earlier uninstaller integrity report remains unresolved. No additional application code changed during publication verification.
