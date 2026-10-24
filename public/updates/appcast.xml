@@ -3,6 +3,15 @@
   <channel>
     <title>BYE Updates</title>
     <item>
+      <title>BYE 0.5.1</title>
+      <pubDate>Sat, 24 Oct 2026 04:09:16 GMT</pubDate>
+      <sparkle:version>11</sparkle:version>
+      <sparkle:shortVersionString>0.5.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description>&lt;ul&gt;&lt;li&gt;BYE has shut down. The replacement application displays a retirement notice and retains application updates.&lt;/li&gt;&lt;li&gt;Search, ratings, reviews, accounts, schedules and AI implementation are absent from the new package.&lt;/li&gt;&lt;li&gt;The application contains no automatic file-removal or self-deletion feature.&lt;/li&gt;&lt;li&gt;Mac: quit and move BYE to the Trash. Windows: use Uninstall BYE to open its existing registered, interactive Windows uninstaller. If unavailable, Installed apps opens with manual portable-copy instructions. No silent or delete-app-data flags are added. Show application folder reveals the running copy.&lt;/li&gt;&lt;li&gt;Saved data outside the application folder remains in place. Previous downloads and backups remain in the user's control.&lt;/li&gt;&lt;/ul&gt;</description>
+      <enclosure url="https://bye-before-you-enroll.pages.dev/updates/BYE-0.5.1-AppleSilicon.zip" length="1153689" type="application/octet-stream" sparkle:edSignature="62Y3h/+jhygqkCdzuus4/inT7e69I8lBkwIJNpvdPglvC5Ju4wVTurfV+9tWzYcedq1O0q+vaXu/Y+oTN0L7Dw==" />
+    </item>
+    <item>
       <title>BYE 0.5.0</title>
       <pubDate>Thu, 22 Oct 2026 16:38:18 GMT</pubDate>
       <sparkle:version>10</sparkle:version>

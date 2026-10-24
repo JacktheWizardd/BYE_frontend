@@ -31,3 +31,41 @@ Resolve six website merge conflicts by retaining the retirement gate and holding
 
 Verified: typecheck, 120 tests, build/static checks and Chromium/WebKit retirement fixtures at 390/1280. No push, deployment or release publication.
 ```
+
+## Mac combined retirement and RMP removal — staged locally
+
+The owner selected the combined outcome: remove the RMP implementation and show the retirement notice in one update. Mac 0.5.1/build 11 already implements both. The release script copied its signed update archive, checksum, DMG and prepared appcast into the local website checkout. Existing appcast records remain byte-equivalent; the new item points at the matching signed archive and size. The Mac bundle has no BYEAPI/RMP transport or reader implementation. The application does not self-delete or erase saved files.
+
+This staging is not a commit, push, deployment or release publication. Public copies do not change until the website feed is deployed and an installed Mac accepts/installs the signed update. Offline copies remain unchanged. The DMG remains behind the closed ordinary-download gate. Windows stays unpublished with readiness false; its portable package and native uninstall path still require Windows acceptance.
+
+GitHub Desktop Summary:
+```text
+Stage Mac 0.5.1 retirement update without RMP integration
+```
+
+Description:
+```text
+Stage the signed Mac 0.5.1/build 11 retirement ZIP, checksums, DMG and matching appcast. The minimal app removes RMP and other service integrations and shows the shutdown notice while retaining the updater. Preserve previous feed records, release files and the website shutdown. Windows retirement delivery remains disabled.
+
+Verified artifact checksums and matching feed version, archive size and signature. Existing Mac update rehearsals covered 0.4.0 and 0.5.0. No custom deletion code, service credential changes or database changes. Public release requires a separate explicit commit/push/deployment decision; native Windows acceptance remains pending.
+```
+
+## Owner-authorized publication — October 23
+
+The owner explicitly authorized committing/pushing the staged Mac update and publishing Windows as well. This supersedes the earlier hold on Windows publication; it does not supply native Windows acceptance. `windowsReady` now controls delivery, `windowsPublicationAuthorized` records that decision, and `windowsNativeTested` remains false. Local verification reports are preserved unchanged.
+
+Publish the exact Windows portable ZIP and checksum as GitHub release v0.5.1 before pushing website metadata. Windows is a manual download: extract into a fresh folder and run BYE.exe. This does not replace the old installed application automatically. Remove old BYE using Windows Installed apps if its uninstaller works; the owner's reported existing uninstaller integrity failure remains unresolved. Do not bypass integrity checks. Portable folders can be removed manually after closing BYE. Preserve saved data and unrelated files.
+
+Mac delivery uses the signed 0.5.1/build 11 Sparkle ZIP and matching appcast. Both builds exclude the original RMP/search/account/AI implementation and show a shutdown notice; neither self-deletes. Existing offline installations change only when their user installs the replacement. Previously downloaded installers/backups remain available. Website pages, APIs and ordinary downloads remain closed.
+
+GitHub Desktop Summary:
+```text
+Publish BYE 0.5.1 Mac and Windows retirement updates
+```
+
+Description:
+```text
+Publish the signed Mac 0.5.1/build 11 update and enable Windows 0.5.1 metadata with the exact hosted portable ZIP. Preserve the shutdown gate and previous Mac feed records. Record explicit owner authorization for Windows publication without claiming native Windows acceptance. No custom deletion code, credential changes or database changes.
+
+Checksums and Windows ZIP integrity passed. Website typecheck, all 121 tests, retirement-preserving build/static checks and Chromium/WebKit fixtures at 390/1280 passed for this release. Earlier real Mac upgrade rehearsals covered 0.4.0 and 0.5.0. Windows native acceptance and the reported existing uninstaller integrity error remain unresolved.
+```

@@ -37,8 +37,26 @@ test('desktop feeds and signed update files pass through unchanged for GET and H
 })
 
 
-test('unreviewed Windows retirement delivery and unexpected update queries remain blocked', async () => {
-  for (const path of ['/windows/latest.json', '/download/windows/retirement', '/updates/appcast.xml?v=1', '/updates/unexpected.js']) {
+test('published Windows metadata and the exact portable download are available', async () => {
+  const release = JSON.parse(await readFile(new URL('../retirement-release.json', import.meta.url), 'utf8'))
+  assert.equal(release.windowsReady, true)
+  assert.equal(release.windowsNativeTested, false)
+  assert.equal(release.windowsPublicationAuthorized, true)
+  const metadata = await request('/windows/latest.json')
+  assert.equal(metadata.status, 200)
+  assert.deepEqual(await metadata.json(), { version: release.version, downloadUrl: release.windowsDownloadUrl })
+  const download = await request('/download/windows/retirement')
+  assert.equal(download.status, 302)
+  assert.equal(download.headers.get('Location'), release.windowsArtifactUrl)
+  for (const path of ['/windows/latest.json', '/download/windows/retirement']) {
+    assert.equal((await request(path, 'HEAD')).status, path.includes('latest.json') ? 200 : 302)
+    assert.equal(await (await request(path, 'HEAD')).text(), '')
+    for (const method of ['POST', 'DELETE', 'OPTIONS']) assert.equal((await request(path, method)).status, 503)
+  }
+})
+
+test('unexpected update queries and paths remain blocked', async () => {
+  for (const path of ['/windows/latest.json?v=1', '/download/windows/retirement?v=1', '/updates/appcast.xml?v=1', '/updates/unexpected.js']) {
     const response = await request(path)
     assert.equal(response.status, 503, path)
     assert.equal(response.headers.get('Cache-Control'), 'no-store')
